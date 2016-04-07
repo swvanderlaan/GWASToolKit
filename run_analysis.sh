@@ -84,7 +84,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### - Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
 
 ### REQUIRED | GENERALs
-SOFTWARE=/hpc/local/CentOS6/dhl_ec/software
+SOFTWARE=/hpc/local/CentOS7/dhl_ec/software
 GWAS_SCRIPTS=${SOFTWARE}/GWAS
 PROJECTROOT=/hpc/dhl_ec/svanderlaan/projects/gwas_sec_outcome
 ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES

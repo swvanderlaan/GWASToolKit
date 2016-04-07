@@ -123,13 +123,13 @@ else
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/aegs_combo_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/aegs_combo_1000g_RAW_chr
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		elif [[ ${REFERENCE} = "GoNL4" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_GoNL4/aegs_combo_gonl4_RAW_chr
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -148,7 +148,7 @@ else
 	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -165,7 +165,7 @@ else
 	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/ctmm_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -356,7 +356,7 @@ else
 		
 	echo "All arguments are passed and correct. These are the settings:"
 	### Set location of SNPTEST v2.5.2 & the method to be used.
-	SNPTEST=/hpc/local/CentOS6/dhl_ec/software/snptest_v2.5.2_CentOS6.5_x86_64_static/snptest_v2.5.2
+	SNPTEST=/hpc/local/CentOS7/dhl_ec/software/snptest_v2.5.2_CentOS6.5_x86_64_static/snptest_v2.5.2
 	
 	### Set input-data
 	
@@ -385,7 +385,7 @@ else
 	YOUREMAIL=${11}
 	
 	### Set location of the individual, regional and GWAS scripts
-	GWAS_SCRIPTS=/hpc/local/CentOS6/dhl_ec/software/GWAS
+	GWAS_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/GWAS
 	
 	### Report back these variables
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
