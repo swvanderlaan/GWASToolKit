@@ -1,16 +1,17 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                              RUN_ANALYSES.v1"
+echo "                                              RUN_ANALYSES.v1.1"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " You're here: "`pwd`
-echo " Today's: "`date`
+echo " You're here: "$(pwd)
+echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.20160220"
+echo " Version: RUN_ANALYSES.v1.1.20160407"
 echo ""
-echo " Last update: February 20th, 2016"
+echo " Last update: April 7th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl);"
+echo "              Saskia Haitjema (s.haitjema@umcutrecht.nl"
 echo ""
 echo " Description: Perform individual variant, regional or genome-wide association "
 echo "              analysis on some phenotype(s). It will do the following:"
@@ -95,13 +96,17 @@ COVARIATE_FILE="${PROJECTROOT}/covariates.txt"
 PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
 PROJECT="${PROJECTROOT}/females" # you will have to make this directory
-QSUBQUEUE="medium" # 'medium' (24 hours) for GWAS; 'veryshort' (2 hours) for anything else
 YOUREMAIL="s.w.vanderlaan-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
 TRAIT_TYPE="BINARY" # QUANT/BINARY
 INFO="0.3"
 MAC="6"
 CAF="0.005"
 BETA_SE="100"
+
+### DEFINING QSUB SETTINGS
+QMEMGWAS="8G" # '8Gb' for GWAS; '8Gb' for anything else
+QTIMEGWAS="12:00:00" # 'medium' (24 hours) for GWAS; 'veryshort' (2 hours) for anything else
+
 
 # For per-variant analysis
 VARIANTLIST="none"
