@@ -60,27 +60,28 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### - Argument #6  is path_to to the phenotype-file [refer to readme for list of available phenotypes].
 ### - Argument #7  is path_to to the covariates-file [refer to readme for list of available covariates].
 ### - Argument #8  is path_to the project [name] directory, where the output should be stored.
-### - Argument #9  is the name of the queue to use [veryshort/short/medium/long/verylong] (GWAS require more than 8 hours per chromosome).
-### - Argument #10  is your e-mail address; you'll get an email when the jobs have ended or are aborted/killed.
+### - Argument #9  is the amount of memory you want to use on the HPC (GWAS require more than 8 hours per chromosome).
+### - Argument #10 is the amount of time you want to use the HPC for 
+### - Argument #11 is your e-mail address; you'll get an email when the jobs have ended or are aborted/killed.
 
 ### THIS PART IS SPECIFIC FOR GWAS
-### - Argument #11 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT.
+### - Argument #12 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT.
 
 ### THIS PART IS SPECIFIC FOR INDIVIDUAL VARIANT ANALYSES
-### - Argument #11 you are running an individual variant analysis, thus we expect a path_to to the variant-list-file."
-### - Argument #12 you are running a regional analysis, thus we expect here [CHR] (e.g. 1-22 or X; NOTE: GoNL4 doesn't include information for chromosome X)."
-### - Argument #13 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+### - Argument #12 you are running an individual variant analysis, thus we expect a path_to to the variant-list-file."
+### - Argument #13 you are running a regional analysis, thus we expect here [CHR] (e.g. 1-22 or X; NOTE: GoNL4 doesn't include information for chromosome X)."
+### - Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
 
 ### THIS PART IS SPECIFIC FOR REGIONAL ANALYSES
-### - Argument #11 you are running a regional analysis, thus we expect here [CHR] (e.g. 1-22 or X; NOTE: GoNL4 doesn't include information for chromosome X).
-### - Argument #12 you are running a regional analysis, thus we expect here [REGION_START] (e.g. 12345)
-### - Argument #13 you are running a regional analysis, thus we expect here [REGION_END] (e.g. 678910)
-### - Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT.
+### - Argument #12 you are running a regional analysis, thus we expect here [CHR] (e.g. 1-22 or X; NOTE: GoNL4 doesn't include information for chromosome X).
+### - Argument #13 you are running a regional analysis, thus we expect here [REGION_START] (e.g. 12345)
+### - Argument #14 you are running a regional analysis, thus we expect here [REGION_END] (e.g. 678910)
+### - Argument #15 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT.
 
 ### THIS PART IS SPECIFIC FOR PER-GENE ANALYSES
-### - Argument #11 you are running a per-gene analysis, thus we expect a path_to to the gene-list-file."
-### - Argument #12 you are running a per-gene analysis, thus we expect here [RANGE] (e.g. 500000 for ±500kb)."
-### - Argument #13 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+### - Argument #12 you are running a per-gene analysis, thus we expect a path_to to the gene-list-file."
+### - Argument #13 you are running a per-gene analysis, thus we expect here [RANGE] (e.g. 500000 for ±500kb)."
+### - Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
 
 ### REQUIRED | GENERALs
 SOFTWARE=/hpc/local/CentOS6/dhl_ec/software
@@ -104,10 +105,34 @@ CAF="0.005"
 BETA_SE="100"
 
 ### DEFINING QSUB SETTINGS
-QMEMGWAS="8G" # '8Gb' for GWAS; '8Gb' for anything else
-QTIMEGWAS="12:00:00" # 'medium' (24 hours) for GWAS; 'veryshort' (2 hours) for anything else
+# FOR GWAS
+QMEMGWAS="8G" # '8Gb' for GWAS; 
+QTIMEGWAS="12:00:00" # 12 hours for GWAS; 
+QMEMGWASCLUMP = "180G" # 180Gb needed for clumping;
+QTIMEGWASCLUMP = "12:00:00" # 12 hours for clumping;
+QMEMGWASPLOT = "4G" # 4gb for snptest plotter;
+QTIMEGWASPLOT = "04:00:00" # 4 hours for plotter;
+QMEMGWASPLOTQC = "4G" # 4gb for plotter qc;
+QTIMEGWASPLOTQC = "04:00:00" # 4 hours for plotter qc;
+QMEMGWASLZOOM ="4G" # 4Gb needed for locuszoom;
+QTIMEGWASLZOOM ="00:15:00" # 15mins for locuszoom;
 
+# FOR VARIANT
+QMEMVAR ="8G" # 8Gb for variants;
+QTIMEVAR ="00:15:00" # 15mins for variants;
 
+# FOR REGION
+QMEMREG ="8G" # 8Gb for regions;
+QTIMEREG ="00:30:00" # 30mins for regions;
+
+# FOR GENE
+QMEMGENE ="8G" # 8Gb for genes;
+QTIMEGENE ="00:30:00" # 30 minutes for genes;
+QMEMGENEQC = "4G" # 4 Gb for snptest qc;
+QTIMEGENEQC = "00:30:00" # 30 minutes for snptest qc;
+QMEMGENELZOOM ="4G" # 4Gb for locuszoom;
+QTIMEGENELZOOM ="00:15:00" #15mins for locuszoom;
+ 
 # For per-variant analysis
 VARIANTLIST="none"
 
@@ -147,7 +172,6 @@ echo "The analysis will be run using the following exclusion list.............: 
 echo "The analysis will be run using the following phenotypes.................: ${PHENOTYPE_FILE}"
 echo "The analysis will be run using the following covariates.................: ${COVARIATE_FILE}"
 echo "The project directory is................................................: ${PROJECT}"
-echo "The analysis will be run on the following queue.........................: ${QSUBQUEUE}"
 echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
 echo "The minimum info-score filter is........................................: ${INFO}"
@@ -170,7 +194,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 	echo "Creating jobs to perform GWAS on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QSUBQUEUE} ${YOUREMAIL} ${TRAIT_TYPE} 
+	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMGWAS} ${QTIMEGWAS} ${YOUREMAIL} ${TRAIT_TYPE} 
 
 	### Create QC bash-script to send to qsub
 	for PHENOTYPE in ${PHENOTYPES}; do
@@ -180,49 +204,49 @@ if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "${GWAS_SCRIPTS}/snptest_qc.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${INFO} ${MAC} ${CAF} ${BETA_SE}" > ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		### Submit plotter script
 		### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}GWAS' are finished
-		qsub -S /bin/bash -N QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWAS} -l ${QTIMEGWAS} -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/qc.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		echo ""
 
 		### Create plotter bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_plotter.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		### Submit plotter script
 		### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}GWAS' are finished
-		qsub -S /bin/bash -N PLOTTER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N PLOTTER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASPLOT} -l ${QTIMEGWASPLOT} -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/plotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		echo ""
 
 		### Create QC plotter bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_plotter_qc.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		### Submit plotter script
 		### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}GWAS' are finished
-		qsub -S /bin/bash -N QCPLOTTER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N QCPLOTTER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASPLOTQC} -l ${QTIMEGWASPLOTQC} -M ${YOUREMAIL} -m ea -wd ${PROJECT} ${PROJECT}/qcplotter.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		echo ""
 
 		#### Create clumper bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_clumper.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${CLUMP_P1} ${CLUMP_P2} ${CLUMP_R2} ${CLUMP_KB} ${CLUMP_FIELD} ${REFERENCE}" > ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		#### Submit clumper script
 		#### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N PLOTTER.${STUDY_TYPE}GWAS' are finished
-		qsub -S /bin/bash -N CLUMPER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -pe threaded 12 -wd ${PROJECT} ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N CLUMPER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLUMP} -l ${QTIMEGWASCLUMP} -M ${YOUREMAIL} -m ea -pe threaded 12 -wd ${PROJECT} ${PROJECT}/clumper.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		echo ""
 	
 		##### Create locuszoom bash-script to send to qsub
 		echo " ${GWAS_SCRIPTS}/locuszoom_hits.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${VARIANTID} ${PVALUE} ${LZVERSION} ${PHENO_OUTPUT_DIR}/${PHENOTYPE}.summary_results.QC.${CLUMP_R2}.indexvariants.txt ${RANGE}" > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 		##### Submit clumper script
 		##### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N CLUMPER.${STUDY_TYPE}GWAS' are finished
-		qsub -S /bin/bash -N LZ.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid CLUMPER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N LZ.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -hold_jid CLUMPER.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GWAS.${PHENOTYPE}.${EXCLUSION}.sh
 
 	done
 
 elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 	echo "Creating jobs to perform an individual variant analysis on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QSUBQUEUE} ${YOUREMAIL} ${VARIANTLIST} ${TRAIT_TYPE}
+	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMVAR} ${QTIMEVAR} ${YOUREMAIL} ${VARIANTLIST} ${TRAIT_TYPE}
 
 elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 	echo "Creating jobs to perform a regional analysis on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QSUBQUEUE} ${YOUREMAIL} ${CHR} ${REGION_START} ${REGION_END} ${TRAIT_TYPE}
+	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMREG} ${QTIMEREG} ${YOUREMAIL} ${CHR} ${REGION_START} ${REGION_END} ${TRAIT_TYPE}
 
 elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 	echo "Creating jobs to perform a per-analysis on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QSUBQUEUE} ${YOUREMAIL} ${GENES_FILE} ${RANGE} ${TRAIT_TYPE}
+	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMGENE} ${QTIMEGENE} ${YOUREMAIL} ${GENES_FILE} ${RANGE} ${TRAIT_TYPE}
 
 	### Create QC bash-script to send to qsub
 	while read GENES; do
@@ -236,14 +260,14 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 				echo "${GWAS_SCRIPTS}/snptest_qc.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${INFO} ${MAC} ${CAF} ${BETA_SE}" > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 				### Submit plotter script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}GWAS' are finished
-				qsub -S /bin/bash -N QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
+				qsub -S /bin/bash -N QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENEQC} -l ${QTIMEGENEQC} -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 				echo ""
 	
 				##### Create locuszoom bash-script to send to qsub
 				echo " ${GWAS_SCRIPTS}/locuszoom_hits.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${VARIANTID} ${PVALUE} ${LZVERSION} ${GENE} ${RANGELZ}" > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 				##### Submit clumper script
 				#### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N CLUMPER.${STUDY_TYPE}GWAS' are finished
-				qsub -S /bin/bash -N LZ.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -q $QSUBQUEUE -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
+				qsub -S /bin/bash -N LZ.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENELZOOM} -l ${QTIMEGENELZOOM} -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 			done
 		done
 	done < ${GENES_FILE}
