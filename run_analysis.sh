@@ -108,30 +108,30 @@ BETA_SE="100"
 # FOR GWAS
 QMEMGWAS="8G" # '8Gb' for GWAS; 
 QTIMEGWAS="12:00:00" # 12 hours for GWAS; 
-QMEMGWASCLUMP = "180G" # 180Gb needed for clumping;
-QTIMEGWASCLUMP = "12:00:00" # 12 hours for clumping;
-QMEMGWASPLOT = "4G" # 4gb for snptest plotter;
-QTIMEGWASPLOT = "04:00:00" # 4 hours for plotter;
-QMEMGWASPLOTQC = "4G" # 4gb for plotter qc;
-QTIMEGWASPLOTQC = "04:00:00" # 4 hours for plotter qc;
-QMEMGWASLZOOM ="4G" # 4Gb needed for locuszoom;
-QTIMEGWASLZOOM ="00:15:00" # 15mins for locuszoom;
+QMEMGWASCLUMP="180G" # 180Gb needed for clumping;
+QTIMEGWASCLUMP="12:00:00" # 12 hours for clumping;
+QMEMGWASPLOT="4G" # 4gb for snptest plotter;
+QTIMEGWASPLOT="04:00:00" # 4 hours for plotter;
+QMEMGWASPLOTQC="4G" # 4gb for plotter qc;
+QTIMEGWASPLOTQC="04:00:00" # 4 hours for plotter qc;
+QMEMGWASLZOOM="4G" # 4Gb needed for locuszoom;
+QTIMEGWASLZOOM="00:15:00" # 15mins for locuszoom;
 
 # FOR VARIANT
-QMEMVAR ="8G" # 8Gb for variants;
-QTIMEVAR ="00:15:00" # 15mins for variants;
+QMEMVAR="8G" # 8Gb for variants;
+QTIMEVAR="00:15:00" # 15mins for variants;
 
 # FOR REGION
-QMEMREG ="8G" # 8Gb for regions;
-QTIMEREG ="00:30:00" # 30mins for regions;
+QMEMREG="8G" # 8Gb for regions;
+QTIMEREG="00:30:00" # 30mins for regions;
 
 # FOR GENE
-QMEMGENE ="8G" # 8Gb for genes;
-QTIMEGENE ="00:30:00" # 30 minutes for genes;
-QMEMGENEQC = "4G" # 4 Gb for snptest qc;
-QTIMEGENEQC = "00:30:00" # 30 minutes for snptest qc;
-QMEMGENELZOOM ="4G" # 4Gb for locuszoom;
-QTIMEGENELZOOM ="00:15:00" #15mins for locuszoom;
+QMEMGENE="8G" # 8Gb for genes;
+QTIMEGENE="00:30:00" # 30 minutes for genes;
+QMEMGENEQC="4G" # 4 Gb for snptest qc;
+QTIMEGENEQC="00:30:00" # 30 minutes for snptest qc;
+QMEMGENELZOOM="4G" # 4Gb for locuszoom;
+QTIMEGENELZOOM="00:15:00" #15mins for locuszoom;
  
 # For per-variant analysis
 VARIANTLIST="none"

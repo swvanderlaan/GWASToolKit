@@ -377,8 +377,8 @@ else
 	PROJECT=${8}
 	
 	### Set the BASH qsub queue.
-	QMEM = ${9}
-	QTIME = ${10}
+	QMEM=${9}
+	QTIME=${10}
 	# QSUBQUEUE
 	
 	### Set your email address.
@@ -646,7 +646,7 @@ else
 			fi
 			REGIONS=${PROJECT}/${STUDY_TYPE}GENE_regions_of_interest.txt
 			while read GENES; do 
-				for GENE in ${GENES}; do
+				for GENE in $GENES; do
 				echo "* ${GENE} ± ${RANGE}"
 				cat ${HG19_GENES} | awk '$4=="'${GENES}'"' | awk '{ print $4, $1, ($2-'${RANGE}'), ($3+'${RANGE}') }' >> ${REGIONS}
 				done
