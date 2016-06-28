@@ -95,8 +95,8 @@ STUDY_TYPE="AEGS" # AEGS/AAAGS/CTMM | NOTE: currently only AEGS works
 REFERENCE="1kGp1v3" # 1kGp3v5GoNL5/1kGp1v3/GoNL4 | NOTE: currently only 1kGp1v3 works
 METHOD="EXPECTED" #EXPECTED/SCORE
 EXCLUSION="EXCL_FEMALES" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
-PHENOTYPE_FILE="${PROJECTROOT}/phenotypes.txt"
-COVARIATE_FILE="${PROJECTROOT}/covariates.txt"
+PHENOTYPE_FILE="${PROJECTROOT}/example.phenotypes.txt"
+COVARIATE_FILE="${PROJECTROOT}/example.covariates.txt"
 PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
 PROJECT="${PROJECTROOT}/MALES" # you will have to make this directory
@@ -137,7 +137,7 @@ QMEMGENELZOOM="h_vmem=4G" # 4Gb for locuszoom;
 QTIMEGENELZOOM="h_rt=00:15:00" #15mins for locuszoom;
  
 # For per-variant analysis
-VARIANTLIST="none"
+VARIANTLIST="${PROJECTROOT}/example.variantlist.txt"
 
 # For GWAS/REGION/GENE analysis
 LZVERSION="LZ13"
@@ -152,11 +152,11 @@ CLUMP_FIELD="P"
 
 # For regional analysis
 CHR="none" # e.g. 1
-REGION_START="none" # e.g. 1234
-REGION_END="none" # e.g. 5678
+REGION_START="none" # e.g. 12345678
+REGION_END="none" # e.g. 87654321
 
 # For per-gene analysis
-GENES_FILE="${PROJECTROOT}/genes.txt"
+GENES_FILE="${PROJECTROOT}/example.genelist.txt"
 
 # REQUIRED | NEVER CHANGE
 OUTPUT_DIR=${PROJECT}/snptest_results 
