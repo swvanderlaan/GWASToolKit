@@ -1,16 +1,20 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                             SNPTEST_CLUMPER.v1"
+echo "                                             SNPTEST_CLUMPER.v1.1"
 echo "                                  CLUMPING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " You're here: "`pwd`
-echo " Today's: " `date`
+echo " You're here: "$(pwd)
+echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_CLEANER.v1.20160208"
+echo " Version: SNPTEST_CLEANER.v1.1.20160628"
 echo ""
-echo " Last update: February 8th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl);"
+echo " Last update: June 28th, 2016"
+echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
 echo ""
 echo " Description: Clumping of a genome-wide SNPTEST analysis."
 echo ""
@@ -29,9 +33,10 @@ if [[ $# -lt 8 ]]; then
 	echo "- Argument #8 indicates the reference to be used [1kGp3v5GoNL5/1kGp1v3/GoNL4]."
 	echo ""
 	echo "An example command would be: snptest_clumper.v1.sh [arg1: path_to_output_dir] [arg2: phenotype] [arg3: CLUMP_P2] [arg4: CLUMP_P1] [arg5: CLUMP_R2] [arg6: CLUMP_KB] [arg7: CLUMP_FIELD] [arg8: REFERENCE]"
+	echo ""
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
-  	date
+
   	exit 1
 else
 	echo "All arguments are passed. These are the settings:"
@@ -48,9 +53,9 @@ else
 	### Set location of [imputed] genotype data
 	REFERENCE=${8} # depends on arg1  [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 	
-	MANTEL_RESOURCES=/hpc/local/CentOS6/dhl_ec/software/MANTEL/RESOURCES
+	MANTEL_RESOURCES=/hpc/local/CentOS7/dhl_ec/software/MANTEL/RESOURCES
 	
-	PLINK2=/hpc/local/CentOS6/dhl_ec/software/plink2
+	PLINK2=/hpc/local/CentOS7/dhl_ec/software/plink_v1.9
 	
 	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 		if [[ ${REFERENCE} = "1kGp1v3" ]]; then
@@ -151,12 +156,13 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -175,5 +181,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-

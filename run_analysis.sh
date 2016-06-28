@@ -7,11 +7,14 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.1.20160407"
+echo " Version: RUN_ANALYSES.v1.1.20160628"
 echo ""
-echo " Last update: April 7th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl);"
-echo "              Saskia Haitjema (s.haitjema@umcutrecht.nl"
+echo " Last update: June 28th, 2016"
+echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
 echo ""
 echo " Description: Perform individual variant, regional or genome-wide association "
 echo "              analysis on some phenotype(s). It will do the following:"
@@ -38,7 +41,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### FOR ANY TYPE OF ANALYSIS
 ### - Argument #1  indicates whether you want to analyse a list of variants, a region, or do a GWAS [VARIANT/REGION/GWAS].
 ###                Depending on the choice you additional arguments are expected:
-###                - for GWAS: no additional arguments, except the standard 10 arguments in total.
+###                - for GWAS: no additional arguments, except the standard 12 arguments in total.
 ###                - for VARIANT: 2 additional argument, namely a [FILE] containing the list of variants and the chromosome.
 ###                - for REGION: 3 additional arguments, namely the [CHR], [REGION_START] and [REGION_END] in numerical fashion.
 ###                - for GENES: 2 additional argument, namely a list of [GENES] and a ±[RANGE].
@@ -86,18 +89,18 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### REQUIRED | GENERALs
 SOFTWARE=/hpc/local/CentOS7/dhl_ec/software
 GWAS_SCRIPTS=${SOFTWARE}/GWAS
-PROJECTROOT=/hpc/dhl_ec/svanderlaan/projects/gwas_sec_outcome
+PROJECTROOT=/hpc/dhl_ec/agohar/GWAS_sec_outcome_LA
 ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES
 STUDY_TYPE="AEGS" # AEGS/AAAGS/CTMM | NOTE: currently only AEGS works
 REFERENCE="1kGp1v3" # 1kGp3v5GoNL5/1kGp1v3/GoNL4 | NOTE: currently only 1kGp1v3 works
 METHOD="EXPECTED" #EXPECTED/SCORE
-EXCLUSION="EXCL_MALES" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
+EXCLUSION="EXCL_FEMALES" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
 PHENOTYPE_FILE="${PROJECTROOT}/phenotypes.txt"
 COVARIATE_FILE="${PROJECTROOT}/covariates.txt"
 PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
-PROJECT="${PROJECTROOT}/females" # you will have to make this directory
-YOUREMAIL="s.w.vanderlaan-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
+PROJECT="${PROJECTROOT}/MALES" # you will have to make this directory
+YOUREMAIL="A.Gohar-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
 TRAIT_TYPE="BINARY" # QUANT/BINARY
 INFO="0.3"
 MAC="6"
@@ -260,7 +263,7 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 				echo "${GWAS_SCRIPTS}/snptest_qc.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${INFO} ${MAC} ${CAF} ${BETA_SE}" > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 				### Submit plotter script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}GWAS' are finished
-				qsub -S /bin/bash -N QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENEQC} -l ${QTIMEGENEQC} -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
+				qsub -S /bin/bash -N QC.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.output -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.errors -l ${GMEMGENEQC} -l ${QTIMEGENEQC} -M ${YOUREMAIL} -m ea -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}GENE.${PHENOTYPE}.${EXCLUSION}.sh
 				echo ""
 	
 				##### Create locuszoom bash-script to send to qsub
@@ -325,12 +328,14 @@ fi
 #
 #GZIP
 # Put all graphs in one document including readme.
+
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -349,5 +354,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-

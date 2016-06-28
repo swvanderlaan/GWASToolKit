@@ -17,8 +17,8 @@
 # Starting conversion
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "+                                        OVERLAP DATA                                    +\n";
-print STDERR "+                                            V 1.0                                       +\n";
-print STDERR "+                                         02-02-2016                                     +\n";
+print STDERR "+                                            V2.0                                        +\n";
+print STDERR "+                                         28-06-2016                                     +\n";
 print STDERR "+                  Written by: Jessica van Setten & Sander W. van der Laan               +\n";
 print STDERR "+                                                                                        +\n";
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";

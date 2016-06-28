@@ -1,16 +1,20 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                                 SUMMARISER.v1"
+echo "                                                 SUMMARISER.v1.1"
 echo "                                          SUMMARISES ANALYSIS RESULTS"
 echo ""
-echo " You're here: "`pwd`
-echo " Today's: " `date`
+echo " You're here: "$(pwd)
+echo " Today's: "$(date)
 echo ""
-echo " Version: SUMMARISER.v1.20160220"
+echo " Version: SUMMARISER.v1.1.20160628"
 echo ""
-echo " Last update: February 20th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl);"
+echo " Last update: June 28th, 2016"
+echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
 echo ""
 echo " Description: Summarises analysis results and zips up into one directory."
 echo ""
@@ -27,9 +31,9 @@ if [[ $# -lt 6 ]]; then
 	echo "- Argument #5 which phenotype was analysed."
 	echo ""
 	echo "An example command would be: summariser.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: path_to_output_dir]  [arg5: some_phenotype ]"
+  	echo ""
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
-  	date
   	exit 1
 else
 	echo "All arguments are passed. These are the settings:"
@@ -54,7 +58,7 @@ else
 	echo "                                         SUMMARISING ANALYSIS RESULTS"
 	echo ""
 	echo "Please be patient...this can take a long time depending on the number of files."
-	echo "We started at: `date`"
+	echo "We started at: "$(date)
 	echo ""
 	
 	if [[ -d ${PROJECT_DIR}/Summary ]]; then
@@ -86,12 +90,13 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -110,5 +115,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-

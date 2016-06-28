@@ -1,16 +1,20 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                                SNPTEST_QC.v1"
+echo "                                                SNPTEST_QC.v1.1"
 echo "                                  QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " You're here: "`pwd`
-echo " Today's: " `date`
+echo " You're here: "$(pwd)
+echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_QC.v1.20160219"
+echo " Version: SNPTEST_QC.v1.1.20160628"
 echo ""
-echo " Last update: February 19th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl);"
+echo " Last update: June 28th, 2016"
+echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
 echo ""
 echo " Description: Quality control of a SNPTEST analysis: filter on INFO, MAC, CAF and BETA/SE."
 echo ""
@@ -27,9 +31,9 @@ if [[ $# -lt 6 ]]; then
 	echo "- Argument #6 is lower/upper limit of the BETA/SE [BETA_SE]."
 	echo ""
 	echo "An example command would be: snptest_pheno_wrapper.v1.sh [arg1: path_to_output_dir] [arg2: [PHENOTYPE] ] [arg3: [INFO] ] [arg4: [MAC] ] [arg5: [CAF] ] [arg6: [BETA_SE] ]"
+  	echo ""
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
-  	date
   	exit 1
 else
 	echo "All arguments are passed. These are the settings:"
@@ -53,9 +57,9 @@ else
 	echo "                               QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
 	echo ""
 	echo "Please be patient...this can take a long time depending on the number of files."
-	echo "We started at: "`date`
+	echo "We started at: "$(date)
 	echo ""
-	MANTEL_SCRIPTS=/hpc/local/CentOS6/dhl_ec/software/MANTEL/SCRIPTS
+	MANTEL_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/MANTEL/SCRIPTS
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
@@ -97,12 +101,13 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -121,5 +126,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-

@@ -9,7 +9,7 @@
 # Written by:	Jessica van Setten & Sander W. van der Laan; UMC Utrecht, Utrecht, the 
 #               Netherlands, j.vansetten@umcutrecht.nl or s.w.vanderlaan-2@umcutrecht.nl.
 # Version:		1.0
-# Update date: 	2016-01-28
+# Update date: 	2016-06-28
 #
 # Usage:		convert_impute2dosage.pl [INPUT.gen] [GZIP/NORM] [OUTPUT.dosage]
 
@@ -17,7 +17,7 @@
 print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print "+                                  CONVERT IMPUTE2DOSAGE                                 +\n";
 print "+                                        Version 1.0                                     +\n";
-print "+                                         28-01-2016                                     +\n";
+print "+                                         28-06-2016                                     +\n";
 print "+                  Written by: Jessica van Setten & Sander W. van der Laan               +\n";
 print "+                                                                                        +\n";
 print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";

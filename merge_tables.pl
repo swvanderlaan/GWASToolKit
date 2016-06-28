@@ -18,9 +18,9 @@
 
 # Starting merging
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-print STDERR "+                                   MERGE TABLES FILES                                   +\n";
-print STDERR "+                                           V1.0                                         +\n";
-print STDERR "+                                         17-02-2016                                     +\n";
+print STDERR "+                                     MERGE TABLES FILES                                 +\n";
+print STDERR "+                                            V2.0                                        +\n";
+print STDERR "+                                         28-06-2016                                     +\n";
 print STDERR "+                              Written by: Sander W. van der Laan                        +\n";
 print STDERR "+                                                                                        +\n";
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
