@@ -1,4 +1,4 @@
-#!/bin/bash -x # the "-x" will help with debugging, if errors occure this will be reported in an error file.
+#!/bin/bash
 #
 # You can use the variables below (indicated by "#$") to set some things for the 
 # submission system.
@@ -121,12 +121,13 @@ while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 		$LOCUSZOOM13 --metal $CARDIOGRAMplusC4D_HM2/cardiogramgwas_plus_c4dmetabo.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} --pop EUR --build hg19 --source 1000G_March2012 theme=publication title="${VARIANT} in CARDIoGRAMplusC4D (1kG)" ${LOCUSZOOM_SETTINGS}
 done < ${REGIONS}
 
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -145,5 +146,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-

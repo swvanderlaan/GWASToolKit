@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                          SNPTEST_PHENO_WRAPPER.v1.1"
+echo "                                          SNPTEST_PHENO_WRAPPER.v1.2"
 echo "                                    WRAPPING UP SNPTEST ANALYSIS RESULTS"
 echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PHENO_WRAPPER.v1.1.20160628"
+echo " Version: SNPTEST_PHENO_WRAPPER.v1.2"
 echo ""
-echo " Last update: June 28th, 2016"
+echo " Last update: July 27th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
@@ -23,7 +23,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ $# -lt 6 ]]; then 
-	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [2] argument:"
+	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [6] arguments:"
 	echo "- Argument #1 is path_to the output directory."
 	echo "- Argument #2 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
 	echo "- Argument #3 indicates the type of analysis [GWAS/REGION/GENES]."
@@ -154,6 +154,34 @@ else
   				date
   				exit 1
 		fi
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
+		echo "THIS OPTION IS IN BETA"
+		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
+			# create results file
+			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 19 CALC 21 22  24 25 # AUTOSOMAL & X CHROMOSOMES
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			
+			for FILE in $(ls *.out); do
+				# which file are we processing?
+				echo "Processing file "${FILE}
+				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+				echo ""
+			done
+		
+		elif [[ ${TRAIT_TYPE} = "BINARY" ]]; then	
+			# create BINARY results file
+			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 29 CALC 33 45  47 48 # AUTOSOMAL & X CHROMOSOMES
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			
+			for FILE in $(ls *.out); do
+				# which file are we processing?
+				echo "Processing file "${FILE}
+				cat ${OUTPUT_DIR}/${FILE} | head
+				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+				echo ""
+			done
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "NOT AN OPTION YET!"
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
@@ -205,7 +233,7 @@ else
 				echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
 				echo ""
 				echo " You must supply the correct argument:"
-				echo " * [GWAS/REGION/GENES]       -- indicates the type of analysis."
+				echo " * [GWAS/VARIANT/REGION/GENES]       -- indicates the type of analysis."
 				echo ""
 				echo " Please refer to instruction above."
 				echo ""

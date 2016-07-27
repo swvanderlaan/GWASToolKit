@@ -3,12 +3,12 @@
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "                                       SCRIPT TO MAKE LOCUSZOOM PLOTS"
 echo ""
-echo " You're here: "`pwd`
-echo " Today's: " `date`
+echo " You're here: "$(pwd)
+echo " Today's: "$(date)
 echo ""
-echo " Version: LOCUSZOOM_HITS.v1.3.20160219"
+echo " Version: LOCUSZOOM_HITS.v1.4.20160628"
 echo ""
-echo " Last update: February 19th, 2016"
+echo " Last update: June 28th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)"
 echo ""
 echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
@@ -55,7 +55,6 @@ script_arguments_error() {
 	echo ""
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
-  	date
   	exit 1
 }
 
@@ -84,8 +83,8 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                             MAKE LOCUSZOOM PLOTS"
 	### SETTING LOCUSZOOM
 	# Works for version 1.2 and version 1.3 is forthcoming.
-	LOCUSZOOM12=/hpc/local/CentOS6/dhl_ec/software/locuszoom_1.2/bin/locuszoom
-	LOCUSZOOM13=/hpc/local/CentOS6/dhl_ec/software/locuszoom_1.3/bin/locuszoom
+	LOCUSZOOM12=/hpc/local/CentOS7/dhl_ec/software/locuszoom_1.2/bin/locuszoom
+	LOCUSZOOM13=/hpc/local/CentOS7/dhl_ec/software/locuszoom_1.3/bin/locuszoom
 	echo ""	
 	### CHECKING ARGUMENTS ###
 	### Set location of [imputed] genotype data
@@ -95,13 +94,13 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
 			LDMAP="--pop EUR --build hg19 --source 1000G_March2012"
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		elif [[ ${REFERENCE} = "GoNL4" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -120,7 +119,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -374,12 +373,13 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
+THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo ""
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) 2016 Sander W. van der Laan                                                             +"
+echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
 echo "+                                                                                                       +"
 echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
 echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
@@ -398,5 +398,3 @@ echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWAR
 echo "+                                                                                                       +"
 echo "+ Reference: http://opensource.org.                                                                     +"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-
