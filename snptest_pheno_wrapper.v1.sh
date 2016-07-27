@@ -21,6 +21,22 @@ echo "              of downstream (R) analyses."
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
+script_arguments_error() {
+	echo ""
+	echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
+	echo ""
+	echo " You must supply the correct argument:"
+	echo " * [QUANT]       -- indicates the trait is quantitative (e.g. total cholesterol levels) | THIS IS THE DEFAULT."
+	echo " * [BINARY]      -- indicates the trait is binary (e.g. case-control, etc)."
+	echo ""
+	echo " Please refer to instruction above."
+	echo ""
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	# The wrong arguments are passed, so we'll exit the script now!
+  	date
+  	exit 1
+}
+
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ $# -lt 6 ]]; then 
 	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [6] arguments:"
@@ -139,20 +155,8 @@ else
 				echo ""
 			done
 		else
-			### If arguments are not met than the 
-				echo ""
-				echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-				echo ""
-				echo " You must supply the correct argument:"
-				echo " * [QUANT]       -- indicates the trait is quantitative (e.g. total cholesterol levels) | THIS IS THE DEFAULT."
-				echo " * [BINARY]      -- indicates the trait is binary (e.g. case-control, etc)."
-				echo ""
-				echo " Please refer to instruction above."
-				echo ""
-				echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-				# The wrong arguments are passed, so we'll exit the script now!
-  				date
-  				exit 1
+			### If arguments are not met then this error is displayed.
+				script_arguments_error
 		fi
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 		echo "THIS OPTION IS IN BETA"
@@ -182,6 +186,10 @@ else
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
+		else
+			### If arguments are not met then this error is displayed.
+				script_arguments_error
+		fi
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "NOT AN OPTION YET!"
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
@@ -212,23 +220,11 @@ else
 				echo ""
 			done
 		else
-			### If arguments are not met than the 
-				echo ""
-				echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-				echo ""
-				echo " You must supply the correct argument:"
-				echo " * [QUANT]       -- indicates the trait is quantitative (e.g. total cholesterol levels) | THIS IS THE DEFAULT."
-				echo " * [BINARY]      -- indicates the trait is binary (e.g. case-control, etc)."
-				echo ""
-				echo " Please refer to instruction above."
-				echo ""
-				echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-				# The wrong arguments are passed, so we'll exit the script now!
-  				date
-  				exit 1
+			### If arguments are not met then this error is displayed.
+				script_arguments_error
 		fi
 	else
-			### If arguments are not met than the 
+			### If arguments are not met then this error is displayed. 
 				echo ""
 				echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
 				echo ""
