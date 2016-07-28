@@ -1,20 +1,20 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                             SNPTEST_CLEANER.v1"
+echo "                                             SNPTEST_CLEANER.v1.2"
 echo "                                    CLEANS UP SNPTEST ANALYSIS RESULTS"
 echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_CLEANER.v1.1.20160628"
+echo " Version: SNPTEST_CLEANER.v1.2"
 echo ""
-echo " Last update: June 28th, 2016"
+echo " Last update: July 28th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl";"
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echo ""
 echo " Description: Cleaning up all files from a SNPTEST analysis into one file for ease "
 echo "              of downstream (R) analyses."
@@ -22,15 +22,16 @@ echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 5 ]]; then 
+if [[ $# -lt 6 ]]; then 
 	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [5] argument:"
 	echo "- Argument #1 indicates the type of analysis [GWAS/REGION/GENES]."
 	echo "- Argument #2 which study type [AEGS/AAAGS/CTMM]."
 	echo "- Argument #3 which reference."
-	echo "- Argument #4 is path_to the output directory."
-	echo "- Argument #5 which phenotype was analysed."
+	echo "- Argument #4 which exclusion criterium was used."
+	echo "- Argument #5 is path_to the output directory."
+	echo "- Argument #6 which phenotype was analysed."
 	echo ""
-	echo "An example command would be: snptest_cleaner.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: path_to_output_dir]  [arg5: some_phenotype ]"
+	echo "An example command would be: snptest_cleaner.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: exclusion list] [arg5: path_to_output_dir]  [arg6: some_phenotype ]"
   	echo ""
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
@@ -41,12 +42,14 @@ else
 	ANALYSIS_TYPE=${1}
 	STUDY_TYPE=${2}
 	REFERENCE=${3}
-	OUTPUT_DIR=${4} 
+	EXCLUSION=${4}
+	OUTPUT_DIR=${5} 
 	cd ${OUTPUT_DIR}	
-	PHENOTYPE=${5}
+	PHENOTYPE=${6}
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"
+	echo "The exclusion criterium used................................: ${EXCLUSION}"
 	echo "The output directory is.....................................: ${OUTPUT_DIR}"
 	echo "The following phenotype was analysed and is wrapped up......: ${PHENOTYPE}"
 	
@@ -60,23 +63,23 @@ else
 	
 	echo "Moving scripts and logs..."
 	mkdir -v ${OUTPUT_DIR}/_scriptlogs
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.sh ${OUTPUT_DIR}/_scriptlogs/
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.output ${OUTPUT_DIR}/_scriptlogs/
+	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.*.sh ${OUTPUT_DIR}/_scriptlogs/
+	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.*.log ${OUTPUT_DIR}/_scriptlogs/
 	gzip -v ${OUTPUT_DIR}/_scriptlogs/*.output
 	echo ""
 	echo "Moving raw results..."
 	mkdir -v ${OUTPUT_DIR}/_rawresults
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.log ${OUTPUT_DIR}/_rawresults/
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.out ${OUTPUT_DIR}/_rawresults/
+	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.log ${OUTPUT_DIR}/_rawresults/
+	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.out ${OUTPUT_DIR}/_rawresults/
 	gzip -v ${OUTPUT_DIR}/_rawresults/*.log
 	gzip -v ${OUTPUT_DIR}/_rawresults/*.out
 	echo ""
 	echo "Checking errors-files and zapping them if empty..."
-	if [[ -s ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.errors ]]; then
+	if [[ -s ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.errors ]]; then
 		echo "* ERROR FILE NOT EMPTY: The error file has some data. We'll keep it there for review."
 	else
 		echo "The error file is empty."
-	    rm -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.*.errors
+	    rm -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.errors
 	fi
 	
 	echo ""
