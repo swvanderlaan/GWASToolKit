@@ -16,7 +16,7 @@ echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echo ""
-echo " Description: Plotting of a SNPTEST analysis: making Manhattan, Z-P, SE-N, and QQ plots."
+echo " Description: Plotting of a SNPTEST analysis: making Manhattan, Z-P, and QQ plots."
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
@@ -67,6 +67,7 @@ else
 		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_CI.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_CI.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
+	
 	### QQ-plot stratified by effect allele frequency [P, EAF]
 	echo "QQ-plot stratified by effect allele frequency..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $17, $15 } ' | grep -v NA > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt
@@ -74,6 +75,7 @@ else
 		Rscript ${MANTEL_SCRIPTS}/qqplot_by_caf.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${MANTEL_SCRIPTS}/qqplot_by_caf.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
+	
 	## QQ-plot stratified by imputation quality (info -- imputation quality) [P, INFO]
 	echo "QQ-plot stratified by imputation quality..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $17, $8 } ' | grep -v NA > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_INFO.txt
@@ -81,31 +83,39 @@ else
 		Rscript ${MANTEL_SCRIPTS}/qqplot_by_info.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_INFO.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${MANTEL_SCRIPTS}/qqplot_by_info.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_INFO.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
+	
 	### Plot the imputation quality (info) in a histogram [INFO]
 	echo "Plot the imputation quality (info) in a histogram..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $8 } ' > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt 
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt -PDF -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.pdf ${MANTEL_SCRIPTS}/obsexp.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt -PNG -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.png ${MANTEL_SCRIPTS}/obsexp.R
+	#./info_score_plotter.R -p projectdir -r resultfile -o outputdir -f imageformat
+		Rscript ${MANTEL_SCRIPTS}/info_score_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt -o ${OUTPUT_DIR} -f PDF
+		Rscript ${MANTEL_SCRIPTS}/info_score_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt -o ${OUTPUT_DIR} -f PDF
 	echo ""
+	
 	### Plot the BETAs in a histogram [BETA]
 	echo "Plot the BETAs in a histogram..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $18 } ' > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt 
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt -PDF -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.pdf ${MANTEL_SCRIPTS}/histograms_beta.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt -PNG -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.png ${MANTEL_SCRIPTS}/histograms_beta.R
+	#./effectsize_plotter.R -p projectdir -r resultfile -o outputdir -f imageformat
+		Rscript ${MANTEL_SCRIPTS}/effectsize_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt -o ${OUTPUT_DIR} -f PDF
+		Rscript ${MANTEL_SCRIPTS}/effectsize_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt -o ${OUTPUT_DIR} -f PDF
 	echo ""
+	
 	### Plot the Z-score based p-value (calculated from beta/se) and P [BETA, SE, P]
 	echo "Plot the Z-score based p-value (calculated from beta/se) and P..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $18, $19, $17 } ' > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt 
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt -PDF -500000 -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.pdf ${MANTEL_SCRIPTS}/p_z_plot.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt -PNG -500000 -${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.png ${MANTEL_SCRIPTS}/p_z_plot.R
+	#./p_z_plotter.R -p projectdir -r resultfile -o outputdir -s random_sample -f imageformat #-s 500000 should suffice
+		Rscript ${MANTEL_SCRIPTS}/p_z_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt -o ${OUTPUT_DIR} -s 500000 -f PDF
+		Rscript ${MANTEL_SCRIPTS}/p_z_plotter.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt -o ${OUTPUT_DIR} -s 500000 -f PDF
 	echo ""
+	
 	### Manhattan plot for quick inspection (truncated upto -log10(p-value)) [CHR, BP, P]
 	echo "Manhattan plot for quick inspection (truncated upto -log10(p-value)=2)..."
 	zcat ${RESULTS} | tail -n +2 | awk ' { print $3, $4, $17 } ' > ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Manhattan_forQuickInspect.txt
 	#./manhattan.R -p projectdir -r resultfile -o outputdir -c colorstyle -f imageformat
 		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Manhattan_forQuickInspect.txt -o ${OUTPUT_DIR} -c QC -f PDF
 		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Manhattan_forQuickInspect.txt -o ${OUTPUT_DIR} -c QC -f PNG
-
+	echo ""
+	
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
 	gzip -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_CI.txt
 	gzip -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt
