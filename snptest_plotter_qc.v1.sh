@@ -7,14 +7,14 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PLOTTER_QC.v1.1.20160628"
+echo " Version: SNPTEST_PLOTTER_QC.v1.1"
 echo ""
-echo " Last update: June 28th, 2016"
+echo " Last update: July 28th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echo ""
 echo " Description: Plotting of a SNPTEST analysis: making Manhattan, and QQ plots of"
 echo "              the filtered data."
@@ -63,16 +63,18 @@ else
 	#### QQ-plot including 95%CI and compute lambda [P]
 	echo "Making QQ-plot including 95%CI and compute lambda..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $17 } ' | grep -v NA > ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.QQplot.txt -PVAL -PDF -${OUTPUT_DIR}/${FILENAME}.QQplot.pdf ${MANTEL_SCRIPTS}/qqplot.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.QQplot.txt -PVAL -PNG -${OUTPUT_DIR}/${FILENAME}.QQplot.png ${MANTEL_SCRIPTS}/qqplot.R
+	#./qqplot.R -p projectdir -r resultfile -o outputdir -s stattype -f imageformat
+		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	### Manhattan plot for publications [CHR, BP, P]
 	echo "Manhattan plot for publications ..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $3, $4, $17 } ' > ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -PDF -FULL -${OUTPUT_DIR}/${FILENAME}.ManhattanFULL.pdf ${MANTEL_SCRIPTS}/manhattan_plot.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -PNG -FULL -${OUTPUT_DIR}/${FILENAME}.ManhattanFULL.png ${MANTEL_SCRIPTS}/manhattan_plot.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -PDF -TWOCOLOR -${OUTPUT_DIR}/${FILENAME}.ManhattanTWOCOLOR.pdf ${MANTEL_SCRIPTS}/manhattan_plot.R
-		R CMD BATCH -CL -${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -PNG -TWOCOLOR -${OUTPUT_DIR}/${FILENAME}.ManhattanTWOCOLOR.png ${MANTEL_SCRIPTS}/manhattan_plot.R
+	#./manhattan.R -p projectdir -r resultfile -o outputdir -c colorstyle -f imageformat
+		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF
+		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG
+		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF
+		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
 	gzip -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
 	gzip -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
@@ -82,28 +84,28 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-THISYEAR=$(date +'%Y')
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo ""
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
-echo "+                                                                                                       +"
-echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-echo "+ subject to the following conditions:                                                                  +"
-echo "+                                                                                                       +"
-echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-echo "+ portions of the Software.                                                                             +"
-echo "+                                                                                                       +"
-echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-echo "+                                                                                                       +"
-echo "+ Reference: http://opensource.org.                                                                     +"
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+#THISYEAR=$(date +'%Y')
+#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+#echo ""
+#echo ""
+#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+#echo "+ The MIT License (MIT)                                                                                 +"
+#echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
+#echo "+                                                                                                       +"
+#echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
+#echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
+#echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
+#echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
+#echo "+ subject to the following conditions:                                                                  +"
+#echo "+                                                                                                       +"
+#echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
+#echo "+ portions of the Software.                                                                             +"
+#echo "+                                                                                                       +"
+#echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
+#echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
+#echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
+#echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
+#echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
+#echo "+                                                                                                       +"
+#echo "+ Reference: http://opensource.org.                                                                     +"
+#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
