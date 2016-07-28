@@ -1,20 +1,20 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                          SNPTEST_PHENO_WRAPPER.v1.2"
+echo "                                          SNPTEST_PHENO_WRAPPER.v1.2.1"
 echo "                                    WRAPPING UP SNPTEST ANALYSIS RESULTS"
 echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PHENO_WRAPPER.v1.2"
+echo " Version: SNPTEST_PHENO_WRAPPER.v1.2.1"
 echo ""
-echo " Last update: July 27th, 2016"
+echo " Last update: July 28th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl"
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echo ""
 echo " Description: Wrapping up all files from a SNPTEST analysis into one file for ease "
 echo "              of downstream (R) analyses."
@@ -56,7 +56,7 @@ else
 	echo "All arguments are passed. These are the settings:"
 	# set input-data
 	OUTPUT_DIR=${1} # depends on arg1
-	cd ${OUTPUT_DIR}
+	cd ${OUTPUT_DIR} # moving to the output-directory
 	TRAIT_TYPE=${2} # depends on arg2
 	ANALYSIS_TYPE=${3}
 	STUDY_TYPE=${4}
@@ -132,12 +132,12 @@ else
 		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
 			# create results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 19 CALC 21 22  24 25 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for CHR in $(seq 1 22) X; do
 				# which chromosome are we processing?
 				echo "Processing chromosome "${CHR}
-				cat ${OUTPUT_DIR}/*.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				cat *.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
@@ -145,12 +145,12 @@ else
 		elif [[ ${TRAIT_TYPE} = "BINARY" ]]; then	
 			# create BINARY results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 29 CALC 33 45  47 48 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for CHR in $(seq 1 22) X; do
 				# which chromosome are we processing?
 				echo "Processing chromosome "${CHR}
-				cat ${OUTPUT_DIR}/*.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				cat *.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
@@ -159,16 +159,16 @@ else
 				script_arguments_error
 		fi
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
-		echo "THIS OPTION IS IN BETA"
+		echo "!!! THIS OPTION IS IN BETA !!!"
 		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
 			# create results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 19 CALC 21 22  24 25 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file "${FILE}
-				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "Processing file ${FILE}"
+				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
@@ -176,32 +176,34 @@ else
 		elif [[ ${TRAIT_TYPE} = "BINARY" ]]; then	
 			# create BINARY results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 29 CALC 33 45  47 48 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file "${FILE}
-				cat ${OUTPUT_DIR}/${FILE} | head
-				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}VARIANT.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "Processing file ${FILE}"
+				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
+			
 		else
 			### If arguments are not met then this error is displayed.
 				script_arguments_error
 		fi
+		
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "NOT AN OPTION YET!"
+	
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
 			# create results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 19 CALC 21 22  24 25 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file "${FILE}
-				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "Processing file ${FILE}"
+				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
@@ -209,13 +211,12 @@ else
 		elif [[ ${TRAIT_TYPE} = "BINARY" ]]; then	
 			# create BINARY results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 29 CALC 33 45  47 48 # AUTOSOMAL & X CHROMOSOMES
-			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file "${FILE}
-				cat ${OUTPUT_DIR}/${FILE} | head
-				cat ${OUTPUT_DIR}/${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+				echo "Processing file ${FILE}"
+				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 			done
@@ -223,6 +224,7 @@ else
 			### If arguments are not met then this error is displayed.
 				script_arguments_error
 		fi
+		
 	else
 			### If arguments are not met then this error is displayed. 
 				echo ""
@@ -240,7 +242,7 @@ else
 	fi
 	
 	echo ""
-	gzip -v ${OUTPUT_DIR}/*.summary_results.txt
+	gzip -vf ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 	echo ""
 	echo "Finished. "
 	echo ""
