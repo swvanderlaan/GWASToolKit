@@ -20,7 +20,14 @@ mkdir -p ~/git/ && cd ~/git
 
 ##### Step 2: clone this git, unless it already exists.
 
-[will be added soon...]
+```
+if [ -d ~/git/GWASToolKit/.git ]; then \
+		cd ~/git/GWASToolKit && git pull; \
+	else \
+		cd ~/git/ && git clone https://github.com/swvanderlaan/GWASToolKit.git; \
+	fi
+```
+
 
 --------------
 
