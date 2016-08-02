@@ -6,6 +6,25 @@ Scripts will work within the context of a certain Linux environment (in this cas
 
 All scripts are annotated for debugging purposes - and future reference. The only script the user should edit is the `run_analysis.sh` script, and depending on the analyses to be run, some text-files.
 
+The installation procedure is quite straightforward, and only entails two steps consisting of command one-liners that are *easy* to read. You can copy/paste each example command, per block of code. For some steps you need administrator privileges. Follow the steps in consecutive order.
+
+```
+these `mono-type font` illustrate commands illustrate terminal commands. You can copy & paste these.
+```
+
+To make it easier to copy and paste, long commands that stretch over multiple lines are structered as follows:
+
+```
+Multiline commands end with a dash \
+	indent 4 spaces, and continue on the next line. \
+	Copy & paste these whole blocks of code.
+```
+
+Although we made it easy to just select, copy and paste and run these blocks of code, it is not a good practise to blindly copy and paste commands. Try to be aware about what you are doing. And never, never run `sudo` commands without a good reason to do so. 
+
+We have tested GWASToolKit on CentOS6.6, CentOS7, and OS X El Capitan (version 10.11.[x]). 
+
+
 --------------
 
 #### Installing the scripts locally
@@ -44,7 +63,9 @@ The user must supply a variant list with chromosome and base pair position per v
 
 #### Regional analyses
 
-The user must supply a region of interest in a file. The final analyses results will be concatenated into a summary file.
+[NOTE: this part of the script is not finished yet.]
+
+The user must supply a region of interest in a file. The final analyses results will be concatenated into a summary file. 
 
 --------------
 
@@ -69,6 +90,17 @@ Files made are:
 *.fam -- the new FAM file in PLINK style
 FURTHER NOTES: - A [.gen.gz] extension, i.e. a gzipped [.gen] file is expected. - The FAM file only contains the sample IDs and has PID, MID, Sex and Phenotype set to -9.
 
+
+--------------
+
+#### TO DO
+
+- add proper `--help` flag
+- clean up codes further, especially with respect to the various error-flags
+- add in checks of the environment, similar to `slideToolkit` scripts
+- add in methylation QTL analysis option for Athero-Express data
+- add in expression QTL analysis option for CTMM data
+- add in some code to produce a simple report
 
 --------------
 
