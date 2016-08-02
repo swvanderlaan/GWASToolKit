@@ -45,7 +45,7 @@ The user must supply a region of interest in a file. The final analyses results 
 
 The user must supply a variant list with chromosome and base pair position per variant. The final analyses results will be concatenated into a summary file.
 
-####_NOTE: at the moment these scripts are changing frequently, but for most analyses it should work. Please contact me for support_
+####_NOTE: at the moment these scripts are changing frequently, but for most analyses it should work. Please contact me for support._
 
 
 --------------
