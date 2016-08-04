@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                              RUN_ANALYSES.v1.2.1"
+echo "                                              RUN_ANALYSES.v1.2.2"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.1"
+echo " Version: RUN_ANALYSES.v1.2.2"
 echo ""
-echo " Last update: July 28th, 2016"
+echo " Last update: August 4th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -64,7 +64,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### - Argument #7  is path_to to the covariates-file [refer to readme for list of available covariates].
 ### - Argument #8  is path_to the project [name] directory, where the output should be stored.
 ### - Argument #9  is the amount of memory you want to use on the HPC (GWAS require more than 8 hours per chromosome).
-### - Argument #10 is the amount of time you want to use the HPC for 
+### - Argument #10 is the amount of time you want to use the HPC for the analyses.
 ### - Argument #11 is your e-mail address; you'll get an email when the jobs have ended or are aborted/killed.
 ### - Argument #12 are you mail setting; you can get an email if jobs begin (b), end (e), actually start (s), abort (a), or do not want an email (n).
 
