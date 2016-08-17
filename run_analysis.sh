@@ -9,7 +9,7 @@ echo " Today's: "$(date)
 echo ""
 echo " Version: RUN_ANALYSES.v1.2.2"
 echo ""
-echo " Last update: August 4th, 2016"
+echo " Last update: August 17th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -102,7 +102,7 @@ if [ ! -d ${PROJECTROOT}/SOMESUBDIRECTORY/ ]; then
 else
 	echo "Your project-subdirectory already exists..."
 fi
-PROJECT="${PROJECTROOT}/SOMESUBDIRECTORY
+PROJECT=${PROJECTROOT}/SOMESUBDIRECTORY
 
 ### ANALYSIS SETTINGS
 ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES

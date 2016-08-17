@@ -26,7 +26,8 @@ echo ""
 echo " Update date: 2016-08-17"
 echo " Written by:  Sander W. van der Laan"
 echo ""
-echo "Today's "$(date)
+echo "Today's: "$(date)
+TODAY=$(date +"%Y%m%d")
 echo "////////////////////////////////////////////////////////////////////////////////////"
 
 ### START of if-else statement for the number of command-line arguments passed ###
