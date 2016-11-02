@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.2"
+echo " Version: RUN_ANALYSES.v1.2.3"
 echo ""
-echo " Last update: August 17th, 2016"
+echo " Last update: 2016-11-02"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -94,15 +94,16 @@ GWAS_SCRIPTS=${SOFTWARE}/GWAS
 
 
 ### PROJECT SETTINGS
-PROJECTROOT=/hpc/dhl_ec/YOURLOGINNAME/SOMEDIRECTORY ### you should probably make some project-directory
+PROJECTNAME=SOMEPROJECTNAME ### Change to some project name, for example 'pcsk6'
+PROJECTROOT=/hpc/dhl_ec/YOURLOGINNAME/SOMEDIRECTORY/ ### you should probably make some directory to have the script put your project in
 # Make directories for script if they do not exist yet (!!!PREREQUISITE!!!)
-if [ ! -d ${PROJECTROOT}/SOMESUBDIRECTORY/ ]; then
-	mkdir -v ${GBS}/SOMESUBDIRECTORY/
+if [ ! -d ${PROJECTROOT}/${PROJECTNAME}/ ]; then
+	mkdir -v ${GBS}/${PROJECTNAME}/
 	echo "The project-subdirectory is non-existent. Mr. Bourne will create it for you..."
 else
 	echo "Your project-subdirectory already exists..."
 fi
-PROJECT=${PROJECTROOT}/SOMESUBDIRECTORY
+PROJECT=${PROJECTROOT}/${PROJECTNAME}
 
 ### ANALYSIS SETTINGS
 ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES
@@ -116,11 +117,11 @@ EXCLUSION="EXCL_DEFAULT" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NO
 # BMI
 # CRP
 # TRAIT3
-PHENOTYPE_FILE="${PROJECTROOT}/example.phenotypes.txt"
+PHENOTYPE_FILE="${PROJECTROOT}/${PROJECTNAME}.phenotypes.txt"
 
 # Example covariate-list format:
 # COHORT Age sex PC1_2013 PC2_2013 PC3_2013 PC4_2013 PC5_2013 PC6_2013 PC7_2013 PC8_2013 PC9_2013 PC10_2013
-COVARIATE_FILE="${PROJECTROOT}/example.covariates.txt"
+COVARIATE_FILE="${PROJECTROOT}/${PROJECTNAME}.covariates.txt"
 
 PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
@@ -156,7 +157,7 @@ QMEMGENELZOOM="h_vmem=4G" # 4Gb for locuszoom;
 QTIMEGENELZOOM="h_rt=00:15:00" #15mins for locuszoom;
 
 # MAILSETTINGS
-YOUREMAIL="A.Gohar-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
+YOUREMAIL="your-mail@address.com" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
 MAILSETTINGS="beas" 
 # 'b' Mail is sent at the beginning of the job; 
 # 'e' Mail is sent at the end of the job; 
@@ -172,7 +173,7 @@ MAILSETTINGS="beas"
 # rs5678 2 12345567
 # rs4321 14 12345567
 # rs9876 20 12345567
-VARIANTLIST="${PROJECTROOT}/example.variantlist.txt"
+VARIANTLIST="${PROJECTROOT}/${PROJECTNAME}.variantlist.txt"
 
 # For GWAS/REGION/GENE analysis
 LZVERSION="LZ13"
@@ -191,7 +192,7 @@ REGION_START="none" # e.g. 12345678
 REGION_END="none" # e.g. 87654321
 
 # For per-gene analysis
-GENES_FILE="${PROJECTROOT}/example.genelist.txt"
+GENES_FILE="${PROJECTROOT}/${PROJECTNAME}.genelist.txt"
 
 # Filter settings -- specifically, GWAS, GENE and REGIONAL analyses
 INFO="0.3"
@@ -206,19 +207,26 @@ PVALUE="17"
 RANGELZ=$(expr "$RANGE" / 1000)
 
 ### RETURNING SETTINGS
-echo "These things were set:"
+echo "-----------------------------------------"
+echo "            General settings"
+echo "-----------------------------------------"
 echo "The analysis scripts are located here...................................: ${GWAS_SCRIPTS}"
 echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 echo "The analysis will be run using the following method.....................: ${METHOD}"
-echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION}"
-echo "The analysis will be run using the following phenotypes.................: ${PHENOTYPE_FILE}"
-echo "The analysis will be run using the following covariates.................: ${COVARIATE_FILE}"
+echo ""
+echo "-----------------------------------------"
+echo "        Project specific settings"
+echo "-----------------------------------------"
+echo "The project name is.....................................................: ${PROJECTNAME}"
 echo "The project directory is................................................: ${PROJECT}"
 echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 echo "These are you mailsettings..............................................: ${MAILSETTINGS}"
+echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION}"
+echo "The analysis will be run using the following phenotypes.................: ${PHENOTYPE_FILE}"
 echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
+echo "The analysis will be run using the following covariates.................: ${COVARIATE_FILE}"
 echo "The minimum info-score filter is........................................: ${INFO}"
 echo "The minimum minor allele count is.......................................: ${MAC}"
 echo "The minimum coded allele frequency is...................................: ${CAF}"
