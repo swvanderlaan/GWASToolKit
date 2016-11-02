@@ -7,7 +7,7 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.3"
+echo " Version: RUN_ANALYSES.v1.2.4"
 echo ""
 echo " Last update: 2016-11-02"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
