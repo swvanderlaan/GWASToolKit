@@ -16,7 +16,7 @@
 print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print "+                                       REMOVE DUPES                                     +\n";
 print "+                                           V2.0                                         +\n";
-print "+                                         28-06-2016                                     +\n";
+print "+                                         03-11-2016                                     +\n";
 print "+                              Written by: Sander W. van der Laan                        +\n";
 print "+                                                                                        +\n";
 print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
@@ -73,7 +73,7 @@ print "+ The MIT License (MIT)                                                  
 print "+ Copyright (c) 2016 Sander W. van der Laan                                              +\n";
 print "+                                                                                        +\n";
 print "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this   +\n";
-print "+ software and associated documentation files (the \"Software\"), to deal in the         +\n";
+print "+ software and associated documentation files (the \"Software\"), to deal in the           +\n";
 print "+ Software without restriction, including without limitation the rights to use, copy,    +\n";
 print "+ modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,    +\n";
 print "+ and to permit persons to whom the Software is furnished to do so, subject to the       +\n";
@@ -82,7 +82,7 @@ print "+                                                                        
 print "+ The above copyright notice and this permission notice shall be included in all copies  +\n";
 print "+ or substantial portions of the Software.                                               +\n";
 print "+                                                                                        +\n";
-print "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,  +\n";
+print "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    +\n";
 print "+ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          +\n";
 print "+ PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     +\n";
 print "+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   +\n";

@@ -27,7 +27,7 @@ if [[ $# -lt 6 ]]; then
 	echo "- Argument #2 which study type [AEGS/AAAGS/CTMM]."
 	echo "- Argument #3 which reference."
 	echo "- Argument #4 is path_to the output directory."
-	echo "- Argument #5 is project directory path"
+	echo "- Argument #5 is project directory path."
 	echo "- Argument #5 which phenotype was analysed."
 	echo ""
 	echo "An example command would be: summariser.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: path_to_output_dir]  [arg5: some_phenotype ]"
@@ -68,7 +68,7 @@ else
 	else
 		echo "Summary directory does exist."
 		SUMMARY=${PROJECT_DIR}/Summary
-	if
+	fi
 	
 	echo ""
 	echo "Copying results files..."
