@@ -6,9 +6,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: LOCUSZOOM_HITS.v1.4.20160628"
+echo " Version: LOCUSZOOM_HITS.v1.4.1"
 echo ""
-echo " Last update: June 28th, 2016"
+echo " Last update: November 11th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)"
 echo ""
 echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
@@ -94,13 +94,13 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
 			LDMAP="--pop EUR --build hg19 --source 1000G_March2012"
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		elif [[ ${REFERENCE} = "GoNL4" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -119,7 +119,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""
@@ -136,7 +136,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			echo "Unfortunately it is not possible yet to make LZ with this reference."
-			HG19_GENES=/hpc/local/CentOS6/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met than the 
 			echo ""

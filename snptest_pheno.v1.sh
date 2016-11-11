@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PHENO.v1.2.2"
+echo " Version: SNPTEST_PHENO.v1.2.3"
 echo ""
-echo " Last update: October 28th, 2016"
+echo " Last update: November 11th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -126,13 +126,13 @@ else
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/aegs_combo_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/aegs_combo_1000g_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		elif [[ ${REFERENCE} = "GoNL4" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_GoNL4/aegs_combo_gonl4_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed
 			echo ""
@@ -151,7 +151,7 @@ else
 	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed 
 			echo ""
@@ -168,7 +168,7 @@ else
 	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/ctmm_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWAS/glist-hg19
+			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed 
 			echo ""
@@ -424,7 +424,7 @@ else
 	MAILSETTINGS=${12} 
 	
 	### Set location of the individual, regional and GWAS scripts
-	GWAS_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/GWAS
+	GWAS_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit
 	
 	### Report back these variables
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then

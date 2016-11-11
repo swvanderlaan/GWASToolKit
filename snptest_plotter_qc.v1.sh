@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PLOTTER_QC.v1.1"
+echo " Version: SNPTEST_PLOTTER_QC.v1.1.1"
 echo ""
-echo " Last update: July 28th, 2016"
+echo " Last update: November 11th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
