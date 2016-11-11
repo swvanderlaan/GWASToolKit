@@ -253,27 +253,27 @@ else
 	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		if [[ ${EXCLUSION} = "EXCL_DEFAULT" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA.list
 		elif [[ ${EXCLUSION} = "EXCL_FEMALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_Females.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_Females.list
 		elif [[ ${EXCLUSION} = "EXCL_MALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_Males.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_Males.list
 		elif [[ ${EXCLUSION} = "EXCL_CKD" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_CKD.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_CKD.list
 		elif [[ ${EXCLUSION} = "EXCL_NONCKD" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_nonCKD.list	
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonCKD.list	
 		elif [[ ${EXCLUSION} = "EXCL_T2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_T2D.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_T2D.list
 		elif [[ ${EXCLUSION} = "EXCL_NONT2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_nonT2D.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonT2D.list
 		elif [[ ${EXCLUSION} = "EXCL_SMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_SMOKER.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_SMOKER.list
 		elif [[ ${EXCLUSION} = "EXCL_NONSMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_nonSMOKER.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonSMOKER.list
 		elif [[ ${EXCLUSION} = "EXCL_PRE2007" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_pre2007.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_pre2007.list
 		elif [[ ${EXCLUSION} = "EXCL_POST2007" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/exclusion_nonCEA_post2007.list
+			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_post2007.list
 		else
 		### If arguments are not met then this error message will be displayed 
 			echo ""
