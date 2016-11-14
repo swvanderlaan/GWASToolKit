@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                              RUN_ANALYSES.v1.2.2"
+echo "                                              RUN_ANALYSIS.v1.2.5"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
 echo " You're here: "$(pwd)
@@ -9,7 +9,7 @@ echo " Today's: "$(date)
 echo ""
 echo " Version: RUN_ANALYSES.v1.2.5"
 echo ""
-echo " Last update: 2016-11-11"
+echo " Last update: 2016-11-14"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -112,12 +112,34 @@ REFERENCE="1kGp3v5GoNL5" # 1kGp3v5GoNL5/1kGp1v3/GoNL4
 METHOD="EXPECTED" #EXPECTED/SCORE -- EXPECTED is likely best
 EXCLUSION="EXCL_DEFAULT" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
 
+TRAIT_TYPE="BINARY" # QUANT/BINARY
 ### PHENOTYPES AND COVARIATES
 # Example phenotype-list format: -- should be 'binary' OR 'continuous'
 # BMI
 # CRP
 # TRAIT3
-PHENOTYPE_FILE="${PROJECTROOT}/${PROJECTNAME}.phenotypes.txt"
+if [[ ${TRAIT_TYPE} = "BINARY" ]]; then
+	echo "Running a 'binary' analysis...setting the phenotype file appropriately."
+	PHENOTYPE_FILE="${PROJECTROOT}/${PROJECTNAME}.phenotypes.bin.txt"
+elif [[ ${TRAIT_TYPE} = "QUANT" ]]; then
+	echo "Running a 'quantitative' analysis...setting the phenotype file appropriately."
+	PHENOTYPE_FILE="${PROJECTROOT}/${PROJECTNAME}.phenotypes.con.txt"
+else 
+	### If arguments are not met than the 
+	echo ""
+	echo "      *** ERROR *** ERROR --- $(basename "$0") --- ERROR *** ERROR ***"
+	echo ""
+	echo " You must supply the correct argument:"
+	echo " * [BINARY]  -- to run a 'binary' analysis (e.g. on stroke cases vs. controls)."
+	echo " * [QUANT]   -- to run a 'quantitative' analysis (e.g. on BMI)."
+	echo ""
+	echo " Please refer to instruction above."
+	echo ""
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	# The wrong arguments are passed, so we'll exit the script now!
+	date
+	exit 1
+fi
 
 # Example covariate-list format:
 # COHORT Age sex PC1_2013 PC2_2013 PC3_2013 PC4_2013 PC5_2013 PC6_2013 PC7_2013 PC8_2013 PC9_2013 PC10_2013
@@ -125,7 +147,6 @@ COVARIATE_FILE="${PROJECTROOT}/${PROJECTNAME}.covariates.txt"
 
 PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
-TRAIT_TYPE="BINARY" # QUANT/BINARY
 
 ### DEFINING QSUB SETTINGS
 # FOR GWAS
