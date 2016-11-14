@@ -6,9 +6,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: LOCUSZOOM_HITS.v1.4.1"
+echo " Version: LOCUSZOOM_HITS.v1.4.2"
 echo ""
-echo " Last update: November 11th, 2016"
+echo " Last update: November 14th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)"
 echo ""
 echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
@@ -214,18 +214,18 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
 		while read VARIANTS; do
 			for VARIANT in ${VARIANTS}; do
 				echo "Plotting variant: ${VARIANT}"
 				
 				if [[ ${LZVERSION} = "LZ13" ]]; then
 					cd ${OUTPUTDIR}
-					${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+					${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 				elif [[ ${LZVERSION} = "LZ12" ]]; then
 					cd ${OUTPUTDIR}
-					${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}GWAS.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+					${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 				else
 				### If arguments are not met than the 
 					echo ""
@@ -264,8 +264,8 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}REGION.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}REGION.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}REGION.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
 				
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			LINE=${REGIONOFINTEREST}
@@ -276,10 +276,10 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			echo "Processing ${VARIANT} locus on ${CHR} between ${START} and ${END}..."
 			if [[ ${LZVERSION} = "LZ13" ]]; then
 				cd ${OUTPUTDIR}
-				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}REGION.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 			elif [[ ${LZVERSION} = "LZ12" ]]; then
 				cd ${OUTPUTDIR}
-				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}REGION.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 			else
 			### If arguments are not met than the 
 				echo ""
@@ -322,15 +322,15 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
 		echo "Plotting variant: ${GENE}"
 			if [[ ${LZVERSION} = "LZ13" ]]; then
 				cd ${OUTPUTDIR}
-				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 			elif [[ ${LZVERSION} = "LZ12" ]]; then
 				cd ${OUTPUTDIR}
-				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}GENE.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
 			else
 			### If arguments are not met than the 
 				echo ""

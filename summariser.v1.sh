@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                                 SUMMARISER.v1.1"
+echo "                                                   SUMMARISER"
 echo "                                          SUMMARISES ANALYSIS RESULTS"
 echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SUMMARISER.v1.1"
+echo " Version: SUMMARISER.v1.2"
 echo ""
-echo " Last update: July 28th, 2016"
+echo " Last update: November 14th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -30,7 +30,7 @@ if [[ $# -lt 6 ]]; then
 	echo "- Argument #5 is project directory path."
 	echo "- Argument #5 which phenotype was analysed."
 	echo ""
-	echo "An example command would be: summariser.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: path_to_output_dir]  [arg5: some_phenotype ]"
+	echo "An example command would be: summariser.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: path_to_output_dir] [arg6: path_to_project_dir ] [arg7: some_phenotype ] [arg8: trait_type ]"
   	echo ""
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
@@ -42,17 +42,15 @@ else
 	STUDY_TYPE=${2}
 	REFERENCE=${3}
 	OUTPUT_DIR=${4} 
-	cd ${OUTPUT_DIR}
 	PROJECT_DIR=${5}	
-	PHENOTYPE=${7}
+	PHENOTYPE=${6}
+	TRAIT_TYPE=${7}
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"
 	echo "The output directory is.....................................: ${OUTPUT_DIR}"
 	echo "The project directory is....................................: ${PROJECT_DIR}"
-	echo "The following gene was analysed and is summarised...........: ${GENE}"
 	echo "The following phenotype was analysed and is summarised......: ${PHENOTYPE}"
-	
 	### Starting of the script
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "                                         SUMMARISING ANALYSIS RESULTS"
@@ -72,12 +70,48 @@ else
 	
 	echo ""
 	echo "Copying results files..."
-	cp -v ${OUTPUT_DIR}/${STUDY_TYPE}*.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz Summary/
+	
+	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
+		echo "*** NOT IMPLEMENTED YET ***"
+	
+	#cp -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz ${SUMMARY}/
+
+
+	#LOCUSZOOMFILE=$(ls ${OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf)
  	
- 	LOCUSZOOMFILE=$(ls ${OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf)
+ 	#cp -v ${i}/locuszoom/160221_MCL1/chr1_150047026-151052214.pdf Summary/${i}.chr1_150047026-151052214.pdf
+	
+
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
+	cp -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+	
+	echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
+	zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=$PHENOTYPE TRAIT_RESULT=$TRAIT_TYPE '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=","  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
+	gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
+
+
+ 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
+		echo "*** NOT IMPLEMENTED YET ***"
+		
+ 	else
+		### If arguments are not met then this error message will be displayed 
+		echo ""
+		echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
+		echo ""
+		echo " You must supply the correct argument:"
+		echo " * [GWAS]         -- uses a total of 13 arguments | THIS IS THE DEFAULT."
+		echo " * [VARIANT]      -- uses 14 arguments, and the last should be a variant-list and the chromosome."
+		echo " * [REGION]       -- uses 16 arguments, and the last three should indicate the chromosomal range."
+		echo " * [GENES]        -- uses 14 arguments, and the last three should indicate the gene list and the range."
+		echo ""
+		echo " Please refer to instruction above."
+		echo ""
+		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		# The wrong arguments are passed, so we'll exit the script now!
+  		date
+  		exit 1
+	fi
  	
- 	cp -v ${i}/locuszoom/160221_MCL1/chr1_150047026-151052214.pdf Summary/${i}.chr1_150047026-151052214.pdf
- 
 	echo ""
 	echo "All summarised."
 	echo ""

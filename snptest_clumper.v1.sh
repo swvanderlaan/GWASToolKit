@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_CLEANER.v1.1"
+echo " Version: SNPTEST_CLEANER.v1.2"
 echo ""
-echo " Last update: July 28th, 2016"
+echo " Last update: November 14th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -59,9 +59,9 @@ else
 	
 	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 		if [[ ${REFERENCE} = "1kGp1v3" ]]; then
-			REFERENCE_1kGp3v5GoNL5=${MANTEL_RESOURCES}/1000Gp1v3_EUR # 1000Gp1v3.20101123.EUR.bim
+			REFERENCE_1kGp1v3=${MANTEL_RESOURCES}/1000Gp1v3_EUR # 1000Gp1v3.20101123.EUR.bim
 		elif [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-			REFERENCE_1kGp1v3=${MANTEL_RESOURCES}/1000Gp3v5_EUR # 1000Gp3v5.20130502.EUR.bim
+			REFERENCE_1kGp3v5GoNL5=${MANTEL_RESOURCES}/1000Gp3v5_EUR # 1000Gp3v5.20130502.EUR.bim
 		elif [[ ${REFERENCE} = "GoNL4" ]]; then
 			echo "Apologies: currently it is not possible to clump based on GoNL4"
 		else
