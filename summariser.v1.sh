@@ -46,6 +46,8 @@ else
 	PHENOTYPE_FILE=${6} 
 	PHENOTYPES=$(cat ${PHENOTYPE_FILE})
 	TRAIT_TYPE=${7}
+	GENE=${8}
+	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"
@@ -59,13 +61,13 @@ else
 	echo "We started at: "$(date)
 	echo ""
 	
-	if [[ -d ${PROJECT_DIR}/Summary ]]; then
+	if [[ ! -d ${PROJECT_DIR}/summary ]]; then
 		echo "Summary directory doesn't exist: making it."
-		mkdir -v ${PROJECT_DIR}/Summary
-		SUMMARY=${PROJECT_DIR}/Summary
+		mkdir -v ${PROJECT_DIR}/summary
+		SUMMARY=${PROJECT_DIR}/summary
 	else
 		echo "Summary directory does exist."
-		SUMMARY=${PROJECT_DIR}/Summary
+		SUMMARY=${PROJECT_DIR}/summary
 	fi
 	
 	echo ""
@@ -73,33 +75,45 @@ else
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"
 	
-	#cp -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz ${SUMMARY}/
-
-
-	#LOCUSZOOMFILE=$(ls ${OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf)
- 	
- 	#cp -v ${i}/locuszoom/160221_MCL1/chr1_150047026-151052214.pdf Summary/${i}.chr1_150047026-151052214.pdf
 	
-
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 	
-	echo "Summarising data..."
-	echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
+		echo "Summarising data..."
+		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
 
-	for PHENOTYPE in ${PHENOTYPES}; do
-	PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
-		echo "* Copying results for [ ${PHENOTYPE} ]..."
-		cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+		for PHENOTYPE in ${PHENOTYPES}; do
+		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+			echo "* Copying results for [ ${PHENOTYPE} ]..."
+			cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
 		
-		echo ""
-		echo "* Concatenating results for [ ${PHENOTYPE} ]..."
-		zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=$PHENOTYPE TRAIT_RESULT=$TRAIT_TYPE '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt	
-	done
-	echo " * Gzipping the summarised data..."
-	gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
+			echo ""
+			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
+			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} -v TRAIT_RESULT=${TRAIT_TYPE} '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+				
+		done
+		echo " * Gzipping the summarised data..."
+		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
 
  	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
-		echo "*** NOT IMPLEMENTED YET ***"
+		
+		echo "Summarising data..."
+		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+
+		for PHENOTYPE in ${PHENOTYPES}; do
+		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+			echo "* Copying results for [ ${PHENOTYPE} ]..."
+			cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+		
+			echo ""
+			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
+			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} -v TRAIT_RESULT=${TRAIT_TYPE} '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+		
+			echo "* Copying LocusZoom plots for [ ${PHENOTYPE} ]..."
+			cp -v ${PHENO_OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENE}.LocusZoom.pdf
+		
+		done
+		echo " * Gzipping the summarised data..."
+		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
 		
  	else
 		### If arguments are not met then this error message will be displayed 

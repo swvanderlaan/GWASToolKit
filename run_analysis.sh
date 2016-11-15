@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.5"
+echo " Version: RUN_ANALYSES.v1.2.6"
 echo ""
-echo " Last update: 2016-11-14"
+echo " Last update: 2016-11-15"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -323,10 +323,10 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		
-		###### Create summariser bash-script to send to qsub 
-		#echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		###### Create summariser bash-script to send to qsub
+		echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${GENE_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE} ${GENE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		###### Submit summariser script
-		#qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		
 	done
 
@@ -346,19 +346,38 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 
 				GENE_OUTPUT_DIR=${OUTPUT_DIR}/${GENE}
 				PHENO_OUTPUT_DIR=${GENE_OUTPUT_DIR}/${PHENOTYPE}
-
+				
+				##### Create qc bash-script to send to qsub
 				echo "${GWAS_SCRIPTS}/snptest_qc.v1.sh ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${INFO} ${MAC} ${CAF} ${BETA_SE}" > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-				### Submit plotter script
+				### Submit qc script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
 				qsub -S /bin/bash -N QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENEQC} -l ${QTIMEGENEQC} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 	
 				##### Create locuszoom bash-script to send to qsub
 				echo "${GWAS_SCRIPTS}/locuszoom_hits.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} ${VARIANTID} ${PVALUE} ${LZVERSION} ${GENE} ${RANGELZ}" > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-				##### Submit clumper script
+				##### Submit locuszoom script
 				#### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
 				qsub -S /bin/bash -N LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENELZOOM} -l ${QTIMEGENELZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 				echo ""
 			done
+		done
+	done < ${GENES_FILE}
+	
+	##### Create cleaner bash-script to send to qsub
+	echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+	##### Submit cleaner script
+	qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+	
+	while read GENES; do
+		for GENE in ${GENES}; do
+			echo "* ${GENE} ± ${RANGE}"
+			GENE_OUTPUT_DIR=${OUTPUT_DIR}/${GENE}
+			
+			###### Create summariser bash-script to send to qsub
+			echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${GENE_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE} ${GENE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+			###### Submit summariser script
+			qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${GENE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		
 		done
 	done < ${GENES_FILE}
 	
