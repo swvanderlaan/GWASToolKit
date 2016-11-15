@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# to do: add in readme functionality, text file with summary results and explanation of things
+# to do: make argument parsing depending on ${ANALYSIS_TYPE}
+# to do: add in gzipping functionality of 'summary' directory and its readme
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "                                                   SUMMARISER"
 echo "                                          SUMMARISES ANALYSIS RESULTS"
@@ -7,9 +11,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SUMMARISER.v1.2"
+echo " Version: SUMMARISER.v1.3"
 echo ""
-echo " Last update: November 14th, 2016"
+echo " Last update: November 15th, 2016"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -21,7 +25,7 @@ echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 6 ]]; then 
+if [[ $# -lt 7 ]]; then 
 	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [5] argument:"
 	echo "- Argument #1 indicates the type of analysis [GWAS/REGION/GENES]."
 	echo "- Argument #2 which study type [AEGS/AAAGS/CTMM]."
@@ -46,7 +50,6 @@ else
 	PHENOTYPE_FILE=${6} 
 	PHENOTYPES=$(cat ${PHENOTYPE_FILE})
 	TRAIT_TYPE=${7}
-	GENE=${8}
 	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
@@ -61,22 +64,21 @@ else
 	echo "We started at: "$(date)
 	echo ""
 	
-	if [[ ! -d ${PROJECT_DIR}/summary ]]; then
-		echo "Summary directory doesn't exist: making it."
-		mkdir -v ${PROJECT_DIR}/summary
-		SUMMARY=${PROJECT_DIR}/summary
-	else
-		echo "Summary directory does exist."
-		SUMMARY=${PROJECT_DIR}/summary
-	fi
-	
-	echo ""
-	
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"
 	
 	
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
+	
+		if [[ ! -d ${PROJECT_DIR}/summary.${ANALYSIS_TYPE} ]]; then
+			echo "Summary directory doesn't exist: making it."
+			mkdir -v ${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
+			SUMMARY=${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
+		else
+			echo "Summary directory does exist."
+			SUMMARY=${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
+		fi
+		echo ""
 	
 		echo "Summarising data..."
 		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
@@ -95,6 +97,17 @@ else
 		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
 
  	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
+ 		GENE=${8}
+ 		
+ 		if [[ ! -d ${PROJECT_DIR}/summary.${GENE} ]]; then
+			echo "Summary directory doesn't exist: making it."
+			mkdir -v ${PROJECT_DIR}/summary.${GENE}
+			SUMMARY=${PROJECT_DIR}/summary.${GENE}
+		else
+			echo "Summary directory does exist."
+			SUMMARY=${PROJECT_DIR}/summary.${GENE}
+		fi
+		echo ""
 		
 		echo "Summarising data..."
 		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
