@@ -41,16 +41,16 @@ else
 	ANALYSIS_TYPE=${1}
 	STUDY_TYPE=${2}
 	REFERENCE=${3}
-	OUTPUT_DIR=${4} 
-	PROJECT_DIR=${5}	
-	PHENOTYPE=${6}
+	OUTPUT_DIR=${4} # this is the directory of the results 'snptest_results' relative to '/hpc/dhl_ec/YOURLOGINNAME/SOMEDIRECTORY/PROJECTNAME/'
+	PROJECT_DIR=${5} # the name of the project directory: /hpc/dhl_ec/YOURLOGINNAME/SOMEDIRECTORY/PROJECTNAME	
+	PHENOTYPE_FILE=${6} 
+	PHENOTYPES=$(cat ${PHENOTYPE_FILE})
 	TRAIT_TYPE=${7}
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"
 	echo "The output directory is.....................................: ${OUTPUT_DIR}"
 	echo "The project directory is....................................: ${PROJECT_DIR}"
-	echo "The following phenotype was analysed and is summarised......: ${PHENOTYPE}"
 	### Starting of the script
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "                                         SUMMARISING ANALYSIS RESULTS"
@@ -69,7 +69,6 @@ else
 	fi
 	
 	echo ""
-	echo "Copying results files..."
 	
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"
@@ -83,12 +82,21 @@ else
 	
 
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
-	cp -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
 	
-	echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
-	zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=$PHENOTYPE TRAIT_RESULT=$TRAIT_TYPE '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
-	gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.summary.txt
+	echo "Summarising data..."
+	echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
 
+	for PHENOTYPE in ${PHENOTYPES}; do
+	PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+		echo "* Copying results for [ ${PHENOTYPE} ]..."
+		cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+		
+		echo ""
+		echo "* Concatenating results for [ ${PHENOTYPE} ]..."
+		zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=$PHENOTYPE TRAIT_RESULT=$TRAIT_TYPE '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt	
+	done
+	echo " * Gzipping the summarised data..."
+	gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
 
  	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"

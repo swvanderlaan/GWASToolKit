@@ -50,7 +50,7 @@ if ($zipped eq "GZIP") {
     print "         (Arguments are case-sensitive.)\n";
 
 }
-
+#my $fh, '>', 'report.txt'
 open (OUT, ">$outfile") or die "* ERROR: Couldn't open output file: $!"; 
  
 while (my $sLine = <IN>) {
