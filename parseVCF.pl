@@ -64,6 +64,8 @@ my $vid6 = ""; # 'chr[X]:bp[XXXXX]:A1_A2'
 my $vid7 = ""; # 'chr[X]:bp[XXXXX]:[REF/I/D]_[ALT/D/I]'
 my $vid8 = ""; # 'rs[xxxx]' or 'chr[X]:bp[XXXXX]'
 my $vid9 = ""; # 'rs[xxxx]' or '[X]:bp[XXXXX]'
+my $vid10 = ""; # 'chr[X]:bp[XXXXX]'
+my $vid11 = ""; # '[X]:bp[XXXXX]'
 my $REF = ""; # reference allele
 my $ALT = ""; # other allele
 my $AlleleA = ""; # reference allele, with [REF/I/D] nomenclature
@@ -94,7 +96,7 @@ print STDERR "Creating output file...\n";
 open(OUT, '>', $output) or die "* ERROR: Could not create the output file [ $output ]!";
 
 print STDERR "* create header...\n";
-print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tCHR\tBP\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
+print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tVariantID_alt10\tVariantID_alt11\tCHR\tBP\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
 
 print STDERR "* looping over file to extract relevant data...\n";
 my $dummy=<IN>;
@@ -274,26 +276,33 @@ while (my $row = <IN>) {
 
 ### adjust the key variantID8 -- # 'rs[xxxx]' or 'chr[X]:bp[XXXXX]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
-  	$vid1 = "chr$chr\:$bp";
+  	$vid8 = "chr$chr\:$bp";
   	$AlleleA = "$REF";
   	$AlleleB = "$ALT";
   } else { 
-  	$vid1 = $vareach[2];
+  	$vid8 = $vareach[2];
   	$AlleleA = "$REF";
 	$AlleleB = "$ALT";
   	}
  
-### adjust the key variantID9 -- # 'rs[xxxx]' or 'chr[X]:bp[XXXXX]'
+### adjust the key variantID9 -- # 'rs[xxxx]' or '[X]:bp[XXXXX]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
-  	$vid1 = "$chr\:$bp";
+  	$vid9 = "$chr\:$bp";
   	$AlleleA = "$REF";
   	$AlleleB = "$ALT";
   } else { 
-  	$vid1 = $vareach[2];
+  	$vid9 = $vareach[2];
   	$AlleleA = "$REF";
 	$AlleleB = "$ALT";
-  	} 				
-print OUT "$vid\t$vid1\t$vid2\t$vid3\t$vid4\t$vid5\t$vid6\t$vid7\t$vid8\t$vid9\t$chr\t$bp\t$REF\t$ALT\t$AlleleA\t$AlleleB\t$VT\t$AF\t$EURAF\t$AFRAF\t$AMRAF\t$ASNAF\t$EASAF\t$SASAF\t\n";
+  	}
+
+### adjust the key variantID9 -- # 'chr[X]:bp[XXXXX]'
+  $vid10 = "chr$chr\:$bp";
+
+### adjust the key variantID9 -- # '[X]:bp[XXXXX]'
+  $vid11 = "$chr\:$bp";
+  
+print OUT "$vid\t$vid1\t$vid2\t$vid3\t$vid4\t$vid5\t$vid6\t$vid7\t$vid8\t$vid9\t$vid10\t$vid11\t$chr\t$bp\t$REF\t$ALT\t$AlleleA\t$AlleleB\t$VT\t$AF\t$EURAF\t$AFRAF\t$AMRAF\t$ASNAF\t$EASAF\t$SASAF\t\n";
 
 }
 
