@@ -14,7 +14,7 @@
 # Starting parsing
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "+                                     PARSE VCF FILES                                    +\n";
-print STDERR "+                                         V1.1.0                                         +\n";
+print STDERR "+                                         V1.2.0                                         +\n";
 print STDERR "+                                                                                        +\n";
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "\n";
@@ -306,38 +306,38 @@ while (my $row = <IN>) {
   
 ### adjust the key variantID12 -- # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
 if (length($REF) == 1 and length($ALT) == 1){
-  	$vid5 = "chr$chr\:$bp";
+  	$vid12 = "chr$chr\:$bp";
   	$AlleleA = "$REF";
 	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
-  		$vid5 = "chr$chr\:$bp\:$REF\_$ALT";
+  		$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
   		$AlleleA = "$REF";
 		$AlleleB = "$ALT";
   		} elsif (length($ALT) > 1){ 
-  			$vid5 = "chr$chr\:$bp\:$REF\_$ALT";
+  			$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
   			$AlleleA = "$REF";
 			$AlleleB = "$ALT";
   			} else { 
-  				$vid5 = "chr$chr\:$bp";
+  				$vid12 = "chr$chr\:$bp";
   				$AlleleA = "$REF";
 		  		$AlleleB = "$ALT";
   				}  
  
 ### adjust the key variantID13 -- # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
 if (length($REF) == 1 and length($ALT) == 1){
-  	$vid5 = "$chr\:$bp";
+  	$vid13 = "$chr\:$bp";
   	$AlleleA = "$REF";
 	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
-  		$vid5 = "$chr\:$bp\:$REF\_$ALT";
+  		$vid13 = "$chr\:$bp\:$REF\_$ALT";
   		$AlleleA = "$REF";
 		$AlleleB = "$ALT";
   		} elsif (length($ALT) > 1){ 
-  			$vid5 = "$chr\:$bp\:$REF\_$ALT";
+  			$vid13 = "$chr\:$bp\:$REF\_$ALT";
   			$AlleleA = "$REF";
 			$AlleleB = "$ALT";
   			} else { 
-  				$vid5 = "$chr\:$bp";
+  				$vid13 = "$chr\:$bp";
   				$AlleleA = "$REF";
 		  		$AlleleB = "$ALT";
   				}  
