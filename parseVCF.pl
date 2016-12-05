@@ -6,7 +6,7 @@
 #
 # Written by:	Vinicius Tragante dó Ó & Sander W. van der Laan; UMC Utrecht, Utrecht, the 
 #               Netherlands, v.tragantew@umcutrecht.nl or s.w.vanderlaan-2@umcutrecht.nl.
-# Version:		1.2.0
+# Version:		1.2.6
 # Update date: 	2016-11-30
 #
 # Usage:		parseVCF.pl --file [input.vcf.gz] --out [output.txt]
@@ -82,8 +82,6 @@ my $ASNAF = "";
 my $EASAF = "";
 my $SASAF = "";
 
-#my $file = 'ALL.wgs.integrated_phase1_v3.20101123.snps_indels_sv.sites.vcf.gz';
-
 ### READING INPUT FILE
 print STDERR "Reading input file...\n";
 if ($file =~ /.gz$/) {
@@ -98,7 +96,7 @@ print STDERR "Creating output file...\n";
 open(OUT, '>', $output) or die "* ERROR: Could not create the output file [ $output ]!";
 
 print STDERR "* create header...\n";
-print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tVariantID_alt10\tVariantID_alt11\tVariantID_alt12\tVariantID_alt13\tCHR\tBP\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
+print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tVariantID_alt10\tVariantID_alt11\tVariantID_alt12\tVariantID_alt13\tCHR_REF\tBP_REF\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
 
 print STDERR "* looping over file to extract relevant data...\n";
 my $dummy=<IN>;
@@ -110,6 +108,8 @@ while (my $row = <IN>) {
 	  $REF = $vareach[3]; # reference allele
 	  $ALT = $vareach[4]; # alternate allele
 	  $INFO = $vareach[7]; # info column -- refer to below for information
+	  $AlleleA = $vareach[3];
+	  $AlleleB = $vareach[4];
 
 ### NOTE: $vareach[2]; # variant allele
 
@@ -181,8 +181,6 @@ while (my $row = <IN>) {
 ### adjust the key variantID1 -- # 'rs[xxxx]' or 'chr[X]:bp[XXXXX]:[I/D]_[D/I]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
   	$vid1 = "chr$chr\:$bp\:$REF\_$ALT";
-  	$AlleleA = "$REF";
-  	$AlleleB = "$ALT";
   } elsif ($vareach[2] =~ m/(\.)/ and length($REF) > 1){ 
   		$vid1 = "chr$chr\:$bp\:I\_D";
 	  	$AlleleA = "I";
@@ -193,33 +191,21 @@ while (my $row = <IN>) {
 	  		$AlleleB = "I";
   			} else { 
   				$vid1 = $vareach[2];
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}
 
 ### adjust the key variantID2 -- # 'rs[xxxx]' or '[X]:bp[XXXXX]:A1_A2'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
   	$vid2 = "$chr\:$bp\:$REF\_$ALT";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif ($vareach[2] =~ m/(\.)/ and length($REF) > 1){ 
   		$vid2 = "$chr\:$bp\:$REF\_$ALT";
-  		$AlleleA = "$REF";
-		$AlleleB = "$ALT";
   		} elsif ($vareach[2] =~ m/(\.)/ and length($ALT) > 1){ 
   			$vid2 = "$chr\:$bp\:$REF\_$ALT";
-  			$AlleleA = "$REF";
-		  	$AlleleB = "$ALT";
   			} else { 
   				$vid2 = $vareach[2];
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}
 ### adjust the key variantID3 -- # 'rs[xxxx]' or '[X]:bp[XXXXX]:[I/D]_[D/I]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
   	$vid3 = "$chr\:$bp\:$REF\_$ALT";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif ($vareach[2] =~ m/(\.)/ and length($REF) > 1){ 
   		$vid3 = "$chr\:$bp\:I\_D";
   		$AlleleA = "I";
@@ -230,8 +216,6 @@ while (my $row = <IN>) {
 		  	$AlleleB = "I";
   			} else { 
   				$vid3 = $vareach[2];
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}
 ### adjust the key variantID4 -- # '[X]:bp[XXXXX]:A1_A2'
   	$vid4 = "$chr\:$bp\:$REF\_$ALT";
@@ -239,8 +223,6 @@ while (my $row = <IN>) {
 ### adjust the key variantID5 -- # '[X]:bp[XXXXX]:[REF/I/D]_[ALT/D/I]'
   if (length($REF) == 1 and length($ALT) == 1){
   	$vid5 = "$chr\:$bp\:$REF\_$ALT";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
   		$vid5 = "$chr\:$bp\:I\_D";
   		$AlleleA = "I";
@@ -251,8 +233,6 @@ while (my $row = <IN>) {
 		  	$AlleleB = "I";
   			} else { 
   				$vid5 = "$chr\:$bp\:$REF\_$ALT";
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}
 ### adjust the key variantID6 -- # 'chr[X]:bp[XXXXX]:A1_A2'
   $vid6 = "chr$chr\:$bp\:$REF\_$ALT";
@@ -260,8 +240,6 @@ while (my $row = <IN>) {
 ### adjust the key variantID7 -- # 'chr[X]:bp[XXXXX]:[REF/I/D]_[ALT/D/I]'
   if (length($REF) == 1 and length($ALT) == 1){
   	$vid7 = "chr$chr\:$bp\:$REF\_$ALT";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
   		$vid7 = "chr$chr\:$bp\:I\_D";
   		$AlleleA = "I";
@@ -272,30 +250,20 @@ while (my $row = <IN>) {
 			$AlleleB = "I";
   			} else { 
   				$vid7 = "chr$chr\:$bp\:$REF\_$ALT";
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}
 
 ### adjust the key variantID8 -- # 'rs[xxxx]' or 'chr[X]:bp[XXXXX]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
   	$vid8 = "chr$chr\:$bp";
-  	$AlleleA = "$REF";
-  	$AlleleB = "$ALT";
   } else { 
   	$vid8 = $vareach[2];
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   	}
  
 ### adjust the key variantID9 -- # 'rs[xxxx]' or '[X]:bp[XXXXX]'
   if ($vareach[2] =~ m/(\.)/ and length($REF) == 1 and length($ALT) == 1){
   	$vid9 = "$chr\:$bp";
-  	$AlleleA = "$REF";
-  	$AlleleB = "$ALT";
   } else { 
   	$vid9 = $vareach[2];
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   	}
 
 ### adjust the key variantID10 -- # 'chr[X]:bp[XXXXX]'
@@ -307,39 +275,23 @@ while (my $row = <IN>) {
 ### adjust the key variantID12 -- # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
 if (length($REF) == 1 and length($ALT) == 1){
   	$vid12 = "chr$chr\:$bp";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
   		$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
-  		$AlleleA = "$REF";
-		$AlleleB = "$ALT";
   		} elsif (length($ALT) > 1){ 
   			$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
-  			$AlleleA = "$REF";
-			$AlleleB = "$ALT";
   			} else { 
   				$vid12 = "chr$chr\:$bp";
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}  
  
 ### adjust the key variantID13 -- # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
 if (length($REF) == 1 and length($ALT) == 1){
   	$vid13 = "$chr\:$bp";
-  	$AlleleA = "$REF";
-	$AlleleB = "$ALT";
   } elsif (length($REF) > 1){ 
   		$vid13 = "$chr\:$bp\:$REF\_$ALT";
-  		$AlleleA = "$REF";
-		$AlleleB = "$ALT";
   		} elsif (length($ALT) > 1){ 
   			$vid13 = "$chr\:$bp\:$REF\_$ALT";
-  			$AlleleA = "$REF";
-			$AlleleB = "$ALT";
   			} else { 
   				$vid13 = "$chr\:$bp";
-  				$AlleleA = "$REF";
-		  		$AlleleB = "$ALT";
   				}  
  				
 print OUT "$vid\t$vid1\t$vid2\t$vid3\t$vid4\t$vid5\t$vid6\t$vid7\t$vid8\t$vid9\t$vid10\t$vid11\t$vid12\t$vid13\t$chr\t$bp\t$REF\t$ALT\t$AlleleA\t$AlleleB\t$VT\t$AF\t$EURAF\t$AFRAF\t$AMRAF\t$ASNAF\t$EASAF\t$SASAF\t\n";
