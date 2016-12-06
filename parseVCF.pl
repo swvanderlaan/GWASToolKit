@@ -6,19 +6,19 @@
 #
 # Written by:	Vinicius Tragante dó Ó & Sander W. van der Laan; UMC Utrecht, Utrecht, the 
 #               Netherlands, v.tragantew@umcutrecht.nl or s.w.vanderlaan-2@umcutrecht.nl.
-# Version:		1.2.6
-# Update date: 	2016-11-30
+# Version:		1.2.7
+# Update date: 	2016-12-06
 #
 # Usage:		parseVCF.pl --file [input.vcf.gz] --out [output.txt]
 
 # Starting parsing
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "+                                     PARSE VCF FILES                                    +\n";
-print STDERR "+                                         V1.2.0                                         +\n";
+print STDERR "+                                         V1.2.7                                         +\n";
 print STDERR "+                                                                                        +\n";
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "\n";
-print STDERR "Hello. I am starting the overlapping of the files you've prodided.\n";
+print STDERR "Hello. I am starting the overlapping of the files you've provided.\n";
 my $time = localtime; # scalar context
 print STDERR "The current date and time is: $time.\n";
 print STDERR "\n";
@@ -68,6 +68,8 @@ my $vid10 = ""; # 'chr[X]:bp[XXXXX]'
 my $vid11 = ""; # '[X]:bp[XXXXX]'
 my $vid12 = ""; # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
 my $vid13 = ""; # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
+#my $vid14 = ""; # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:R_[D/I]' (but ONLY for INDELS!!!)
+#my $vid15 = ""; # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:R_[D/I]' (but ONLY for INDELS!!!)
 my $REF = ""; # reference allele
 my $ALT = ""; # other allele
 my $AlleleA = ""; # reference allele, with [REF/I/D] nomenclature
@@ -81,6 +83,7 @@ my $AMRAF = "";
 my $ASNAF = "";
 my $EASAF = "";
 my $SASAF = "";
+#my $ref_indel = "R";
 
 ### READING INPUT FILE
 print STDERR "Reading input file...\n";
@@ -96,6 +99,7 @@ print STDERR "Creating output file...\n";
 open(OUT, '>', $output) or die "* ERROR: Could not create the output file [ $output ]!";
 
 print STDERR "* create header...\n";
+#print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tVariantID_alt10\tVariantID_alt11\tVariantID_alt12\tVariantID_alt13\tVariantID_alt14\tVariantID_alt15\tCHR_REF\tBP_REF\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
 print OUT "VariantID\tVariantID_alt1\tVariantID_alt2\tVariantID_alt3\tVariantID_alt4\tVariantID_alt5\tVariantID_alt6\tVariantID_alt7\tVariantID_alt8\tVariantID_alt9\tVariantID_alt10\tVariantID_alt11\tVariantID_alt12\tVariantID_alt13\tCHR_REF\tBP_REF\tREF\tALT\tAlleleA\tAlleleB\tVT\tAF\tEURAF\tAFRAF\tAMRAF\tASNAF\tEASAF\tSASAF\n";
 
 print STDERR "* looping over file to extract relevant data...\n";
@@ -218,7 +222,7 @@ while (my $row = <IN>) {
   				$vid3 = $vareach[2];
   				}
 ### adjust the key variantID4 -- # '[X]:bp[XXXXX]:A1_A2'
-  	$vid4 = "$chr\:$bp\:$REF\_$ALT";
+  $vid4 = "$chr\:$bp\:$REF\_$ALT";
 
 ### adjust the key variantID5 -- # '[X]:bp[XXXXX]:[REF/I/D]_[ALT/D/I]'
   if (length($REF) == 1 and length($ALT) == 1){
@@ -234,6 +238,7 @@ while (my $row = <IN>) {
   			} else { 
   				$vid5 = "$chr\:$bp\:$REF\_$ALT";
   				}
+  				
 ### adjust the key variantID6 -- # 'chr[X]:bp[XXXXX]:A1_A2'
   $vid6 = "chr$chr\:$bp\:$REF\_$ALT";
   
@@ -273,27 +278,59 @@ while (my $row = <IN>) {
   $vid11 = "$chr\:$bp";
   
 ### adjust the key variantID12 -- # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
-if (length($REF) == 1 and length($ALT) == 1){
-  	$vid12 = "chr$chr\:$bp";
-  } elsif (length($REF) > 1){ 
-  		$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
-  		} elsif (length($ALT) > 1){ 
-  			$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
-  			} else { 
-  				$vid12 = "chr$chr\:$bp";
-  				}  
+  if (length($REF) == 1 and length($ALT) == 1){
+    	$vid12 = "chr$chr\:$bp";
+    } elsif (length($REF) > 1){ 
+    		$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
+    		} elsif (length($ALT) > 1){ 
+    			$vid12 = "chr$chr\:$bp\:$REF\_$ALT";
+    			} else { 
+    				$vid12 = "chr$chr\:$bp";
+    				}  
  
 ### adjust the key variantID13 -- # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:A1_A2' (but ONLY for INDELS!!!)
-if (length($REF) == 1 and length($ALT) == 1){
-  	$vid13 = "$chr\:$bp";
-  } elsif (length($REF) > 1){ 
-  		$vid13 = "$chr\:$bp\:$REF\_$ALT";
-  		} elsif (length($ALT) > 1){ 
-  			$vid13 = "$chr\:$bp\:$REF\_$ALT";
-  			} else { 
-  				$vid13 = "$chr\:$bp";
-  				}  
+  if (length($REF) == 1 and length($ALT) == 1){
+    	$vid13 = "$chr\:$bp";
+    } elsif (length($REF) > 1){ 
+    		$vid13 = "$chr\:$bp\:$REF\_$ALT";
+    		} elsif (length($ALT) > 1){ 
+    			$vid13 = "$chr\:$bp\:$REF\_$ALT";
+    			} else { 
+    				$vid13 = "$chr\:$bp";
+    				}  
+# 
+# ### adjust the key variantID14 -- # 'chr[X]:bp[XXXXX]' or 'chr[X]:bp[XXXXX]:R_[D/I]' (but ONLY for INDELS!!!)
+#   if (length($REF) == 1 and length($ALT) == 1){
+#   	$vid14 = "chr$chr\:$bp";
+#   } elsif (length($REF) > 1){ 
+#   		$vid14 = "chr$chr\:$bp\:$ref_indel\_D";
+#   		$AlleleA = "$ref_indel";
+# 		$AlleleB = "D";
+#   		} elsif (length($ALT) > 1){ 
+#   			$vid14 = "chr$chr\:$bp\:$ref_indel\_I";
+#   			$AlleleA = "$ref_indel";
+# 		  	$AlleleB = "I";
+#   			} else { 
+#   				$vid14 = "chr$chr\:$bp";
+#   				}
+# 
+# ### adjust the key variantID15 -- # '[X]:bp[XXXXX]' or '[X]:bp[XXXXX]:R_[D/I]' (but ONLY for INDELS!!!)
+#   if (length($REF) == 1 and length($ALT) == 1){
+#   	$vid15 = "$chr\:$bp";
+#   } elsif (length($REF) > 1){ 
+#   		$vid15 = "$chr\:$bp\:$ref_indel\_D";
+#   		$AlleleA = "$ref_indel";
+# 		$AlleleB = "D";
+#   		} elsif (length($ALT) > 1){ 
+#   			$vid15 = "$chr\:$bp\:$ref_indel\_I";
+#   			$AlleleA = "$ref_indel";
+# 		  	$AlleleB = "I";
+#   			} else { 
+#   				$vid15 = "$chr\:$bp";
+#   				}
+# 
  				
+#print OUT "$vid\t$vid1\t$vid2\t$vid3\t$vid4\t$vid5\t$vid6\t$vid7\t$vid8\t$vid9\t$vid10\t$vid11\t$vid12\t$vid13\t$vid14\t$vid15\t$chr\t$bp\t$REF\t$ALT\t$AlleleA\t$AlleleB\t$VT\t$AF\t$EURAF\t$AFRAF\t$AMRAF\t$ASNAF\t$EASAF\t$SASAF\t\n";
 print OUT "$vid\t$vid1\t$vid2\t$vid3\t$vid4\t$vid5\t$vid6\t$vid7\t$vid8\t$vid9\t$vid10\t$vid11\t$vid12\t$vid13\t$chr\t$bp\t$REF\t$ALT\t$AlleleA\t$AlleleB\t$VT\t$AF\t$EURAF\t$AFRAF\t$AMRAF\t$ASNAF\t$EASAF\t$SASAF\t\n";
 
 }
