@@ -1,4 +1,47 @@
 #!/bin/bash
+#
+### MoSCoW
+### - make with arguments
+### - add in VEGAS lookup function
+### - add in fastQTLanalysis option
+### - add in Variant summarizer (all results in one file)
+### - add in readme-generator-function
+### - add in gzipper-function
+
+### Make a variant wrapper script
+### for i in $(ls ../cad/snptest_results) ; do echo "* processing [ "$i" ]..."; echo "$i" >> phenotype.list; done
+### echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt
+### for i in $(cat phenotype.list); do echo "* processing [ "$i" ]..."; zcat AEGS.VARIANT.1kGp3v5GoNL5."$i".summary_results.txt.gz | tail -n +2 | awk -v pheno=$i '{ print pheno, $0 }' OFS=","  >> AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt; done
+
+#IN ALL CASES
+#	UPON COMPLETION RUN fastQTL FOR mQTL
+#	
+#	AFTER fastQTL PRODUCE QC PLOTS
+#	
+#IN CASE OF GWAS
+#	
+#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
+#	
+#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA (LOOKUP SCRIPT)
+#
+#IN CASE OF REGION
+#	
+#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
+#	
+#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA
+#	
+#IN CASE OF VARIANT
+#	
+#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
+#	
+#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA (LOOKUP SCRIPT)
+#	
+#
+#PRODUCE RELEVANT README
+#
+#GZIP
+# Put all graphs in one document including readme.
+
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "                                              RUN_ANALYSIS"
@@ -7,9 +50,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.6"
+echo " Version: RUN_ANALYSES.v1.2.7"
 echo ""
-echo " Last update: 2016-11-15"
+echo " Last update: 2016-12-06"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -86,6 +129,21 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### - Argument #14 you are running a per-gene analysis, thus we expect here [RANGE] (e.g. 500000 for ±500kb)."
 ### - Argument #15 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
 
+
+### PHENOTYPES
+### Calcification_bin
+### Collagen_bin
+### SMC_bin
+### Macrophages_bin
+### Fat40_bin
+### Fat10_bin
+### IPH
+### Macrophages_BC
+### SMC_BC
+### Neutrophils_BC
+### Mastcells_BC
+### VesselDensityAvg_BC
+
 ### REQUIRED | GENERALS
 
 ### SYSTEM REQUIRED | NEVER CHANGE
@@ -94,8 +152,8 @@ GWAS_SCRIPTS=${SOFTWARE}/GWASToolKit
 
 
 ### PROJECT SETTINGS
-PROJECTNAME=SOMEPROJECTNAME ### Change to some project name, for example 'pcsk6'
-PROJECTROOT=/hpc/dhl_ec/YOURLOGINNAME/SOMEDIRECTORY ### you should probably make some directory to have the script put your project in
+PROJECTNAME="SOMENAME" ### Change to some project name, for example 'pcsk6'
+PROJECTROOT="/hpc/dhl_ec/svanderlaan/projects/lookups/SOMEDIR" ### you should probably make some directory to have the script put your project in
 # Make directories for script if they do not exist yet (!!!PREREQUISITE!!!)
 if [ ! -d ${PROJECTROOT}/${PROJECTNAME}/ ]; then
 	mkdir -v ${PROJECTROOT}/${PROJECTNAME}/
@@ -106,7 +164,7 @@ fi
 PROJECT=${PROJECTROOT}/${PROJECTNAME}
 
 ### ANALYSIS SETTINGS
-ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES
+ANALYSIS_TYPE="VARIANT" # GWAS/VARIANT/REGION/GENES
 STUDY_TYPE="AEGS" # AEGS/AAAGS/CTMM | NOTE: currently only AEGS and CTMM works
 REFERENCE="1kGp3v5GoNL5" # 1kGp3v5GoNL5/1kGp1v3/GoNL4
 METHOD="EXPECTED" #EXPECTED/SCORE -- EXPECTED is likely best
@@ -179,7 +237,7 @@ QTIMEGENELZOOM="h_rt=00:15:00" #15mins for locuszoom;
 
 # MAILSETTINGS
 YOUREMAIL="s.w.vanderlaan-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
-MAILSETTINGS="ea" 
+MAILSETTINGS="a" 
 # 'b' Mail is sent at the beginning of the job; 
 # 'e' Mail is sent at the end of the job; 
 # 'a' Mail is sent when the job is aborted or rescheduled.
@@ -198,7 +256,7 @@ VARIANTLIST="${PROJECTROOT}/${PROJECTNAME}.variantlist.txt"
 
 # For GWAS/REGION/GENE analysis
 LZVERSION="LZ13"
-RANGE="500000" # 500000=500kb, needed for GWAS (LocusZoom plots); and GENE analyses (analysis and LocusZoom plots)
+RANGE="200000" # 500000=500kb, needed for GWAS (LocusZoom plots); and GENE analyses (analysis and LocusZoom plots)
 
 # For GWAS
 CLUMP_P2="1"
@@ -312,18 +370,55 @@ if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 	done
 
 elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
-	echo "Creating jobs to perform an individual variant analysis on your phenotype(s)..."
+
+### Make a script for this -- looksup the proper variantID for these SNPs
+# 	THOUSANDG_GONL5="/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/"
+# 	
+# 	mv -v ${VARIANTLIST} ${PROJECTROOT}/${PROJECTNAME}.variantlist.txt.original
+# 	
+# 	VARIANTLISTORIGINAL="${PROJECTROOT}/${PROJECTNAME}.variantlist.txt.original"
+# 	 
+# 	while IFS='' read -r VARIANTOFINTEREST || [[ -n "$VARIANTOFINTEREST" ]]; do
+# 		### EXAMPLE VARIANT LIST -- NOTE that we have to look up the variantID when using 1Gp3+GoNL5 data!!!
+# 		### rs12344 12 9029381
+# 		### rs35467 4 171011538
+# 		
+# 		LINE=${VARIANTOFINTEREST}
+# 		echo "${LINE}"
+# 		VARIANT=$(echo "${LINE}" | awk '{ print $1 }')
+# 		VARIANTFORFILE=$(echo "${LINE}" | awk '{ print $1 }' | sed 's/\:/_/g')
+# 		CHR=$(echo "${LINE}" | awk '{ print $2 }')
+# 		BP=$(echo "${LINE}" | awk '{ print $3 }')
+# 		
+# 		if [[ ${CHR} -lt 10 ]]; then 
+# 			echo "Checking data for chromosome [ ${CHR} ]..."
+# 			zcat ${THOUSANDG_GONL5}/aegs_combo_1kGp3GoNL5_RAW_chr${CHR}.stats.gz | awk '$3=='"0"${CHR}' && $4=='${BP}'' | awk '{ print $2, '${CHR}', $4}'
+# 			zcat ${THOUSANDG_GONL5}/aegs_combo_1kGp3GoNL5_RAW_chr${CHR}.stats.gz | awk '$3=='"0"${CHR}' && $4=='${BP}'' | awk '{ print $2, '${CHR}', $4}' >> ${PROJECTROOT}/${PROJECTNAME}.variantlist.txt
+# 		
+# 		elif  [[ ${CHR} -ge 10 ]]; then
+# 			echo "Checking data for chromosome [ ${CHR} ]..."
+# 			zcat ${THOUSANDG_GONL5}/aegs_combo_1kGp3GoNL5_RAW_chr${CHR}.stats.gz | awk '$3=='"0"${CHR}' && $4=='${BP}'' | awk '{ print $2, '${CHR}', $4}'
+# 			zcat ${THOUSANDG_GONL5}/aegs_combo_1kGp3GoNL5_RAW_chr${CHR}.stats.gz | awk '$3=='"0"${CHR}' && $4=='${BP}'' | awk '{ print $2, '${CHR}', $4}' >> ${PROJECTROOT}/${PROJECTNAME}.variantlist.txt
+# 		
+# 		else
+# 			echo "*** ERROR *** Something is rotten in the City of Gotham; most likely a typo. Double back, please."	
+# 			exit 1
+# 		fi
+# 		
+# 	done < ${VARIANTLISTORIGINAL}
+
+ 	echo "Creating jobs to perform an individual variant analysis on your phenotype(s)..."
 	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMVAR} ${QTIMEVAR} ${YOUREMAIL} ${MAILSETTINGS} ${VARIANTLIST} ${TRAIT_TYPE}
 
 	for PHENOTYPE in ${PHENOTYPES}; do
 	
-	PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 	
 		##### Create cleaner bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		
-		###### Create summariser bash-script to send to qsub
+		###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
 		#echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		###### Submit summariser script
 		#qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
@@ -399,41 +494,6 @@ else
 	date
 	exit 1
 fi
-
-#IN ALL CASES
-#	UPON COMPLETION RUN fastQTL FOR mQTL
-#	
-#	AFTER fastQTL PRODUCE QC PLOTS
-#	
-#IN CASE OF GWAS
-#	
-#	LOOKUP SNP IN AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA (LOOKUP SCRIPT)
-#
-#IN CASE OF REGION
-#	UPON COMPLETION (WRAPPER SCRIPT!) RUN LOCUSZOOM PLOTTER OF REGION
-#	
-#	LOOKUP SNP IN AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA
-#	
-#IN CASE OF VARIANT
-#	UPON COMPLETION (WRAPPER SCRIPT!) LOOKUP SNP IN AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS AEGS (LOOKUP SCRIPT)
-#	
-#	LOOKUP GENES IN VEGAS PUBLIC GWAS DATA (LOOKUP SCRIPT)
-#	
-#
-#PRODUCE RELEVANT README
-#
-#GZIP
-# Put all graphs in one document including readme.
 
 THISYEAR=$(date +'%Y')
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
