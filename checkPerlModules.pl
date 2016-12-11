@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # Parse VCF file
 #
@@ -24,25 +24,16 @@ my $time = localtime; # scalar context
 print STDERR "The current date and time is: $time.\n";
 print STDERR "\n";
 
-#use strict;
-#use warnings;
 use ExtUtils::Installed; # to show all installed modules
-
-print STDERR "* Listing all installed modules.\n";
-my $inst    = ExtUtils::Installed->new();
-my @modules = $inst->modules();
-foreach $module (@modules){
-     print $module . "\n";
-}
 
 ### First, check if all the required modules have been installed inthe system this script will run on.
 print STDERR "* Checking if required modules are present.\n";
 
 BEGIN {
     my @import_modules = (
-        'Getopt::Lucid',
-        'Apache::Htpasswd',
-        'IO::CaptureOutput'
+        'YAML',
+        'Getopt::Long',
+        'Statistics::Distributions'
         );
 
     my ($inst) = ExtUtils::Installed->new();
@@ -63,6 +54,12 @@ BEGIN {
 
 } # end 'BEGIN' block
 
+print STDERR "* Listing all installed modules.\n";
+my $inst    = ExtUtils::Installed->new();
+my @modules = $inst->modules();
+foreach $module (@modules){
+     print $module . "\n";
+}
 
 print STDERR "\n";
 print STDERR "Wow. That was a lot of work. I'm glad it's done. Let's have beer, buddy!\n";
