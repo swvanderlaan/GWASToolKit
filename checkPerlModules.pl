@@ -24,13 +24,45 @@ my $time = localtime; # scalar context
 print STDERR "The current date and time is: $time.\n";
 print STDERR "\n";
 
+use strict;
+use warnings;
 use ExtUtils::Installed; # to show all installed modules
 
+print STDERR "* Listing all installed modules.\n";
 my $inst    = ExtUtils::Installed->new();
 my @modules = $inst->modules();
- foreach $module (@modules){
-      print $module . "\n";
+foreach $module (@modules){
+     print $module . "\n";
 }
+
+### First, check if all the required modules have been installed inthe system this script will run on.
+print STDERR "* Checking if required modules are present.\n";
+
+BEGIN {
+    my @import_modules = (
+        'Getopt::Lucid',
+        'Apache::Htpasswd',
+        'IO::CaptureOutput'
+        );
+
+    my ($inst) = ExtUtils::Installed->new();
+    my (@installed_modules) = $inst->modules();
+
+    for ( @import_modules ) {
+
+        eval{ $inst->validate($_) };
+        if($@) {
+            print qq{\n*** ERROR *** Module [ $_ ] does not seem to be installed in this system. Please install the module and try again!\n};
+            exit 1;
+
+        } # end 'if'
+		else {
+			print STDERR "\n. The required modules $import_modules exist."
+		}
+    } # end 'for'
+
+} # end 'BEGIN' block
+
 
 print STDERR "\n";
 print STDERR "Wow. That was a lot of work. I'm glad it's done. Let's have beer, buddy!\n";
