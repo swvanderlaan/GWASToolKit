@@ -30,7 +30,7 @@ use ExtUtils::Installed; # to show all installed modules
 print STDERR "* Checking if required modules are present.\n";
 
 my @import_modules = (
-    #'YAML',
+    'YAML',
     'Getopt::Long',
     'Statistics::Distributions'
     );
@@ -45,7 +45,7 @@ for ( @import_modules ) {
         #exit 1;
         } # end 'if'
         else {
-        print STDERR "\n. The required modules $import_modules exist."
+        print STDERR "\n. The required modules $import_modules exist.\n"
         }
     } # end 'for'
 
