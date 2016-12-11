@@ -24,8 +24,8 @@ my $time = localtime; # scalar context
 print STDERR "The current date and time is: $time.\n";
 print STDERR "\n";
 
-use strict;
-use warnings;
+#use strict;
+#use warnings;
 use ExtUtils::Installed; # to show all installed modules
 
 print STDERR "* Listing all installed modules.\n";
