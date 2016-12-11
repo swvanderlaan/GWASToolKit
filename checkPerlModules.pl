@@ -31,7 +31,7 @@ print STDERR "* Checking if required modules are present.\n";
 
 BEGIN {
     my @import_modules = (
-        'YAML',
+        #'YAML',
         'Getopt::Long',
         'Statistics::Distributions'
         );
