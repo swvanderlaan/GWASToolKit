@@ -1,5 +1,5 @@
 #!usr/bin/perl 
-
+#
 # Remove duplicate lines from a (gzipped) file.
 #
 # Description: 	removes duplicate lines from a (gzipped) file. The lines do not have to be
@@ -11,7 +11,7 @@
 # Update date: 	2016-01-28
 #
 # Usage:		removedupes.pl [INPUT] [GZIP/NORM] [OUTPUT]
-
+#
 # Starting removal
 print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print "+                                       REMOVE DUPES                                     +\n";
