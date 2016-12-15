@@ -1,18 +1,41 @@
 #!/bin/bash
 
+script_copyright_message() {
+	echo ""
+	THISYEAR=$(date +'%Y')
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "+ The MIT License (MIT)                                                                                 +"
+	echo "+ Copyright (c) 2015-${THISYEAR} Sander W. van der Laan                                                        +"
+	echo "+                                                                                                       +"
+	echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
+	echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
+	echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
+	echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
+	echo "+ subject to the following conditions:                                                                  +"
+	echo "+                                                                                                       +"
+	echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
+	echo "+ portions of the Software.                                                                             +"
+	echo "+                                                                                                       +"
+	echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
+	echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
+	echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
+	echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
+	echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
+	echo "+                                                                                                       +"
+	echo "+ Reference: http://opensource.org.                                                                     +"
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+}
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                          SNPTEST_PLOTTER_QC.v1.1"
+echo "                                            SNPTEST_PLOTTER_QC"
 echo "                                  PLOTTING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " You're here: "$(pwd)
-echo " Today's: "$(date)
+echo " Version    : v1.1.2"
 echo ""
-echo " Version: SNPTEST_PLOTTER_QC.v1.1.1"
+echo " Last update: 2016-12-15"
+echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
-echo " Last update: November 11th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echo ""
@@ -48,7 +71,7 @@ else
 	echo "Please be patient...this can take a long time depending on the number of files."
 	echo "We started at: "$(date)
 	echo ""
-	MANTEL_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/MANTEL/SCRIPTS
+	SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/MetaGWASToolKit/SCRIPTS
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
@@ -63,49 +86,23 @@ else
 	#### QQ-plot including 95%CI and compute lambda [P]
 	echo "Making QQ-plot including 95%CI and compute lambda..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $17 } ' | grep -v NA > ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-	#./qqplot.R -p projectdir -r resultfile -o outputdir -s stattype -f imageformat
-		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
-		Rscript ${MANTEL_SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
+		Rscript ${SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		Rscript ${SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	### Manhattan plot for publications [CHR, BP, P]
 	echo "Manhattan plot for publications ..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $3, $4, $17 } ' > ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
-	#./manhattan.R -p projectdir -r resultfile -o outputdir -c colorstyle -f imageformat
-		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF
-		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG
-		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF
-		Rscript ${MANTEL_SCRIPTS}/manhattan_plot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG
+		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF -t ${FILENAME}
+		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG -t ${FILENAME}
+		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
+		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG -t ${FILENAME}
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
-	gzip -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-	gzip -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
+	rm -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
+	rm -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
 	echo ""
 	echo ""
 
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-#THISYEAR=$(date +'%Y')
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo ""
-#echo ""
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo "+ The MIT License (MIT)                                                                                 +"
-#echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-#echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-#echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-#echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-#echo "+ subject to the following conditions:                                                                  +"
-#echo "+                                                                                                       +"
-#echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-#echo "+ portions of the Software.                                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-#echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-#echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-#echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-#echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-#echo "+                                                                                                       +"
-#echo "+ Reference: http://opensource.org.                                                                     +"
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+script_copyright_message

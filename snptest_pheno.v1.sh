@@ -1,36 +1,31 @@
 #!/bin/bash
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                               SNPTEST_PHENO"
-echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
-echo ""
-echo " You're here: "$(pwd)
-echo " Today's: "$(date)
-echo ""
-echo " Version: SNPTEST_PHENO.v1.2.4"
-echo ""
-echo " Last update: November 14th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo ""
-echo " Description: Perform individual variant, regional or genome-wide association "
-echo "              analysis on some phenotype(s). It will do the following:"
-echo "              - Run GWAS using SNPTESTv2.5.2 and 1000G (phase 1), GoNL4, or "
-echo "                1000G (phase 3) + GoNL5 data per chromosome."
-echo "              - Collect results in one file upon completion of jobs."
-echo ""
-echo " REQUIRED: "
-echo " * A high-performance computer cluster with a qsub system."
-echo " * Imputed genotype data with 1000G[p1/p3]/GoNL[4/5] as reference."
-echo " * SNPTEST v2.5+"
-echo " * R v3.2+"
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-# ERROR MESSAGE FUNCTION
+### MESSAGE FUNCTIONS
+script_copyright_message() {
+	echo ""
+	THISYEAR=$(date +'%Y')
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "+ The MIT License (MIT)                                                                                 +"
+	echo "+ Copyright (c) 2015-${THISYEAR} Sander W. van der Laan                                                        +"
+	echo "+                                                                                                       +"
+	echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
+	echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
+	echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
+	echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
+	echo "+ subject to the following conditions:                                                                  +"
+	echo "+                                                                                                       +"
+	echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
+	echo "+ portions of the Software.                                                                             +"
+	echo "+                                                                                                       +"
+	echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
+	echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
+	echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
+	echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
+	echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
+	echo "+                                                                                                       +"
+	echo "+ Reference: http://opensource.org.                                                                     +"
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+}
 script_arguments_error() {
 	echo "$1" # ANALYSIS TYPE
 	echo "- Argument #1  indicates whether you want to analyse a list of variants, a region, or do a GWAS [VARIANT/REGION/GWAS]."
@@ -122,7 +117,32 @@ script_arguments_error_normalization() {
   			date
   			exit 1
 }
-
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "                                               SNPTEST_PHENO"
+echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
+echo ""
+echo " Version    : v1.2.5"
+echo ""
+echo " Last update: 2016-12-15"
+echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echo ""
+echo " Description: Perform individual variant, regional or genome-wide association "
+echo "              analysis on some phenotype(s). It will do the following:"
+echo "              - Run GWAS using SNPTESTv2.5.2 and 1000G (phase 1), GoNL4, or "
+echo "                1000G (phase 3) + GoNL5 data per chromosome."
+echo "              - Collect results in one file upon completion of jobs."
+echo ""
+echo " REQUIRED: "
+echo " * A high-performance computer cluster with a qsub system."
+echo " * Imputed genotype data with 1000G[p1/p3]/GoNL[4/5] as reference."
+echo " * SNPTEST v2.5+"
+echo " * R v3.2+"
+echo ""
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 ### Set the analysis type.
 ANALYSIS_TYPE=${1}
@@ -644,7 +664,7 @@ else
 						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
 					else
 						### If arguments are not met then this error message will be displayed
-						script_arguments_error_studytype
+						script_arguments_error_normalization
 					fi
 				elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
 					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.gen.gz ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
@@ -885,29 +905,3 @@ else
 
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
-
-#THISYEAR=$(date +'%Y')
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo ""
-#echo ""
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo "+ The MIT License (MIT)                                                                                 +"
-#echo "+ Copyright (c) 2015-${THISYEAR} Sander W. van der Laan                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-#echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-#echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-#echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-#echo "+ subject to the following conditions:                                                                  +"
-#echo "+                                                                                                       +"
-#echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-#echo "+ portions of the Software.                                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-#echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-#echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-#echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-#echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-#echo "+                                                                                                       +"
-#echo "+ Reference: http://opensource.org.                                                                     +"
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
