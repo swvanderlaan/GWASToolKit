@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+#
 # Overlap some data with some other data
 #
 # Description: 	this script can overlap data. Provided with one file (LOOKUP.txt) it will
@@ -13,7 +13,7 @@
 # Update date: 	2016-02-02
 #
 # Usage:		overlap.pl [LOOKUP.txt] [COLUMN#] [SOURCE.txt] [COLUMN#] []
-
+#
 # Starting conversion
 print STDERR "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 print STDERR "+                                        OVERLAP DATA                                    +\n";

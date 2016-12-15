@@ -1,4 +1,6 @@
-# Overlap some data with some other data
+#!/usr/bin/perl
+
+# Parse VCF file
 #
 # Description: 	this script parse VCF files of 1000G phase 1 or phase 3. It will make a new 
 #				file containing variantIDs, alleles and frequencies. Can be used to align

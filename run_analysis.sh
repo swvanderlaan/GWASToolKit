@@ -50,9 +50,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: RUN_ANALYSES.v1.2.7"
+echo " Version: RUN_ANALYSES.v1.2.8"
 echo ""
-echo " Last update: 2016-12-06"
+echo " Last update: 2016-12-15"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -113,6 +113,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ### THIS PART IS SPECIFIC FOR GWAS
 ### - Argument #13 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT.
+### - Argument #14 indicates whether to standardize or use the raw trait [STANDARDIZE/RAW] | NOTE: currently * only * available for GWAS and AEGS!!!
 
 ### THIS PART IS SPECIFIC FOR INDIVIDUAL VARIANT ANALYSES
 ### - Argument #13 you are running an individual variant list analysis, thus we expect a path_to to the variant-list-file which includes three columns: SNP CHR BP (e.g. rs12345 5 1234).
@@ -152,8 +153,8 @@ GWAS_SCRIPTS=${SOFTWARE}/GWASToolKit
 
 
 ### PROJECT SETTINGS
-PROJECTNAME="SOMENAME" ### Change to some project name, for example 'pcsk6'
-PROJECTROOT="/hpc/dhl_ec/svanderlaan/projects/lookups/SOMEDIR" ### you should probably make some directory to have the script put your project in
+PROJECTNAME="SOMEDIR" ### Change to some project name, for example 'pcsk6'
+PROJECTROOT="/hpc/dhl_ec/ACCOUNTNAME/SOMEDIR/SOMEOTHERDIR/WHATEVER" ### you should probably make some directory to have the script put your project in
 # Make directories for script if they do not exist yet (!!!PREREQUISITE!!!)
 if [ ! -d ${PROJECTROOT}/${PROJECTNAME}/ ]; then
 	mkdir -v ${PROJECTROOT}/${PROJECTNAME}/
@@ -164,13 +165,13 @@ fi
 PROJECT=${PROJECTROOT}/${PROJECTNAME}
 
 ### ANALYSIS SETTINGS
-ANALYSIS_TYPE="VARIANT" # GWAS/VARIANT/REGION/GENES
+ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES
 STUDY_TYPE="AEGS" # AEGS/AAAGS/CTMM | NOTE: currently only AEGS and CTMM works
-REFERENCE="1kGp3v5GoNL5" # 1kGp3v5GoNL5/1kGp1v3/GoNL4
+REFERENCE="1kGp1v3" # 1kGp3v5GoNL5/1kGp1v3/GoNL4
 METHOD="EXPECTED" #EXPECTED/SCORE -- EXPECTED is likely best
 EXCLUSION="EXCL_DEFAULT" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
 
-TRAIT_TYPE="BINARY" # QUANT/BINARY
+TRAIT_TYPE="QUANT" # QUANT/BINARY
 ### PHENOTYPES AND COVARIATES
 # Example phenotype-list format: -- should be 'binary' OR 'continuous'
 # BMI
@@ -236,8 +237,8 @@ QMEMGENELZOOM="h_vmem=4G" # 4Gb for locuszoom;
 QTIMEGENELZOOM="h_rt=00:15:00" #15mins for locuszoom;
 
 # MAILSETTINGS
-YOUREMAIL="s.w.vanderlaan-2@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
-MAILSETTINGS="a" 
+YOUREMAIL="some.name@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
+MAILSETTINGS="beas" 
 # 'b' Mail is sent at the beginning of the job; 
 # 'e' Mail is sent at the end of the job; 
 # 'a' Mail is sent when the job is aborted or rescheduled.
@@ -264,6 +265,7 @@ CLUMP_P1="0.000005" # should be of the form 0.005 rather than 5e-3
 CLUMP_R2="0.2"
 CLUMP_KB="500"
 CLUMP_FIELD="P"
+STANDARDIZE="STANDARDIZE" # options: STANDARDIZE/RAW
 
 # For regional analysis
 CHR="none" # e.g. 1
@@ -326,7 +328,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 	echo "Creating jobs to perform GWAS on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMGWAS} ${QTIMEGWAS} ${YOUREMAIL} ${MAILSETTINGS} ${TRAIT_TYPE} 
+	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMGWAS} ${QTIMEGWAS} ${YOUREMAIL} ${MAILSETTINGS} ${TRAIT_TYPE} ${STANDARDIZE}
 
 	### Create QC bash-script to send to qsub
 	for PHENOTYPE in ${PHENOTYPES}; do
