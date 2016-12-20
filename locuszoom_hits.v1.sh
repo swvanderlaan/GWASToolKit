@@ -1,23 +1,66 @@
 #!/bin/bash
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                       SCRIPT TO MAKE LOCUSZOOM PLOTS"
-echo ""
-echo " You're here: "$(pwd)
-echo " Today's: "$(date)
-echo ""
-echo " Version: LOCUSZOOM_HITS.v1.4.2"
-echo ""
-echo " Last update: November 14th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)"
-echo ""
-echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
-echo "              (determined after clumping!). "
-echo ""
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+### DISPLAY FUNCTIONS
+### Setting colouring
+NONE='\033[00m'
+BOLD='\033[1m'
+OPAQUE='\033[2m'
+FLASHING='\033[5m'
+UNDERLINE='\033[4m'
 
-# ERROR MESSAGE FUNCTION
+RED='\033[01;31m'
+GREEN='\033[01;32m'
+YELLOW='\033[01;33m'
+PURPLE='\033[01;35m'
+CYAN='\033[01;36m'
+WHITE='\033[01;37m'
+
+function echobold { #'echobold' is the function name
+    echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
+}
+function echonooption { 
+    echo -e "${OPAQUE}${RED}${1}${NONE}"
+}
+function echoerrorflash { 
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+}
+function echoerror { 
+    echo -e "${RED}${1}${NONE}"
+}
+# errors no option
+function echoerrornooption { 
+    echo -e "${YELLOW}${1}${NONE}"
+}
+function echoerrorflashnooption { 
+    echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
+}
+
+### MESSAGE FUNCTIONS
+script_copyright_message() {
+	echo ""
+	THISYEAR=$(date +'%Y')
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "+ The MIT License (MIT)                                                                                 +"
+	echo "+ Copyright (c) 2015-${THISYEAR} Sander W. van der Laan                                                        +"
+	echo "+                                                                                                       +"
+	echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
+	echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
+	echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
+	echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
+	echo "+ subject to the following conditions:                                                                  +"
+	echo "+                                                                                                       +"
+	echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
+	echo "+ portions of the Software.                                                                             +"
+	echo "+                                                                                                       +"
+	echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
+	echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
+	echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
+	echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
+	echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
+	echo "+                                                                                                       +"
+	echo "+ Reference: http://opensource.org.                                                                     +"
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+}
 script_arguments_error() {
 	echo "$1" # ANALYSIS TYPE
 	echo "- Argument #1  indicates whether you want to analyse a list of variants, a region, or do a GWAS [VARIANT/REGION/GWAS]."
@@ -58,6 +101,20 @@ script_arguments_error() {
   	exit 1
 }
 
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "                                           LOCUSZOOM PLOTTER"
+echo ""
+echo " Version    : v1.4.3"
+echo ""
+echo " Last update: 2016-12-20"
+echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
+echo "              (determined after clumping!). "
+echo ""
+echo ""
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
 ### START of if-else statement for the number of command-line arguments passed ###
 ### Set the analysis type.
 ANALYSIS_TYPE=${1}
@@ -69,14 +126,17 @@ STUDY_TYPE=${2}
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 9 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply at least [9] arguments when running a *** GENOME-WIDE ANALYSIS ***!"
+	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 11 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [11] arguments when running a *** REGIONAL ANALYSIS ***!"
+	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 10 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [10] arguments when running a *** GENE ANALYSIS ***!"
+	script_copyright_message
 
 else
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -149,6 +209,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			# The wrong arguments are passed, so we'll exit the script now!
   			date
   			exit 1
+  			script_copyright_message
 		fi
 	else
 		### If arguments are not met than the 
@@ -166,6 +227,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			# The wrong arguments are passed, so we'll exit the script now!
   			date
   			exit 1
+  			script_copyright_message
 	fi
 
 	### SETTING VARIABLES BASED ON ARGUMENTS PASSED
@@ -202,7 +264,10 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 
 		### Determine the range
 		RANGE=${10}
-		echo "Investigating range: ${RANGE}kb around the gene."
+		echo ""
+		N_VARIANTS=$(cat ${VARIANTLIST} | wc -l)
+		echo "Number of variants to plot...: ${N_VARIANTS} variants"
+		echo "Investigating range..........: ${RANGE}kb around each of these variants."
 		
 		echo ""
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -218,14 +283,18 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
 		while read VARIANTS; do
 			for VARIANT in ${VARIANTS}; do
-				echo "Plotting variant: ${VARIANT}"
+				echo "Plotting variant: ${VARIANT} ± ${RANGE}kb..."
 				
 				if [[ ${LZVERSION} = "LZ13" ]]; then
+					echo "Using LocusZoom v1.3..."
 					cd ${OUTPUTDIR}
-					${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+					${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE}kb ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				
 				elif [[ ${LZVERSION} = "LZ12" ]]; then
+					echo "Using LocusZoom v1.2..."
 					cd ${OUTPUTDIR}
-					${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+					${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE}kb ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				
 				else
 				### If arguments are not met than the 
 					echo ""
@@ -269,17 +338,20 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 				
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			LINE=${REGIONOFINTEREST}
-			VARIANT=`echo "${LINE}" | awk '{print $1}'`
-			CHR=`echo "${LINE}" | awk '{print $2}'`
-			START=`echo "${LINE}" | awk '{print $3}'`
-			END=`echo "${LINE}" | awk '{print $4}'`
+			VARIANT=$(echo "${LINE}" | awk '{print $1}')
+			CHR=$(echo "${LINE}" | awk '{print $2}')
+			START=$(echo "${LINE}" | awk '{print $3}')
+			END=$(echo "${LINE}" | awk '{print $4}')
+			
 			echo "Processing ${VARIANT} locus on ${CHR} between ${START} and ${END}..."
 			if [[ ${LZVERSION} = "LZ13" ]]; then
 				cd ${OUTPUTDIR}
 				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			
 			elif [[ ${LZVERSION} = "LZ12" ]]; then
 				cd ${OUTPUTDIR}
 				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			
 			else
 			### If arguments are not met than the 
 				echo ""
@@ -328,9 +400,11 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			if [[ ${LZVERSION} = "LZ13" ]]; then
 				cd ${OUTPUTDIR}
 				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			
 			elif [[ ${LZVERSION} = "LZ12" ]]; then
 				cd ${OUTPUTDIR}
 				${LOCUSZOOM12} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			
 			else
 			### If arguments are not met than the 
 				echo ""
@@ -345,6 +419,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 				echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 				# The wrong arguments are passed, so we will exit the script now!
 		  		exit 1
+		  		script_copyright_message
 			fi
 
 		echo ""
@@ -368,33 +443,10 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			# The wrong arguments are passed, so we'll exit the script now!
   			date
   			exit 1
+  			script_copyright_message
 	fi
 
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-THISYEAR=$(date +'%Y')
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo ""
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "+ The MIT License (MIT)                                                                                 +"
-echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
-echo "+                                                                                                       +"
-echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-echo "+ subject to the following conditions:                                                                  +"
-echo "+                                                                                                       +"
-echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-echo "+ portions of the Software.                                                                             +"
-echo "+                                                                                                       +"
-echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-echo "+                                                                                                       +"
-echo "+ Reference: http://opensource.org.                                                                     +"
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+script_copyright_message

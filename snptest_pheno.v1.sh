@@ -27,7 +27,7 @@ script_copyright_message() {
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 }
 script_arguments_error() {
-	echo "$1" # ANALYSIS TYPE
+	echo "$1" # ERROR MESSAGE
 	echo "- Argument #1  indicates whether you want to analyse a list of variants, a region, or do a GWAS [VARIANT/REGION/GWAS]."
 	echo "               Depending on the choice you additional arguments are expected:"
 	echo "               - for GWAS: the standard 11 arguments in total."
@@ -121,9 +121,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                               SNPTEST_PHENO"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " Version    : v1.2.5"
+echo " Version    : v1.2.6"
 echo ""
-echo " Last update: 2016-12-15"
+echo " Last update: 2016-12-18"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -554,7 +554,7 @@ else
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		### Setting variant list
 		GENES_FILE=${13}
-		GENES=`cat ${GENES_FILE}`
+		GENES=$(cat ${GENES_FILE})
 		RANGE=${14}
 		TRAIT_TYPE=${15}
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
@@ -832,7 +832,7 @@ else
 			echo ""
 			echo "Analyzing this list of regions ± {RANGE} basepairs: "
 			cat ${PROJECT}/${STUDY_TYPE}GENE_regions_of_interest.txt
-			echo "Number of regions: "`cat ${PROJECT}/${STUDY_TYPE}GENE_regions_of_interest.txt | wc -l`
+			echo "Number of regions: "$(cat ${PROJECT}/${STUDY_TYPE}GENE_regions_of_interest.txt | wc -l)
 		
 		echo ""
 		### Run SNPTEST for each gene and phenotype
@@ -922,3 +922,5 @@ else
 
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
+
+script_copyright_message

@@ -1,28 +1,34 @@
 #!/bin/bash
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                                SNPTEST_QC.v1.1"
-echo "                                  QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
-echo ""
-echo " You're here: "$(pwd)
-echo " Today's: "$(date)
-echo ""
-echo " Version: SNPTEST_QC.v1.1"
-echo ""
-echo " Last update: July 28th, 2016"
-echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo ""
-echo " Description: Quality control of a SNPTEST analysis: filter on INFO, MAC, CAF and BETA/SE."
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-
-### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 6 ]]; then 
-	echo "Oh, computer says no! Argument not recognised: $(basename "${0}") error! You must supply [6] argument:"
+### MESSAGE FUNCTIONS
+script_copyright_message() {
+	echo ""
+	THISYEAR=$(date +'%Y')
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echo "+ The MIT License (MIT)                                                                                 +"
+	echo "+ Copyright (c) 2015-${THISYEAR} Sander W. van der Laan                                                        +"
+	echo "+                                                                                                       +"
+	echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
+	echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
+	echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
+	echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
+	echo "+ subject to the following conditions:                                                                  +"
+	echo "+                                                                                                       +"
+	echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
+	echo "+ portions of the Software.                                                                             +"
+	echo "+                                                                                                       +"
+	echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
+	echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
+	echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
+	echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
+	echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
+	echo "+                                                                                                       +"
+	echo "+ Reference: http://opensource.org.                                                                     +"
+	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+}
+script_arguments_error() {
+	echo "$1" # ERROR MESSAGE
+	echo ""
 	echo "- Argument #1 is path_to the output directory."
 	echo "- Argument #2 is name of the phenotype."
 	echo "- Argument #3 is minimum info-score [INFO]."
@@ -35,6 +41,31 @@ if [[ $# -lt 6 ]]; then
   	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
   	exit 1
+}
+
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echo "                                                   SNPTEST_QC"
+echo "                                  QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
+echo ""
+echo " Version    : v1.1.1"
+echo ""
+echo " Last update: 2016-12-19"
+echo " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echo ""
+echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echo ""
+echo " Description: Quality control of a SNPTEST analysis: filter on INFO, MAC, CAF and BETA/SE."
+echo ""
+echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+### START of if-else statement for the number of command-line arguments passed ###
+if [[ $# -lt 6 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply at least [8] arguments when clumping a *** GENOME-WIDE ANALYSIS ***!"
+	echo ""
+	script_copyright_message
 else
 	echo "All arguments are passed. These are the settings:"
 	# set input-data
@@ -59,7 +90,6 @@ else
 	echo "Please be patient...this can take a long time depending on the number of files."
 	echo "We started at: "$(date)
 	echo ""
-	MANTEL_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/MANTEL/SCRIPTS
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
@@ -101,28 +131,4 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-#THISYEAR=$(date +'%Y')
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo ""
-#echo ""
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo "+ The MIT License (MIT)                                                                                 +"
-#echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-#echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-#echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-#echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-#echo "+ subject to the following conditions:                                                                  +"
-#echo "+                                                                                                       +"
-#echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-#echo "+ portions of the Software.                                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-#echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-#echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-#echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-#echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-#echo "+                                                                                                       +"
-#echo "+ Reference: http://opensource.org.                                                                     +"
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+script_copyright_message
