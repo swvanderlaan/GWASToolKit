@@ -47,9 +47,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                              RUN_ANALYSIS"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " Version    : v1.2.9"
+echo " Version    : v1.3.0"
 echo ""
-echo " Last update: 2016-12-19"
+echo " Last update: 2017-02-09"
 echo " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -216,14 +216,20 @@ QMEMGWASPLOTQC="h_vmem=4G" # 4gb for plotter qc;
 QTIMEGWASPLOTQC="h_rt=12:00:00" # 4 hours for plotter qc;
 QMEMGWASLZOOM="h_vmem=4G" # 4Gb needed for locuszoom;
 QTIMEGWASLZOOM="h_rt=01:00:00" # 15mins for locuszoom;
+QMEMGWASCLEANER="h_vmem=4G" # 4Gb needed for cleaner;
+QTIMEGWASCLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # FOR VARIANT
 QMEMVAR="h_vmem=8G" # 8Gb for variants;
 QTIMEVAR="h_rt=00:15:00" # 15mins for variants;
+QMEMVARCLEANER="h_vmem=4G" # 4Gb needed for cleaner;
+QTIMEVARCLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # FOR REGION
 QMEMREG="h_vmem=8G" # 8Gb for regions;
 QTIMEREG="h_rt=00:30:00" # 30mins for regions;
+QMEMREGCLEANER="h_vmem=4G" # 4Gb needed for cleaner;
+QTIMEREGCLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # FOR GENE
 QMEMGENE="h_vmem=8G" # 8Gb for genes;
@@ -232,6 +238,8 @@ QMEMGENEQC="h_vmem=4G" # 4 Gb for snptest qc;
 QTIMEGENEQC="h_rt=00:30:00" # 30 minutes for snptest qc;
 QMEMGENELZOOM="h_vmem=4G" # 4Gb for locuszoom;
 QTIMEGENELZOOM="h_rt=00:15:00" #15mins for locuszoom;
+QMEMGENECLEANER="h_vmem=4G" # 4Gb needed for cleaner;
+QTIMEGENECLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # MAILSETTINGS
 YOUREMAIL="some.name@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
@@ -364,7 +372,7 @@ if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		##### Create cleaner bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		##### Submit cleaner script
-		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLEANER} -l ${QTIMEGWASCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 
 	done
 
@@ -415,7 +423,7 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 	
 		##### Create cleaner bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+		#qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		
 		###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
 		#echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
@@ -460,7 +468,7 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
  	##### Create cleaner bash-script to send to qsub
  	echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
  	##### Submit cleaner script
- 	qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+ 	qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGENECLEANER} -l ${QTIMEGENECLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 	
 	while read GENES; do
 		for GENE in ${GENES}; do
