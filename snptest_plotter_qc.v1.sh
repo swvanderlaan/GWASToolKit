@@ -30,9 +30,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                            SNPTEST_PLOTTER_QC"
 echo "                                  PLOTTING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " Version    : v1.1.2"
+echo " Version    : v1.1.3"
 echo ""
-echo " Last update: 2016-12-15"
+echo " Last update: 2017-02-10"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -97,8 +97,8 @@ else
 		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
 		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG -t ${FILENAME}
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
-	rm -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-	rm -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
+	#rm -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
+	#rm -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
 	echo ""
 	echo ""
 

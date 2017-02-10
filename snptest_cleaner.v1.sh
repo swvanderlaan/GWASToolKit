@@ -49,9 +49,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                             SNPTEST_CLEANER"
 echo "                                    CLEANS UP SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " Version    : v1.2.1"
+echo " Version    : v1.2.2"
 echo ""
-echo " Last update: 2016-12-18"
+echo " Last update: 2017-02-10"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -101,9 +101,10 @@ else
 	echo ""
 	echo "Moving raw results..."
 	mkdir -v ${OUTPUT_DIR}/_rawresults
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.log ${OUTPUT_DIR}/_rawresults/
 	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.out ${OUTPUT_DIR}/_rawresults/
-	gzip -v ${OUTPUT_DIR}/_rawresults/*.log
+	echo ""
+	echo "Gzipping logs and raw results..."
+	gzip -v ${OUTPUT_DIR}/_scriptlogs/*.log
 	gzip -v ${OUTPUT_DIR}/_rawresults/*.out
 	echo ""
 	echo "Checking errors-files and zapping them if empty..."

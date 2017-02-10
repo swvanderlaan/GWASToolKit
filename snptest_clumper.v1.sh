@@ -66,9 +66,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                             SNPTEST_CLUMPER"
 echo "                                  CLUMPING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " Version    : v1.2.2"
+echo " Version    : v1.2.3"
 echo ""
-echo " Last update: 2016-12-20"
+echo " Last update: 2017-02-10"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -186,7 +186,7 @@ else
 	echo "Counting the total of number of index variants to look at."
 	cat ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo | wc -l
 	cat ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo | sort -u > ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt
-	rm -v ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo
+	#rm -v ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo
 	echo ""
 	
 	echo "Making a list of TOP-variants based on p < ${CLUMP_P1}."

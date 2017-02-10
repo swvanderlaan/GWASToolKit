@@ -30,9 +30,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                             SNPTEST_PLOTTER"
 echo "                                  PLOTTING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " Version    : v1.1.1"
+echo " Version    : v1.1.2"
 echo ""
-echo " Last update: 2016-12-15"
+echo " Last update: 2017-02-10"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -133,13 +133,13 @@ else
 	echo ""
 	
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_CI.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_INFO.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt
-	rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Manhattan_forQuickInspect.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_CI.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_EAF.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.QQplot_INFO.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_INFO.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Histogram_BETA.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.PZ_Plot.txt
+	#rm -v ${OUTPUT_DIR}/${PHENOTYPE}.${FILENAME}.Manhattan_forQuickInspect.txt
 	echo ""
 
 ### END of if-else statement for the number of command-line arguments passed ###
