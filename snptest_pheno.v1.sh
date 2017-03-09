@@ -750,6 +750,7 @@ else
 					script_arguments_error_studytype
 				fi
 				echo ""
+			done < ${VARIANTLIST}
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 				### Create wrap-up bash-script to send to qsub
@@ -757,9 +758,8 @@ else
 				### Submit wrap-up script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
 				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-				
 				echo ""
-			done < ${VARIANTLIST}
+
 		done
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "Submit jobs to perform a regional analysis on your phenotype(s)..."
