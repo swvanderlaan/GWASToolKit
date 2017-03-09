@@ -749,6 +749,8 @@ else
 					### If arguments are not met then this error message will be displayed
 					script_arguments_error_studytype
 				fi
+
+			done < ${VARIANTLIST}
 				echo ""
 			done < ${VARIANTLIST}
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
