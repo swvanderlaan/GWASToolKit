@@ -47,7 +47,7 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                              RUN_ANALYSIS"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " Version    : v1.3.2"
+echo " Version    : v1.3.1"
 echo ""
 echo " Last update: 2017-03-10"
 echo " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
@@ -55,8 +55,6 @@ echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
-echo "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
 echo ""
 echo " Description: Perform individual variant, regional or genome-wide association "
 echo "              analysis on some phenotype(s). It will do the following:"
@@ -152,8 +150,8 @@ GWAS_SCRIPTS=${SOFTWARE}/GWASToolKit
 
 
 ### PROJECT SETTINGS
-PROJECTNAME="SOMEDIR" ### Change to some project name, for example 'pcsk6'
-PROJECTROOT="/hpc/dhl_ec/ACCOUNTNAME/SOMEDIR/SOMEOTHERDIR/WHATEVER" ### you should probably make some directory to have the script put your project in
+PROJECTNAME="SOMEPROJECTNAME" ### Change to some project name, for example 'pcsk6'
+PROJECTROOT="/hpc/dhl_ec/YOURFOLDER/SOMEOTHERFOLDER" ### you should probably make some directory to have the script put your project in
 # Make directories for script if they do not exist yet (!!!PREREQUISITE!!!)
 if [ ! -d ${PROJECTROOT}/${PROJECTNAME}/ ]; then
 	mkdir -v ${PROJECTROOT}/${PROJECTNAME}/
@@ -164,13 +162,13 @@ fi
 PROJECT=${PROJECTROOT}/${PROJECTNAME}
 
 ### ANALYSIS SETTINGS
-ANALYSIS_TYPE="GWAS" # GWAS/VARIANT/REGION/GENES
+ANALYSIS_TYPE="VARIANT" # GWAS/VARIANT/REGION/GENES
 STUDY_TYPE="AEGS" # AEGS/AAAGS/CTMM | NOTE: currently only AEGS and CTMM works
 REFERENCE="1kGp3v5GoNL5" # 1kGp3v5GoNL5/1kGp1v3/GoNL4
 METHOD="EXPECTED" #EXPECTED/SCORE -- EXPECTED is likely best
 EXCLUSION="EXCL_DEFAULT" # EXCL_DEFAULT/EXCL_FEMALES/EXCL_MALES/EXCL_CKD/EXCL_NONCKD/EXCL_T2D/EXCL_NONT2D/EXCL_SMOKER/EXCL_NONSMOKER/EXCL_PRE2007/EXCL_POST2007
 
-TRAIT_TYPE="QUANT" # QUANT/BINARY
+TRAIT_TYPE="BINARY" # QUANT/BINARY
 ### PHENOTYPES AND COVARIATES
 # Example phenotype-list format: -- should be 'binary' OR 'continuous'
 # BMI
@@ -244,7 +242,7 @@ QMEMGENECLEANER="h_vmem=4G" # 4Gb needed for cleaner;
 QTIMEGENECLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # MAILSETTINGS
-YOUREMAIL="some.name@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
+YOUREMAIL="YOUREMAIL@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
 MAILSETTINGS="beas" 
 # 'b' Mail is sent at the beginning of the job; 
 # 'e' Mail is sent at the end of the job; 
@@ -418,20 +416,20 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 # 	done < ${VARIANTLISTORIGINAL}
 
  	echo "Creating jobs to perform an individual variant analysis on your phenotype(s)..."
-	${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMVAR} ${QTIMEVAR} ${YOUREMAIL} ${MAILSETTINGS} ${VARIANTLIST} ${TRAIT_TYPE}
+	#${GWAS_SCRIPTS}/snptest_pheno.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${METHOD} ${EXCLUSION} ${PHENOTYPE_FILE} ${COVARIATE_FILE} ${PROJECT} ${QMEMVAR} ${QTIMEVAR} ${YOUREMAIL} ${MAILSETTINGS} ${VARIANTLIST} ${TRAIT_TYPE}
 
 	for PHENOTYPE in ${PHENOTYPES}; do
 	
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 	
 		##### Create cleaner bash-script to send to qsub
-		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-		#qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		
 		###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
-		echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENO_OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${PHENO_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		###### Submit summariser script
-		qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		
 	done
 
