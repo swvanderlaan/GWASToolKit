@@ -242,7 +242,7 @@ QMEMGENECLEANER="h_vmem=4G" # 4Gb needed for cleaner;
 QTIMEGENECLEANER="h_rt=01:00:00" # 1hours to clean;
 
 # MAILSETTINGS
-YOUREMAIL="YOUREMAIL@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
+YOUREMAIL="your.email@umcutrecht.nl" # you're e-mail address; you'll get an email when the job has ended or when it was aborted
 MAILSETTINGS="beas" 
 # 'b' Mail is sent at the beginning of the job; 
 # 'e' Mail is sent at the end of the job; 
@@ -424,13 +424,13 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 	
 		##### Create cleaner bash-script to send to qsub
 		echo "${GWAS_SCRIPTS}/snptest_cleaner.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${EXCLUSION} ${PHENO_OUTPUT_DIR} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 		
 	done
 		###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
 		echo "${GWAS_SCRIPTS}/summariser.v1.sh ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${OUTPUT_DIR} ${PROJECT} ${PHENOTYPE_FILE} ${TRAIT_TYPE}" > ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 		###### Submit summariser script
-		qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${OUTPUT_DIR} ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
+		qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${TRAIT_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -o ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.log -e ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${OUTPUT_DIR} ${OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${TRAIT_TYPE}.${EXCLUSION}.sh
 
 elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 	echo "Creating jobs to perform a regional analysis on your phenotype(s)..."
