@@ -99,7 +99,7 @@ else
 	echo "Moving scripts and logs..."
 	mkdir -v ${OUTPUT_DIR}/_scriptlogs
 	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.*.sh ${OUTPUT_DIR}/_scriptlogs/
-	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.*.log ${OUTPUT_DIR}/_scriptlogs/
+	mv -v ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.*.log ${OUTPUT_DIR}/_scriptlogs/
 	echo ""
 	echo "Moving raw results..."
 	mkdir -v ${OUTPUT_DIR}/_rawresults
