@@ -121,14 +121,16 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                               SNPTEST_PHENO"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " Version    : v1.2.7"
+echo " Version    : v1.2.8"
 echo ""
-echo " Last update: 2017-02-10"
+echo " Last update: 2017-03-10"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echo "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
+echo "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
 echo ""
 echo " Description: Perform individual variant, regional or genome-wide association "
 echo "              analysis on some phenotype(s). It will do the following:"
@@ -751,16 +753,16 @@ else
 				fi
 
 			done < ${VARIANTLIST}
-				echo ""
-			done < ${VARIANTLIST}
-				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
-				echo ""
-				### Create wrap-up bash-script to send to qsub
-				echo "${GWAS_SCRIPTS}/snptest_pheno_wrapper.v1.sh ${PHENO_OUTPUT_DIR} ${TRAIT_TYPE} ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-				### Submit wrap-up script
-				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-				echo ""
+			
+			echo ""
+			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+			echo ""
+			### Create wrap-up bash-script to send to qsub
+			echo "${GWAS_SCRIPTS}/snptest_pheno_wrapper.v1.sh ${PHENO_OUTPUT_DIR} ${TRAIT_TYPE} ${ANALYSIS_TYPE} ${STUDY_TYPE} ${REFERENCE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			### Submit wrap-up script
+			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
+			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			echo ""
 
 		done
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then

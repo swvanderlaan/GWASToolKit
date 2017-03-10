@@ -11,14 +11,16 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SUMMARISER.v1.3"
+echo " Version    : v1.3.1"
 echo ""
-echo " Last update: November 15th, 2016"
+echo " Last update: 2017-03-10"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echo "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
+echo "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
 echo ""
 echo " Description: Summarises analysis results and zips up into one directory."
 echo ""
@@ -81,7 +83,7 @@ else
 		echo ""
 	
 		echo "Summarising data..."
-		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+		echo "Phenotype TraitType ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${VARIANT}.summary.txt
 
 		for PHENOTYPE in ${PHENOTYPES}; do
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
@@ -90,11 +92,11 @@ else
 		
 			echo ""
 			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
-			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} -v TRAIT_RESULT=${TRAIT_TYPE} '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} -v TRAIT_RESULT=${TRAIT_TYPE} '{ print PHENOTYPE_RESULT, TRAIT_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${VARIANT}.summary.txt
 				
 		done
 		echo " * Gzipping the summarised data..."
-		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${GENE}.summary.txt
+		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${TRAIT_TYPE}.${VARIANT}.summary.txt
 
  	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
  		GENE=${8}
@@ -134,10 +136,8 @@ else
 		echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
 		echo ""
 		echo " You must supply the correct argument:"
-		echo " * [GWAS]         -- uses a total of 13 arguments | THIS IS THE DEFAULT."
-		echo " * [VARIANT]      -- uses 14 arguments, and the last should be a variant-list and the chromosome."
-		echo " * [REGION]       -- uses 16 arguments, and the last three should indicate the chromosomal range."
-		echo " * [GENES]        -- uses 14 arguments, and the last three should indicate the gene list and the range."
+		echo " * [GWAS/VARIANT/REGION]  -- uses 7 arguments."
+		echo " * [GENES]                -- uses 8 arguments, the 8th is the GENE-name."
 		echo ""
 		echo " Please refer to instruction above."
 		echo ""

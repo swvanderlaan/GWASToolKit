@@ -7,14 +7,16 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version: SNPTEST_PHENO_WRAPPER.v1.2.1"
+echo " Version    : v1.2.2"
 echo ""
-echo " Last update: July 28th, 2016"
+echo " Last update: 2017-03-10"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echo "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
+echo "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
 echo ""
 echo " Description: Wrapping up all files from a SNPTEST analysis into one file for ease "
 echo "              of downstream (R) analyses."
@@ -136,7 +138,7 @@ else
 			
 			for CHR in $(seq 1 22) X; do
 				# which chromosome are we processing?
-				echo "Processing chromosome "${CHR}
+				echo "Processing chromosome ${CHR}..."
 				cat *.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
@@ -149,7 +151,7 @@ else
 			
 			for CHR in $(seq 1 22) X; do
 				# which chromosome are we processing?
-				echo "Processing chromosome "${CHR}
+				echo "Processing chromosome ${CHR}..."
 				cat *.chr${CHR}.out | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
@@ -159,14 +161,13 @@ else
 				script_arguments_error
 		fi
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
-		echo "!!! THIS OPTION IS IN BETA !!!"
 		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
 			# create results file
 			###   1     2    3   4  5            6            8              9    14     15     16     18     CALC 19 CALC 21 22  24 25 # AUTOSOMAL & X CHROMOSOMES
 			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file ${FILE}"
+				echo "Processing file ${FILE}..."
 				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
@@ -179,7 +180,7 @@ else
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file ${FILE}"
+				echo "Processing file ${FILE}..."
 				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
@@ -201,7 +202,7 @@ else
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file ${FILE}"
+				echo "Processing file ${FILE}..."
 				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$19*$18), $19, (((2*$16)+$15)/(2*$18)), $21, $22, $24, $25 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
@@ -214,7 +215,7 @@ else
 			
 			for FILE in $(ls *.out); do
 				# which file are we processing?
-				echo "Processing file ${FILE}"
+				echo "Processing file ${FILE}..."
 				cat ${FILE} | grep -v "#" | tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $8, $9, $14, $15, $16, $18, (2*$29*$18), $29, (((2*$16)+$15)/(2*$18)), $33, $45, $47, $48 } ' >> ${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
