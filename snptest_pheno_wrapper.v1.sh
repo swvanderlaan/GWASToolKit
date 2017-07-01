@@ -7,9 +7,9 @@ echo ""
 echo " You're here: "$(pwd)
 echo " Today's: "$(date)
 echo ""
-echo " Version    : v1.2.2"
+echo " Version    : v1.2.3"
 echo ""
-echo " Last update: 2017-03-10"
+echo " Last update: 2017-06-30"
 echo " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -78,58 +78,6 @@ else
 	echo "We started at: "$(date)
 	echo ""
 	
-	### HEADER of SNPTEST output-file
-	###	SEMI-QUANTITATIVE/BINARY			QUANTITATIVE
-	### 1	alternate_ids 					1  alternate_ids
-	### 2	rsid  							2  rsid
-	### 3	chromosome  					3  chromosome
-	### 4	position  						4  position
-	### 5	alleleA  						5  alleleA
-	### 6	alleleB  						6  alleleB
-	### 7	index  							7  index
-	### 8	average_maximum_posterior_call 	8  average_maximum_posterior_call
-	### 9	info  							9  info
-	### 10	cohort_1_AA  					10 cohort_1_AA
-	### 11	cohort_1_AB  					11 cohort_1_AB
-	### 12	cohort_1_BB  					12 cohort_1_BB
-	### 13	cohort_1_NULL  					13 cohort_1_NULL
-	### 14	all_AA  						14 all_AA
-	### 15	all_AB  						15 all_AB
-	### 16	all_BB  						16 all_BB
-	### 17	all_NULL  						17 all_NULL
-	### 18	all_total  						18 all_total
-	### 19	cases_AA  						19 all_maf
-	### 20	cases_AB  						20 missing_data_proportion
-	### 21	cases_BB  						21 cohort_1_hwe
-	### 22	cases_NULL  					22 frequentist_add_pvalue
-	### 23	cases_total  					23 frequentist_add_info
-	### 24	controls_AA  					24 frequentist_add_beta_1
-	### 25	controls_AB  					25 frequentist_add_se_1
-	### 26	controls_BB  					26 comment
-	### 27	controls_NULL
-	### 28	controls_total
-	### 29	all_maf
-	### 30	cases_maf
-	### 31	controls_maf
-	### 32	missing_data_proportion
-	### 33	cohort_1_hwe
-	### 34	cases_hwe
-	### 35	controls_hwe
-	### 36	het_OR
-	### 37	het_OR_lower
-	### 38	het_OR_upper
-	### 39	hom_OR
-	### 40	hom_OR_lower
-	### 41	hom_OR_upper
-	### 42	all_OR
-	### 43	all_OR_lower
-	### 44	all_OR_upper
-	### 45	frequentist_add_pvalue
-	### 46	frequentist_add_info
-	### 47	frequentist_add_beta_1
-	### 48	frequentist_add_se_1
-	### 49	comment
-	###
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		if [[ ${TRAIT_TYPE} = "QUANT" ]]; then
 			# create results file
@@ -276,3 +224,58 @@ fi
 #echo "+                                                                                                       +"
 #echo "+ Reference: http://opensource.org.                                                                     +"
 #echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+
+	### HEADER of SNPTEST output-file
+	###	SEMI-QUANTITATIVE/BINARY			QUANTITATIVE
+	### 1	alternate_ids 					1  alternate_ids
+	### 2	rsid  							2  rsid
+	### 3	chromosome  					3  chromosome
+	### 4	position  						4  position
+	### 5	alleleA  						5  alleleA
+	### 6	alleleB  						6  alleleB
+	### 7	index  							7  index
+	### 8	average_maximum_posterior_call 	8  average_maximum_posterior_call
+	### 9	info  							9  info
+	### 10	cohort_1_AA  					10 cohort_1_AA
+	### 11	cohort_1_AB  					11 cohort_1_AB
+	### 12	cohort_1_BB  					12 cohort_1_BB
+	### 13	cohort_1_NULL  					13 cohort_1_NULL
+	### 14	all_AA  						14 all_AA
+	### 15	all_AB  						15 all_AB
+	### 16	all_BB  						16 all_BB
+	### 17	all_NULL  						17 all_NULL
+	### 18	all_total  						18 all_total
+	### 19	cases_AA  						19 all_maf
+	### 20	cases_AB  						20 missing_data_proportion
+	### 21	cases_BB  						21 cohort_1_hwe
+	### 22	cases_NULL  					22 frequentist_add_pvalue
+	### 23	cases_total  					23 frequentist_add_info
+	### 24	controls_AA  					24 frequentist_add_beta_1
+	### 25	controls_AB  					25 frequentist_add_se_1
+	### 26	controls_BB  					26 comment
+	### 27	controls_NULL
+	### 28	controls_total
+	### 29	all_maf
+	### 30	cases_maf
+	### 31	controls_maf
+	### 32	missing_data_proportion
+	### 33	cohort_1_hwe
+	### 34	cases_hwe
+	### 35	controls_hwe
+	### 36	het_OR
+	### 37	het_OR_lower
+	### 38	het_OR_upper
+	### 39	hom_OR
+	### 40	hom_OR_lower
+	### 41	hom_OR_upper
+	### 42	all_OR
+	### 43	all_OR_lower
+	### 44	all_OR_upper
+	### 45	frequentist_add_pvalue
+	### 46	frequentist_add_info
+	### 47	frequentist_add_beta_1
+	### 48	frequentist_add_se_1
+	### 49	comment
+	###
+

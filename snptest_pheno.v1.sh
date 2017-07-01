@@ -38,17 +38,17 @@ script_arguments_error() {
 	echo "- Argument #3  is input data to use, i.e. where the [imputed] genotypes reside: [1kGp3v5GoNL5/1kGp1v3/GoNL4]."
 	echo "- Argument #4  is the name of the SNPTEST method used [score/expected]."
 	echo "- Argument #5  is exclusion-list to be used, can be either:"
-	echo "               [EXCL_DEFAULT]   * exclusion_nonCEA.list            - excludes all non-CEA samples, THIS IS THE DEFAULT"
-	echo "               [EXCL_FEMALES]   * exclusion_nonCEA_Females.list    - excludes all non-CEA samples and all females"
-	echo "               [EXCL_MALES]     * exclusion_nonCEA_Males.list      - excludes all non-CEA samples and all males"
-	echo "               [EXCL_CKD]       * exclusion_nonCEA_CKD.list        - excludes all non-CEA samples and with CKD"
-	echo "               [EXCL_NONCKD]    * exclusion_nonCEA_nonCKD.list     - excludes all non-CEA samples and without CKD"
-	echo "               [EXCL_T2D]       * exclusion_nonCEA_T2D.list        - excludes all non-CEA samples and who have type 2 diabetes"
-	echo "               [EXCL_NONT2D]    * exclusion_nonCEA_nonT2D.list     - excludes all non-CEA samples and who *do not* have type 2 diabetes"
-	echo "               [EXCL_SMOKER]    * exclusion_nonCEA_SMOKER.list     - excludes all non-CEA samples and who are smokers "
-	echo "               [EXCL_NONSMOKER] * exclusion_nonCEA_nonSMOKER.list  - excludes all non-CEA samples and who are non-smokers"
-	echo "               [EXCL_PRE2007]   * exclusion_nonCEA_pre2007.list    - excludes all non-CEA samples and who were included before 2007; AE exclusive"
-	echo "               [EXCL_POST2007]  * exclusion_nonCEA_post2007.list   - excludes all non-CEA samples and who were included after 2007; AE exclusive"
+	echo "               [EXCL_DEFAULT]   * exclusion_nonCEA.list            - excludes all non-STUDY samples, THIS IS THE DEFAULT"
+	echo "               [EXCL_FEMALES]   * exclusion_nonCEA_Females.list    - excludes all non-STUDY samples and all females"
+	echo "               [EXCL_MALES]     * exclusion_nonCEA_Males.list      - excludes all non-STUDY samples and all males"
+	echo "               [EXCL_CKD]       * exclusion_nonCEA_CKD.list        - excludes all non-STUDY samples and with CKD"
+	echo "               [EXCL_NONCKD]    * exclusion_nonCEA_nonCKD.list     - excludes all non-STUDY samples and without CKD"
+	echo "               [EXCL_T2D]       * exclusion_nonCEA_T2D.list        - excludes all non-STUDY samples and who have type 2 diabetes"
+	echo "               [EXCL_NONT2D]    * exclusion_nonCEA_nonT2D.list     - excludes all non-STUDY samples and who *do not* have type 2 diabetes"
+	echo "               [EXCL_SMOKER]    * exclusion_nonCEA_SMOKER.list     - excludes all non-STUDY samples and who are smokers "
+	echo "               [EXCL_NONSMOKER] * exclusion_nonCEA_nonSMOKER.list  - excludes all non-STUDY samples and who are non-smokers"
+	echo "               [EXCL_PRE2007]   * exclusion_nonCEA_pre2007.list    - excludes all non-STUDY samples and who were included before 2007; AE exclusive"
+	echo "               [EXCL_POST2007]  * exclusion_nonCEA_post2007.list   - excludes all non-STUDY samples and who were included after 2007; AE exclusive"
 	echo "- Argument #6  is path_to to the phenotype-file [refer to readme for list of available phenotypes]."
 	echo "- Argument #7  is path_to to the covariates-file [refer to readme for list of available covariates]."
 	echo "- Argument #8  is path_to the project [name] directory, where the output should be stored."
@@ -59,12 +59,14 @@ script_arguments_error() {
 	echo ""
 	echo "For GWAS:"
 	echo "- Argument #13 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+	echo "- Argument #14 determines the way phenotypes are normalized, i.e. raw or standardized phenotypes are used [RAW/STANDARDIZE]."
 	echo ""
 	echo "An example command would be: snptest_pheno.v1.sh [arg1: VARIANT/REGION/GWAS] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: SCORE/EXPECTED] [arg5: which_exclusion_list] [arg6: path_to_phenotype_file ] [arg7: path_to_covariates_file ] [arg8: path_to_project] [arg9: job_memory] [arg10: job_time] [arg11: your_email@domain.com] [arg12: mailsettings] [arg13: trait_type [QUANT/BINARY]]"
   	echo ""
   	echo "For per-VARIANT ANALYSES:"
 	echo "- Argument #13 you are running an individual variant list analysis, thus we expect a path_to to the variant-list-file which includes three columns: SNP CHR BP (e.g. rs12345 5 1234)."
 	echo "- Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+	echo "- Argument #15 determines the way phenotypes are normalized, i.e. raw or standardized phenotypes are used [RAW/STANDARDIZE]."
 	echo ""
 	echo "An example command would be: snptest_pheno.v1.sh [arg1: VARIANT/REGION/GWAS] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: SCORE/EXPECTED] [arg5: which_exclusion_list] [arg6: path_to_phenotype_file ] [arg7: path_to_covariates_file ] [arg8: path_to_project] [arg9: job_memory] [arg10: job_time] [arg11: your_email@domain.com] [arg12: mailsettings] [arg13: path_to_variant_list] [arg14: trait_type [QUANT/BINARY]]"
 	echo ""
@@ -73,13 +75,15 @@ script_arguments_error() {
 	echo "- Argument #14 you are running a regional analysis, thus we expect here [REGION_START] (e.g. 12345)"
 	echo "- Argument #15 you are running a regional analysis, thus we expect here [REGION_END] (e.g. 678910)"
 	echo "- Argument #16 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+	echo "- Argument #17 determines the way phenotypes are normalized, i.e. raw or standardized phenotypes are used [RAW/STANDARDIZE]."
 	echo ""
 	echo "An example command would be: snptest_pheno.v1.sh [arg1: VARIANT/REGION/GWAS] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: SCORE/EXPECTED] [arg5: which_exclusion_list] [arg6: path_to_phenotype_file ] [arg7: path_to_covariates_file ] [arg8: path_to_project] [arg9: job_memory] [arg10: job_time] [arg11: your_email@domain.com] [arg12: mailsettings] [arg13: chromosome] [arg14: region_start] [arg15: region_end] [arg16: trait_type [QUANT/BINARY]]"
 	echo ""
   	echo "For per-GENE ANALYSES:"
-  	echo "- Argument #12 you are running a per-gene analysis using a list of genes, thus we expect here path_to_a_list_of [GENES]."
-	echo "- Argument #13 you are running a per-gene analysis, thus we expect here [RANGE]."
-	echo "- Argument #14 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+  	echo "- Argument #13 you are running a per-gene analysis using a list of genes, thus we expect here path_to_a_list_of [GENES]."
+	echo "- Argument #14 you are running a per-gene analysis, thus we expect here [RANGE]."
+	echo "- Argument #15 indicates the type of trait, quantitative or binary [QUANT/BINARY] | QUANT IS THE DEFAULT."
+	echo "- Argument #16 determines the way phenotypes are normalized, i.e. raw or standardized phenotypes are used [RAW/STANDARDIZE]."
 	echo ""
 	echo "An example command would be: snptest_pheno.v1.sh [arg1: VARIANT/REGION/GWAS] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: SCORE/EXPECTED] [arg5: which_exclusion_list] [arg6: path_to_phenotype_file ] [arg7: path_to_covariates_file ] [arg8: path_to_project] [arg9: job_memory] [arg10: job_time] [arg11: your_email@domain.com] [arg12: mailsettings] [arg13: chromosome] [arg14: range] [arg15: trait_type [QUANT/BINARY]]"
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -94,14 +98,13 @@ script_arguments_error_studytype() {
 			echo ""
 			echo " You must supply the correct argument:"
 			echo " * [AEGS/AAAGS/CTMM] -- for use of imputed data of Athero-Express Genomics Study 1 & 2 (AEGS, n = 1,526), "
-			echo "                        Abdominal Aortic Aneurysm Express Genomics Study (AAAGS, n = 479), or CTMM (n = )."
+			echo "                        Abdominal Aortic Aneurysm Express Genomics Study (AAAGS, n = 479), or CTMM (n = 624)."
 			echo "                        Please note that for AAAGS and CTMM only 1000G (phase 3, version 5, "
 			echo "                        \"Final release\") plus GoNL5 imputed data is available."
 			echo "                        For AEGS also 1000G (phase 1, version 3) and GoNL4 imputed data is available."
 			echo ""
 			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			# The wrong arguments are passed, so we'll exit the script now!
-  			date
   			exit 1
 }
 script_arguments_error_normalization() {
@@ -117,13 +120,28 @@ script_arguments_error_normalization() {
   			date
   			exit 1
 }
+script_arguments_error_reference() {
+			echo ""
+			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
+			echo ""
+			echo " You must supply the correct argument:"
+			echo " * [1kGp3v5GoNL5] -- for use of data imputed using 1000G (phase 3, version 5, \"Final release\") plus GoNL5."
+			echo " * AEGS only: [1kGp1v3]      -- for use of data imputed using 1000G (phase 1, version 3)."
+			echo " * AEGS only: [GoNL4]        -- for use of data imputed using GoNL4, note that this data *does not* include chromosome X."
+			echo ""
+			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			# The wrong arguments are passed, so we'll exit the script now!
+  			date
+  			exit 1
+}
+
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "                                               SNPTEST_PHENO"
 echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
 echo ""
-echo " Version    : v1.2.9"
+echo " Version    : v1.2.10"
 echo ""
-echo " Last update: 2017-06-30"
+echo " Last update: 2017-07-01"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -148,9 +166,11 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ### Set the analysis type.
 ANALYSIS_TYPE=${1}
+echo "*** DEBUG *** Analysis type: ${ANALYSIS_TYPE}"
 
 ### Set the analysis type.
 STUDY_TYPE=${2}
+echo "*** DEBUG *** Study type: ${STUDY_TYPE}"
 
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 14 ]]; then 
@@ -188,35 +208,15 @@ else
 			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [1kGp3v5GoNL5] -- for use of data imputed using 1000G (phase 3, version 5, \"Final release\") plus GoNL5."
-			echo " * [1kGp1v3]      -- for use of data imputed using 1000G (phase 1, version 3)."
-			echo " * [GoNL4]        -- for use of data imputed using GoNL4, note that this data *does not* include chromosome X."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
+			scripts_arguments_error_reference
 		fi
-	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
+	elif [[ ${STUDY_TYPE} = "AAAGS" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
 			IMPUTEDDATA=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_1kGp3GoNL5_RAW_chr
 			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [1kGp3v5GoNL5] -- for use of data imputed using 1000G (phase 3, version 5, \"Final release\") plus GoNL5."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
+			script_arguments_error_reference
 		fi
 	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
 		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
@@ -224,33 +224,11 @@ else
 			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
 		else
 		### If arguments are not met then this error message will be displayed 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [1kGp3v5GoNL5] -- for use of data imputed using 1000G (phase 3, version 5, \"Final release\") plus GoNL5."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
+			script_arguments_error_reference
 		fi
 	else
 		### If arguments are not met then this error message will be displayed
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [AEGS/AAAGS/CTMM] -- for use of imputed data of Athero-Express Genomics Study 1 & 2 (AEGS, n = 1,526), "
-			echo "                        Abdominal Aortic Aneurysm Express Genomics Study (AAAGS, n = 479), or CTMM (n = )."
-			echo "                        Please note that for AAAGS and CTMM only 1000G (phase 3, version 5, "
-			echo "                        \"Final release\") plus GoNL5 imputed data is available."
-			echo "                        For AEGS also 1000G (phase 1, version 3) and GoNL4 imputed data is available."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
+			script_arguments_error_studytype
 	fi
 	
 	### Set location of [imputed] genotype data
@@ -332,7 +310,7 @@ else
 			# The wrong arguments are passed, so we'll exit the script now!
   			exit 1
 		fi
-	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
+	elif [[ ${STUDY_TYPE} = "AAAGS" ]]; then
 		if [[ ${EXCLUSION} = "EXCL_DEFAULT" ]]; then
 		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS.list
 		elif [[ ${EXCLUSION} = "EXCL_FEMALES" ]]; then
@@ -449,7 +427,7 @@ else
 	
 	### Report back these variables
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
-		TRAIT_TYPE=${13} # depends on arg11
+		TRAIT_TYPE=${13} # depends on arg13
 		STANDARDIZE=${14} # depends on arg14
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
 		echo "The analysis scripts are located here...................................: ${GWAS_SCRIPTS}"
@@ -462,6 +440,7 @@ else
 			echo "     * ${PHENOTYPE}"
 		done
 		echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
+		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECT}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
@@ -479,6 +458,7 @@ else
 		VARIANTLIST=${13}
 		#CHR=${13}
 		TRAIT_TYPE=${14}
+		STANDARDIZE=${15} # depends on arg15
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
 		echo "The analysis scripts are located here...................................: ${GWAS_SCRIPTS}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
@@ -490,6 +470,7 @@ else
 			echo "     * ${PHENOTYPE}"
 		done
 		echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
+		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECT}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
@@ -509,6 +490,7 @@ else
 		REGION_START=${14}
 		REGION_END=${15}
 		TRAIT_TYPE=${16}
+		STANDARDIZE=${17} # depends on arg17
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
 		echo "The analysis scripts are located here...................................: ${GWAS_SCRIPTS}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
@@ -520,6 +502,7 @@ else
 			echo "     * ${PHENOTYPE}"
 		done
 		echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
+		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECT}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
@@ -539,6 +522,7 @@ else
 		GENES=$(cat ${GENES_FILE})
 		RANGE=${14}
 		TRAIT_TYPE=${15}
+		STANDARDIZE=${16} # depends on arg16
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
 		echo "The analysis scripts are located here...................................: ${GWAS_SCRIPTS}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
@@ -551,6 +535,7 @@ else
 		done
 		echo ""
 		echo "The type of phenotypes..................................................: ${TRAIT_TYPE}"
+		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECT}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
@@ -591,7 +576,7 @@ else
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
 		SAMPLE_FILE=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/aegscombo_phenocov.sample
 	
-	elif [[ ${STUDY_TYPE} = "AAGS" ]]; then
+	elif [[ ${STUDY_TYPE} = "AAAGS" ]]; then
 		SAMPLE_FILE=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_phenocov.sample
 	
 	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
@@ -678,8 +663,17 @@ else
 				BP=$(echo "${LINE}" | awk '{ print $3 }')
 			
 				echo "Analysing the phenotype ${PHENOTYPE} for ${VARIANT} on chromosome ${CHR}."
-				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+				if [[ ${STANDARDIZE} = "STANDARDIZE" ]]; then
+					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+				elif [[ ${STANDARDIZE} = "RAW" ]]; then
+					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+				else
+					### If arguments are not met then this error message will be displayed
+					script_arguments_error_normalization
+				fi
+
 
 			done < ${VARIANTLIST}
 			
@@ -708,8 +702,18 @@ else
   				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			fi
 			echo "Analysing the phenotype ${PHENOTYPE} and all variants on the region ${CHR}:{REGION_START}-${REGION_END}."
-			echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
-			qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+			if [[ ${STANDARDIZE} = "STANDARDIZE" ]]; then
+				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+			elif [[ ${STANDARDIZE} = "RAW" ]]; then
+				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+			else
+				### If arguments are not met then this error message will be displayed
+				script_arguments_error_normalization
+			fi
+			
+			
 			
 			echo ""
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
@@ -786,8 +790,17 @@ else
 				fi
 				
 				echo "Analysing the phenotype ${PHENOTYPE} and all variants of the ${GENELOCUS} locus on ${CHR} between ${START} and ${END}..."
-				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
-				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				
+				if [[ ${STANDARDIZE} = "STANDARDIZE" ]]; then
+					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				elif [[ ${STANDARDIZE} = "RAW" ]]; then
+					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 50 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				else
+					### If arguments are not met then this error message will be displayed
+					script_arguments_error_normalization
+				fi
 				
 				echo ""
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
@@ -807,10 +820,10 @@ else
 		echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
 		echo ""
 		echo " You must supply the correct argument:"
-		echo " * [GWAS]         -- uses a total of 13 arguments | THIS IS THE DEFAULT."
-		echo " * [VARIANT]      -- uses 14 arguments, and the last should be a variant-list and the chromosome."
-		echo " * [REGION]       -- uses 16 arguments, and the last three should indicate the chromosomal range."
-		echo " * [GENES]        -- uses 14 arguments, and the last three should indicate the gene list and the range."
+		echo " * [GWAS]         -- uses a total of 14 arguments | THIS IS THE DEFAULT."
+		echo " * [VARIANT]      -- uses 15 arguments, and the last should be a variant-list and the chromosome."
+		echo " * [REGION]       -- uses 17 arguments, and the last three should indicate the chromosomal range."
+		echo " * [GENES]        -- uses 16 arguments, and the last three should indicate the gene list and the range."
 		echo ""
 		echo " Please refer to instruction above."
 		echo ""
