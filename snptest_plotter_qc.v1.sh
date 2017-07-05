@@ -86,16 +86,16 @@ else
 	#### QQ-plot including 95%CI and compute lambda [P]
 	echo "Making QQ-plot including 95%CI and compute lambda..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $17 } ' | grep -v NA > ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-		Rscript ${SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
-		Rscript ${SCRIPTS}/qqplot.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
+		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	### Manhattan plot for publications [CHR, BP, P]
 	echo "Manhattan plot for publications ..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | tail -n +2 | awk ' { print $3, $4, $17 } ' > ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
-		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF -t ${FILENAME}
-		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG -t ${FILENAME}
-		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
-		Rscript ${SCRIPTS}/manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG -t ${FILENAME}
+		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF -t ${FILENAME}
+		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG -t ${FILENAME}
+		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
+		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG -t ${FILENAME}
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
 	#rm -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
 	#rm -v ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
