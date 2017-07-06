@@ -136,12 +136,12 @@ script_arguments_error_reference() {
 }
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                               SNPTEST_PHENO"
-echo "          INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A PHENOTYPE"
+echo "                                            GWASTOOLKIT ANALYZER"
+echo "            INDIVIDUAL VARIANT, PER-GENE, REGIONAL OR GENOME-WIDE ASSOCIATION STUDY ON A TRAIT"
 echo ""
-echo " Version    : v1.2.10"
+echo " Version    : v1.2.11"
 echo ""
-echo " Last update: 2017-07-01"
+echo " Last update: 2017-07-06"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -164,13 +164,13 @@ echo " * R v3.2+"
 echo ""
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
-### Set the analysis type.
-ANALYSIS_TYPE=${1}
-echo "*** DEBUG *** Analysis type: ${ANALYSIS_TYPE}"
+### LOADING CONFIGURATION FILE
+source "$1" # Depends on arg1.
 
 ### Set the analysis type.
-STUDY_TYPE=${2}
-echo "*** DEBUG *** Study type: ${STUDY_TYPE}"
+ANALYSIS_TYPE=${ANALYSIS_TYPE}
+### Set the analysis type.
+STUDY_TYPE=${STUDY_TYPE}
 
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 14 ]]; then 
@@ -193,7 +193,7 @@ else
 	
 	### CHECKING ARGUMENTS ###
 	### Set location of [imputed] genotype data
-	REFERENCE=${3} # depends on arg3  [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
+	REFERENCE=${REFERENCE} # depends on arg3  [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 	
 	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
@@ -841,4 +841,4 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-script_copyright_message
+# script_copyright_message

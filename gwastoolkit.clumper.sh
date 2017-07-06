@@ -66,9 +66,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                             SNPTEST_CLUMPER"
 echo "                                  CLUMPING OF SNPTEST ANALYSIS RESULTS"
 echo ""
-echo " Version    : v1.2.3"
+echo " Version    : v1.2.4"
 echo ""
-echo " Last update: 2017-02-10"
+echo " Last update: 2017-07-07"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -107,7 +107,7 @@ else
 	ANALYSIS_TYPE=${10}
 	
 	### THIS SHOULD BE PART OF THE GWASToolKit
-	RESOURCES=/hpc/local/CentOS7/dhl_ec/software/MetaGWASToolKit/RESOURCES
+	RESOURCES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/RESOURCES
 	
 	### THERE SHOULD BE A CHECK ON THIS AS A PREREQUISITE
 	PLINK2=/hpc/local/CentOS7/dhl_ec/software/plink_v1.9
