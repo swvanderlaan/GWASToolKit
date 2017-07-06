@@ -91,22 +91,6 @@ script_arguments_error() {
   	date
   	exit 1
 }
-script_arguments_error_studytype() {
-			echo "$1" 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [AEGS/AAAGS/CTMM] -- for use of imputed data of Athero-Express Genomics Study 1 & 2 (AEGS, n = 1,526), "
-			echo "                        Abdominal Aortic Aneurysm Express Genomics Study (AAAGS, n = 479), or CTMM (n = 624)."
-			echo "                        Please note that for AAAGS and CTMM only 1000G (phase 3, version 5, "
-			echo "                        \"Final release\") plus GoNL5 imputed data is available."
-			echo "                        For AEGS also 1000G (phase 1, version 3) and GoNL4 imputed data is available."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			exit 1
-}
 script_arguments_error_normalization() {
 			echo "$1" 
 			echo ""
@@ -114,20 +98,6 @@ script_arguments_error_normalization() {
 			echo ""
 			echo " You must supply the correct argument:"
 			echo " * [STANDARDIZE/RAW] -- SNPTEST can either use the raw trait data or standardize it on the fly."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
-}
-script_arguments_error_reference() {
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [1kGp3v5GoNL5] -- for use of data imputed using 1000G (phase 3, version 5, \"Final release\") plus GoNL5."
-			echo " * AEGS only: [1kGp1v3]      -- for use of data imputed using 1000G (phase 1, version 3)."
-			echo " * AEGS only: [GoNL4]        -- for use of data imputed using GoNL4, note that this data *does not* include chromosome X."
 			echo ""
 			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			# The wrong arguments are passed, so we'll exit the script now!
@@ -171,6 +141,11 @@ source "$1" # Depends on arg1.
 ANALYSIS_TYPE=${ANALYSIS_TYPE}
 ### Set the analysis type.
 STUDY_TYPE=${STUDY_TYPE}
+### Set the reference
+REFERENCE=${REFERENCE}
+### Set location of [imputed] genotype data
+IMPUTEDDATA=${IMPUTEDDATA}
+HG19_GENES=${HG19_GENES}
 
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 14 ]]; then 
@@ -191,242 +166,36 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 14 ]]; then
 	
 else
 	
-	### CHECKING ARGUMENTS ###
-	### Set location of [imputed] genotype data
-	REFERENCE=${REFERENCE} # depends on arg3  [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
+### Set location of [imputed] genotype data
+METHOD=${METHOD} # depends on arg4
 	
-	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
-	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
-		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/aegs_combo_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
-		elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
-			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_1000Gp1v3/aegs_combo_1000g_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
-		elif [[ ${REFERENCE} = "GoNL4" ]]; then
-			IMPUTEDDATA=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_BBMRI_GoNL4/aegs_combo_gonl4_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
-		else
-		### If arguments are not met then this error message will be displayed
-			scripts_arguments_error_reference
-		fi
-	elif [[ ${STUDY_TYPE} = "AAAGS" ]]; then
-		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-			IMPUTEDDATA=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
-		else
-		### If arguments are not met then this error message will be displayed 
-			script_arguments_error_reference
-		fi
-	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
-		if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-			IMPUTEDDATA=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/ctmm_1kGp3GoNL5_RAW_chr
-			HG19_GENES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/glist-hg19
-		else
-		### If arguments are not met then this error message will be displayed 
-			script_arguments_error_reference
-		fi
-	else
-		### If arguments are not met then this error message will be displayed
-			script_arguments_error_studytype
-	fi
+### Set location of exclusion list
+EXCLUSION=${EXCLUSION} # depends on arg4
 	
-	### Set location of [imputed] genotype data
-	METHOD_CHECK=${4} # depends on arg4
+echo "All arguments are passed and correct. These are the settings:"
 	
-	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
-		if [[ ${METHOD_CHECK} = "SCORE" ]]; then
-			METHOD=score
-		elif [[ ${METHOD_CHECK} = "EXPECTED" ]]; then
-			METHOD=expected
-		else
-		### If arguments are not met then this error message will be displayed 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " * [SCORE]         -- uses the method score."
-			echo " * [EXPECTED]      -- uses the method expected."
-			echo ""
-			echo " Please refer to the website of SNPTEST: https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html."
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			date
-  			exit 1
-		fi
-	
-	### Set location of exclusion list
-	EXCLUSION=${5} # depends on arg4
-	
-	### Required input exclusion-list format:
-	### SampleID123X
-	### SampleID123Y
-	### SampleID123Z
-	
-	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
-	if [[ ${STUDY_TYPE} = "AEGS" ]]; then
-		if [[ ${EXCLUSION} = "EXCL_DEFAULT" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA.list
-		elif [[ ${EXCLUSION} = "EXCL_FEMALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_Females.list
-		elif [[ ${EXCLUSION} = "EXCL_MALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_Males.list
-		elif [[ ${EXCLUSION} = "EXCL_CKD" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_CKD.list
-		elif [[ ${EXCLUSION} = "EXCL_NONCKD" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonCKD.list	
-		elif [[ ${EXCLUSION} = "EXCL_T2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_T2D.list
-		elif [[ ${EXCLUSION} = "EXCL_NONT2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonT2D.list
-		elif [[ ${EXCLUSION} = "EXCL_SMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_SMOKER.list
-		elif [[ ${EXCLUSION} = "EXCL_NONSMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_nonSMOKER.list
-		elif [[ ${EXCLUSION} = "EXCL_PRE2007" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_pre2007.list
-		elif [[ ${EXCLUSION} = "EXCL_POST2007" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCEA_post2007.list
-		else
-		### If arguments are not met then this error message will be displayed 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " [EXCL_DEFAULT]   * exclusion_nonCEA.list            -- excludes all non-CEA samples | THIS IS THE DEFAULT"
-			echo " [EXCL_FEMALES]   * exclusion_nonCEA_Females.list    -- excludes all non-CEA samples & all females"
-			echo " [EXCL_MALES]     * exclusion_nonCEA_Males.list      -- excludes all non-CEA samples & all males"
-			echo " [EXCL_CKD]       * exclusion_nonCEA_CKD.list        -- excludes all non-CEA samples & with CKD"
-			echo " [EXCL_NONCKD]    * exclusion_nonCEA_nonCKD.list     -- excludes all non-CEA samples & without CKD"
-			echo " [EXCL_T2D]       * exclusion_nonCEA_T2D.list        -- excludes all non-CEA samples & who have type 2 diabetes"
-			echo " [EXCL_NONT2D]    * exclusion_nonCEA_nonT2D.list     -- excludes all non-CEA samples & who *do not* have type 2 diabetes"
-			echo " [EXCL_SMOKER]    * exclusion_nonCEA_SMOKER.list     -- excludes all non-CEA samples & who are smokers "
-			echo " [EXCL_NONSMOKER] * exclusion_nonCEA_nonSMOKER.list  -- excludes all non-CEA samples & who are non-smokers"
-			echo " [EXCL_PRE2007]   * exclusion_nonCEA_pre2007.list    -- excludes all non-CEA samples & who were included before 2007; AE exclusive"
-			echo " [EXCL_POST2007]  * exclusion_nonCEA_post2007.list   -- excludes all non-CEA samples & who were included after 2007; AE exclusive"
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			exit 1
-		fi
-	elif [[ ${STUDY_TYPE} = "AAAGS" ]]; then
-		if [[ ${EXCLUSION} = "EXCL_DEFAULT" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS.list
-		elif [[ ${EXCLUSION} = "EXCL_FEMALES" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_Females.list
-		elif [[ ${EXCLUSION} = "EXCL_MALES" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_Males.list
-# 		elif [[ ${EXCLUSION} = "EXCL_CKD" ]]; then
-# 		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_CKD.list
-# 		elif [[ ${EXCLUSION} = "EXCL_NONCKD" ]]; then
-# 		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_nonCKD.list	
-		elif [[ ${EXCLUSION} = "EXCL_T2D" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_T2D.list
-		elif [[ ${EXCLUSION} = "EXCL_NONT2D" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_nonT2D.list
-		elif [[ ${EXCLUSION} = "EXCL_SMOKER" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_SMOKER.list
-		elif [[ ${EXCLUSION} = "EXCL_NONSMOKER" ]]; then
-		EXCLUSION_LIST=/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/exclusion_nonAAAGS_nonSMOKER.list
-		else
-			### If arguments are not met then this error message will be displayed 
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " [EXCL_DEFAULT]   * exclusion_nonAAAGS.list            -- excludes all non-AAAGS samples | THIS IS THE DEFAULT"
-			echo " [EXCL_FEMALES]   * exclusion_nonAAAGS_FEMALES.list    -- excludes all non-AAAGS samples & all females"
-			echo " [EXCL_MALES]     * exclusion_nonAAAGS_MALES.list      -- excludes all non-AAAGS samples & all males"
-# 			echo " [EXCL_CKD]       * exclusion_nonAAAGS_CKD.list        -- excludes all non-AAAGS samples & with CKD"
-# 			echo " [EXCL_NONCKD]    * exclusion_nonAAAGS_nonCKD.list     -- excludes all non-AAAGS samples & without CKD"
-			echo " [EXCL_T2D]       * exclusion_nonAAAGS_T2D.list        -- excludes all non-AAAGS samples & who have type 2 diabetes"
-			echo " [EXCL_NONT2D]    * exclusion_nonAAAGS_nonT2D.list     -- excludes all non-AAAGS samples & who *do not* have type 2 diabetes"
-			echo " [EXCL_SMOKER]    * exclusion_nonAAAGS_SMOKER.list     -- excludes all non-AAAGS samples & who are smokers "
-			echo " [EXCL_NONSMOKER] * exclusion_nonAAAGS_nonSMOKER.list  -- excludes all non-AAAGS samples & who are non-smokers"
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			exit 1
-  		fi
-	elif [[ ${STUDY_TYPE} = "CTMM" ]]; then
-		if [[ ${EXCLUSION} = "EXCL_DEFAULT" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM.list
-		elif [[ ${EXCLUSION} = "EXCL_FEMALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_FEMALES.list
-		elif [[ ${EXCLUSION} = "EXCL_MALES" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_MALES.list
-# 		elif [[ ${EXCLUSION} = "EXCL_CKD" ]]; then
-# 			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_CKD.list
-# 		elif [[ ${EXCLUSION} = "EXCL_NONCKD" ]]; then
-# 			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_nonCKD.list	
-		elif [[ ${EXCLUSION} = "EXCL_T2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_T2D.list
-		elif [[ ${EXCLUSION} = "EXCL_NONT2D" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_nonT2D.list
-		elif [[ ${EXCLUSION} = "EXCL_SMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_SMOKER.list
-		elif [[ ${EXCLUSION} = "EXCL_NONSMOKER" ]]; then
-			EXCLUSION_LIST=/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/exclusion_nonCTMM_nonSMOKER.list
-		else
-			echo ""
-			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			echo " You must supply the correct argument:"
-			echo " [EXCL_DEFAULT]   * exclusion_nonCTMM.list            -- excludes all non-CTMM samples | THIS IS THE DEFAULT"
-			echo " [EXCL_FEMALES]   * exclusion_nonCTMM_FEMALES.list    -- excludes all non-CTMM samples & all females"
-			echo " [EXCL_MALES]     * exclusion_nonCTMM_MALES.list      -- excludes all non-CTMM samples & all males"
-# 			echo " [EXCL_CKD]       * exclusion_nonCEA_CKD.list        -- excludes all non-CTMM samples & with CKD"
-# 			echo " [EXCL_NONCKD]    * exclusion_nonCEA_nonCKD.list     -- excludes all non-CTMM samples & without CKD"
-			echo " [EXCL_T2D]       * exclusion_nonCTMM_T2D.list        -- excludes all non-CTMM samples & who have type 2 diabetes"
-			echo " [EXCL_NONT2D]    * exclusion_nonCTMM_nonT2D.list     -- excludes all non-CTMM samples & who *do not* have type 2 diabetes"
-			echo " [EXCL_SMOKER]    * exclusion_nonCTMM_SMOKER.list     -- excludes all non-CTMM samples & who are smokers "
-			echo " [EXCL_NONSMOKER] * exclusion_nonCTMM_nonSMOKER.list  -- excludes all non-CTMM samples & who are non-smokers"
-			echo ""
-			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-			# The wrong arguments are passed, so we'll exit the script now!
-  			exit 1
-  		fi
-	else
-		### If arguments are not met then this error message will be displayed 
-			script_arguments_error_studytype
-	fi
-		
-	echo "All arguments are passed and correct. These are the settings:"
-	### Set location of SNPTEST v2.5.2 & the method to be used.
-	SNPTEST=/hpc/local/CentOS7/dhl_ec/software/snptest_v2.5.2_CentOS6.5_x86_64_static/snptest_v2.5.2
-	
-	### Set input-data
-	
-	### Required input phenotype-list format: -- should be 'binary' OR 'continuous'
-	### TRAIT1
-	### TRAIT2
-	### TRAIT3
-	
-	### Required input covariate-list format:
-	### COVA COVB COVC
-	
-	PHENOTYPE_FILE=${6} 
-	COVARIATE_FILE=${7} 
-	PHENOTYPES=$(cat "$PHENOTYPE_FILE") # which phenotypes to investigate anyway
-	COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
-	
-	### Set the project directory
-	PROJECT=${8}
-	
-	### Set the BASH qsub queue.
-	QMEM=${9}
-	QTIME=${10}
-	
-	### Set your email address.
-	YOUREMAIL=${11}
-	MAILSETTINGS=${12} 
-	
-	### Set location of the individual, regional and GWAS scripts
-	GWAS_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit
+### Set input-data
+PHENOTYPE_FILE=${PHENOTYPE_FILE} 
+COVARIATE_FILE=${COVARIATE_FILE} 
+PHENOTYPES=$(cat "$PHENOTYPE_FILE") # which phenotypes to investigate anyway
+COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
+
+### Set the project directory
+PROJECT=${PROJECTDIR}/${PROJECTNAME}
+
+### Set your email address.
+YOUREMAIL=${YOUREMAIL}
+MAILSETTINGS=${MAILSETTINGS} 
+
+### Set location of the individual, regional and GWAS scripts
+GWAS_SCRIPTS=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit
 	
 	### Report back these variables
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
+		### Set the BASH qsub queue.
+		QMEM=${QMEM}
+		QTIME=${QTIME}
+
 		TRAIT_TYPE=${13} # depends on arg13
 		STANDARDIZE=${14} # depends on arg14
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
