@@ -126,15 +126,22 @@ else
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
-		
+		# what is the basename of the file?
+		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz"
+	
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		# what is the basename of the file?
+		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz"
 		
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
 		### SET INPUT-DATA
 		GENE="$3"
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
+		# what is the basename of the file?
+		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.txt.gz"
+		
 	else
 		echo "Oh, computer says no! Number of arguments found "$#"."
 		script_arguments_error "You must supply [2-3] arguments for cleaning of *** GWASToolKit *** results!"
@@ -157,8 +164,6 @@ else
 	echo ""
 	echo ""
 	echo "Plotting reformatted FILTERED data."
-	# what is the basename of the file?
-	RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.txt.gz"
 	echo ${RESULTS}
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}
