@@ -124,15 +124,30 @@ CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 2 ]]; then 
-	echoerror "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [2] arguments when wrapping up *** GWASToolKit *** analyses results!"
-	echo ""
+if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments when wrapping up *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
+
+elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments when wrapping up *** VARIANT ANALYSIS *** results!"
+	script_copyright_message
+		
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [3] arguments when wrapping up *** REGIONAL ANALYSIS *** results!"
+	script_copyright_message
+	
+elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [3] arguments when wrapping up *** GENE ANALYSIS *** results!"
+	script_copyright_message
+
 else
 	echo "All arguments are passed. These are the settings:"
 	### SET INPUT-DATA
-	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results # depends on arg1
 	
 	echo "The output directory is.....................................: ${OUTPUT_DIR}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
@@ -149,32 +164,57 @@ else
 	echo ""
 
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
+		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 		# create results file
 		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 
 		for CHR in $(seq 1 22) X; do
 			# which chromosome are we processing?
 			echo "Processing chromosome ${CHR}..."
-			cat ${OUTPUT_DIR}/*.chr${CHR}.out | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			cat ${PHENO_OUTPUT_DIR}/*.chr${CHR}.out | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 		done
-		
-	elif [[ ${ANALYSIS_TYPE} = "VARIANT" || ${ANALYSIS_TYPE} = "GENES" ]]; then
+		echo ""
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
+		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 		# create results file
 		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 
-		for FILE in $(ls ${OUTPUT_DIR}/*.out); do
+		for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
 			# which file are we processing?
 			echo "Processing file ${FILE}..."
 			cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 		done
+		echo ""
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+	
+	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
+		GENELOCUS="$3"
+		GENE_OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENELOCUS}
+		PHENO_OUTPUT_DIR=${GENE_OUTPUT_DIR}/${PHENOTYPE}
+		# create results file
+		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+
+		for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
+			# which file are we processing?
+			echo "Processing file ${FILE}..."
+			cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+			echo ""
+		done
+		echo ""
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 		
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "NOT AN OPTION YET!"
@@ -184,8 +224,6 @@ else
 		script_arguments_error_analysis_type
 	fi
 	
-	echo ""
-	gzip -vf ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
 	echo ""
 	echo "Finished. "
 	echo ""

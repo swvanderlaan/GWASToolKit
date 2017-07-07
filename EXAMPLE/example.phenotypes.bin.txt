@@ -1,7 +1,0 @@
-Calcification_bin
-Collagen_bin
-SMC_bin
-Macrophages_bin
-Fat40_bin
-Fat10_bin
-IPH

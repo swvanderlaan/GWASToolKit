@@ -562,7 +562,7 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 				### Create wrap-up bash-script to send to qsub
-				echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENELOCUS} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
 				### Submit wrap-up script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
 				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh

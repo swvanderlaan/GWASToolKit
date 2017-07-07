@@ -71,8 +71,9 @@ script_arguments_error() {
 	echoerror ""
 	echoerror "- Argument #1 is path_to the configuration file."
 	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror "- Argument #3 is the gene analysed -- gene-based analysis only."
 	echoerror ""
-	echoerror "An example command would be: gwastoolkit.cleaner.sh [arg1: path_to_configuration_file] [arg2: phenotype]"
+	echoerror "An example command would be: gwastoolkit.cleaner.sh [arg1: path_to_configuration_file] [arg2: phenotype] [arg3: gene]"
   	echoerror ""
   	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
@@ -107,15 +108,53 @@ CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 2 ]]; then 
-	echoerror "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [2] arguments when cleaning *** GWASToolKit *** analyses!"
-	echo ""
+
+### START of if-else statement for the number of command-line arguments passed ###
+if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** GENOME-WIDE ANALYSIS ***!"
 	script_copyright_message
+	
+elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** VARIANT ANALYSIS ***!"
+	script_copyright_message
+
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** REGIONAL ANALYSIS ***!"
+	script_copyright_message
+	
+elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [3] arguments for regional association plotting of a *** GENE ANALYSIS ***!"
+	script_copyright_message
+
 else
 	echo "All arguments are passed. These are the settings:"
-	### SET INPUT-DATA
-	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	
+	if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	
+	elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		
+	elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+		### SET INPUT-DATA
+		GENE="$3"
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
+	else
+		echo "Oh, computer says no! Number of arguments found "$#"."
+		script_arguments_error "You must supply [3] arguments for regional association plotting of a *** GENE ANALYSIS ***!"
+		script_copyright_message
+
+	fi
 	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
