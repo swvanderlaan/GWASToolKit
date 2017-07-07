@@ -199,4 +199,4 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-script_copyright_message
+# script_copyright_message

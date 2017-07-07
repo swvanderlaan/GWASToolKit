@@ -219,14 +219,13 @@ PHENOTYPES=$(cat "$PHENOTYPE_FILE") # which phenotypes to investigate anyway
 COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 
 ### Set location of the individual, regional and GWAS scripts
-GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 	
 	### Report back these variables
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		QMEM=${QMEMGWAS}
 		QTIME=${QTIMEGWAS}
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
-		echo "The analysis scripts are located here...................................: ${GWASTOOLKITSCRIPTS}"
+		echo "The analysis scripts are located here...................................: ${GWASTOOLKITDIR}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 		echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
@@ -255,7 +254,7 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 		QMEM=${QMEMVAR}
 		QTIME=${QTIMEVAR}
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
-		echo "The analysis scripts are located here...................................: ${GWASTOOLKITSCRIPTS}"
+		echo "The analysis scripts are located here...................................: ${GWASTOOLKITDIR}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 		echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
@@ -284,7 +283,7 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 		QMEM=${QMEMREG}
 		QTIME=${QTIMEREG}
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
-		echo "The analysis scripts are located here...................................: ${GWASTOOLKITSCRIPTS}"
+		echo "The analysis scripts are located here...................................: ${GWASTOOLKITDIR}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 		echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
@@ -315,7 +314,7 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 		QMEM=${QMEMGENE}
 		QTIME=${QTIMEGENE}
 		echo "SNPTEST is located here.................................................: ${SNPTEST}"
-		echo "The analysis scripts are located here...................................: ${GWASTOOLKITSCRIPTS}"
+		echo "The analysis scripts are located here...................................: ${GWASTOOLKITDIR}"
 		echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 		echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
@@ -393,10 +392,10 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 				echo ""
 			done
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITSCRIPTS}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-# 			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			echo ""
 
 		done
@@ -442,10 +441,10 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITSCRIPTS}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-# 			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			echo ""
 
 		done
@@ -478,10 +477,10 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITSCRIPTS}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-# 			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+ 			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			echo ""
 
 		done
@@ -563,10 +562,10 @@ GWASTOOLKITSCRIPTS=${GWASTOOLKITDIR}/SCRIPTS
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 				### Create wrap-up bash-script to send to qsub
-				echo "${GWASTOOLKITSCRIPTS}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
 				### Submit wrap-up script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-# 				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
 				echo ""
 				
 			done

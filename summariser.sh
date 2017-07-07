@@ -124,23 +124,17 @@ source "$1" # Depends on arg1.
 
 ### REQUIRED | GENERALS	
 CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
-PHENOTYPE="$2" # Depends on arg2
+PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 2 ]]; then 
-	echoerror "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [2] arguments when summarising *** GWASToolKit *** analyses results!"
-	echo ""
-	script_copyright_message
-	
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [2] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
 	script_copyright_message
 
-elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
+elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 1 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
+	script_arguments_error "You must supply [1] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
@@ -148,23 +142,25 @@ elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then
 	script_arguments_error "You must supply [2] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
 	script_copyright_message
 	
-elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [3] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
+	script_arguments_error "You must supply [2] arguments when summarising *** GWASToolKit *** [ ${ANALYSIS_TYPE} ] analyses results!"
 	script_copyright_message
-
-else
 
 else
 	echo "All arguments are passed. These are the settings:"
 	### SET INPUT-DATA
-	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results # depends on arg1
 	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"
 	echo "The output directory is.....................................: ${OUTPUT_DIR}"
 	echo "The project directory is....................................: ${PROJECTDIR}"
+	echo "The analysis will be run using the following phenotypes.....: "
+		for PHENOTYPE in ${PHENOTYPES}; do
+			echo "     * ${PHENOTYPE}"
+		done
 	### Starting of the script
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "                                          STARTING SUMMARISATION"
@@ -175,17 +171,16 @@ else
 	
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"
-	
-	
+		
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 	
-		if [[ ! -d ${PROJECT_DIR}/summary.${ANALYSIS_TYPE} ]]; then
+		if [[ ! -d ${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE} ]]; then
 			echo "Summary directory doesn't exist: making it."
-			mkdir -v ${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
-			SUMMARY=${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
+			mkdir -v ${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE}
+			SUMMARY=${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE}
 		else
 			echo "Summary directory does exist."
-			SUMMARY=${PROJECT_DIR}/summary.${ANALYSIS_TYPE}
+			SUMMARY=${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE}
 		fi
 		echo ""
 	
@@ -195,7 +190,7 @@ else
 		for PHENOTYPE in ${PHENOTYPES}; do
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			echo "* Copying results for [ ${PHENOTYPE} ]..."
-			cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+			cp -fv ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
 		
 			echo ""
 			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
@@ -203,21 +198,21 @@ else
 				
 		done
 		echo " * Gzipping the summarised data..."
-		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
+		gzip -fv ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
 
  	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "*** NOT IMPLEMENTED YET ***"
 	
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
- 		GENE="$3"
+ 		GENE="$2"
  		
- 		if [[ ! -d ${PROJECT_DIR}/summary.${GENE} ]]; then
+ 		if [[ ! -d ${PROJECTDIR}/${PROJECTNAME}/summary.${GENE} ]]; then
 			echo "Summary directory doesn't exist: making it."
-			mkdir -v ${PROJECT_DIR}/summary.${GENE}
-			SUMMARY=${PROJECT_DIR}/summary.${GENE}
+			mkdir -v ${PROJECTDIR}/${PROJECTNAME}/summary.${GENE}
+			SUMMARY=${PROJECTDIR}/${PROJECTNAME}/summary.${GENE}
 		else
 			echo "Summary directory does exist."
-			SUMMARY=${PROJECT_DIR}/summary.${GENE}
+			SUMMARY=${PROJECTDIR}/${PROJECTNAME}/summary.${GENE}
 		fi
 		echo ""
 		
@@ -227,18 +222,18 @@ else
 		for PHENOTYPE in ${PHENOTYPES}; do
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			echo "* Copying results for [ ${PHENOTYPE} ]..."
-			cp -v ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+			cp -fv ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
 		
 			echo ""
 			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
 			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} '{ print PHENOTYPE_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${GENE}.summary.txt
 		
 			echo "* Copying LocusZoom plots for [ ${PHENOTYPE} ]..."
-			cp -v ${PHENO_OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENE}.LocusZoom.pdf
+			cp -fv ${PHENO_OUTPUT_DIR}/locuszoom/*_${GENE}/*.pdf ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${GENE}.LocusZoom.pdf
 		
 		done
 		echo " * Gzipping the summarised data..."
-		gzip -v ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${GENE}.summary.txt
+		gzip -fv ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${GENE}.summary.txt
 		
  	else
 		### If arguments are not met then this error message will be displayed 
@@ -253,28 +248,4 @@ else
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
-#THISYEAR=$(date +'%Y')
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo ""
-#echo ""
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-#echo "+ The MIT License (MIT)                                                                                 +"
-#echo "+ Copyright (c) ${THISYEAR} Sander W. van der Laan                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and     +"
-#echo "+ associated documentation files (the \"Software\"), to deal in the Software without restriction,         +"
-#echo "+ including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, +"
-#echo "+ and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, +"
-#echo "+ subject to the following conditions:                                                                  +"
-#echo "+                                                                                                       +"
-#echo "+ The above copyright notice and this permission notice shall be included in all copies or substantial  +"
-#echo "+ portions of the Software.                                                                             +"
-#echo "+                                                                                                       +"
-#echo "+ THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT     +"
-#echo "+ NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND                +"
-#echo "+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  +"
-#echo "+ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN   +"
-#echo "+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                            +"
-#echo "+                                                                                                       +"
-#echo "+ Reference: http://opensource.org.                                                                     +"
-#echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+# script_copyright_message
