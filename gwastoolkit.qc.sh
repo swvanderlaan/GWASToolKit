@@ -1,5 +1,45 @@
 #!/bin/bash
 
+### Creating display functions
+### Setting colouring
+NONE='\033[00m'
+OPAQUE='\033[2m'
+FLASHING='\033[5m'
+BOLD='\033[1m'
+ITALIC='\033[3m'
+UNDERLINE='\033[4m'
+STRIKETHROUGH='\033[9m'
+
+RED='\033[01;31m'
+GREEN='\033[01;32m'
+YELLOW='\033[01;33m'
+PURPLE='\033[01;35m'
+CYAN='\033[01;36m'
+WHITE='\033[01;37m'
+
+function echobold { #'echobold' is the function name
+    echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
+}
+function echoitalic { 
+    echo -e "${ITALIC}${1}${NONE}" 
+}
+function echonooption { 
+    echo -e "${OPAQUE}${RED}${1}${NONE}"
+}
+function echoerrorflash { 
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+}
+function echoerror { 
+    echo -e "${RED}${1}${NONE}"
+}
+# errors no option
+function echoerrornooption { 
+    echo -e "${YELLOW}${1}${NONE}"
+}
+function echoerrorflashnooption { 
+    echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
+}
+
 ### MESSAGE FUNCTIONS
 script_copyright_message() {
 	echo ""
@@ -27,55 +67,53 @@ script_copyright_message() {
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 }
 script_arguments_error() {
-	echo "$1" # ERROR MESSAGE
-	echo ""
-	echo "- Argument #1 is path_to the output directory."
-	echo "- Argument #2 is name of the phenotype."
-	echo "- Argument #3 is minimum info-score [INFO]."
-	echo "- Argument #4 is minimum minor allele count [MAC]."
-	echo "- Argument #5 is minimum coded allele frequency [CAF]."
-	echo "- Argument #6 is lower/upper limit of the BETA/SE [BETA_SE]."
-	echo ""
-	echo "An example command would be: snptest_pheno_wrapper.v1.sh [arg1: path_to_output_dir] [arg2: [PHENOTYPE] ] [arg3: [INFO] ] [arg4: [MAC] ] [arg5: [CAF] ] [arg6: [BETA_SE] ]"
-  	echo ""
-  	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echoerror "$1" # ERROR MESSAGE
+	echoerror ""
+	echoerror "- Argument #1 is path_to the configuration file."
+	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror ""
+	echoerror "An example command would be: gwastoolkit.qc.sh [arg1: path_to_configuration_file] [arg2: phenotype]"
+  	echoerror ""
+  	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
   	exit 1
 }
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                                   SNPTEST_QC"
-echo "                                  QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
-echo ""
-echo " Version    : v1.1.2"
-echo ""
-echo " Last update: 2017-02-10"
-echo " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo ""
-echo " Description: Quality control of a SNPTEST analysis: filter on INFO, MAC, CAF and BETA/SE."
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echobold "                                         GWASTOOLKIT QUALITY CONTROL"
+echobold "                                 quality control of SNPTEST analysis results"
+echobold ""
+echobold " Version    : v1.1.3"
+echobold ""
+echobold " Last update: 2017-07-07"
+echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echobold ""
+echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echobold ""
+echobold " Description: Quality control of a SNPTEST analysis: filter on INFO, MAC, CAF and BETA/SE."
+echobold ""
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+### LOADING CONFIGURATION FILE
+source "$1" # Depends on arg1.
+
+### REQUIRED | GENERALS	
+CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
+PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 6 ]]; then 
+if [[ $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [8] arguments when clumping a *** GENOME-WIDE ANALYSIS ***!"
+	script_arguments_error "You must supply at least [2] arguments when performing quality control on *** GWASToolKit *** results!"
 	echo ""
 	script_copyright_message
 else
 	echo "All arguments are passed. These are the settings:"
-	# set input-data
-	OUTPUT_DIR=${1} # depends on arg1
-	cd ${OUTPUT_DIR}
-	PHENOTYPE=${2} # depends on arg2
-	INFO=${3} # depends on arg3
-	MAC=${4} # depends on arg4
-	CAF=${5} # depends on arg5
-	BETA_SE=${6} # depends on arg6
+	### SET INPUT-DATA
+	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+
 	echo "The output directory is...................: ${OUTPUT_DIR}"
 	echo "The phenotypes is.........................: ${PHENOTYPE}"
 	echo "The minimum info-score filter is..........: ${INFO}"
@@ -85,7 +123,7 @@ else
 	echo ""	
 	# PLOT GWAS RESULTS
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	echo "                               QUALITY CONTROL OF SNPTEST ANALYSIS RESULTS"
+	echo "                                            STARTING QUALITY CONTROL"
 	echo ""
 	echo "Please be patient...this can take a long time depending on the number of files."
 	echo "We started at: "$(date)

@@ -1,5 +1,45 @@
 #!/bin/bash
 
+### Creating display functions
+### Setting colouring
+NONE='\033[00m'
+OPAQUE='\033[2m'
+FLASHING='\033[5m'
+BOLD='\033[1m'
+ITALIC='\033[3m'
+UNDERLINE='\033[4m'
+STRIKETHROUGH='\033[9m'
+
+RED='\033[01;31m'
+GREEN='\033[01;32m'
+YELLOW='\033[01;33m'
+PURPLE='\033[01;35m'
+CYAN='\033[01;36m'
+WHITE='\033[01;37m'
+
+function echobold { #'echobold' is the function name
+    echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
+}
+function echoitalic { 
+    echo -e "${ITALIC}${1}${NONE}" 
+}
+function echonooption { 
+    echo -e "${OPAQUE}${RED}${1}${NONE}"
+}
+function echoerrorflash { 
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+}
+function echoerror { 
+    echo -e "${RED}${1}${NONE}"
+}
+# errors no option
+function echoerrornooption { 
+    echo -e "${YELLOW}${1}${NONE}"
+}
+function echoerrorflashnooption { 
+    echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
+}
+
 ### MESSAGE FUNCTIONS
 script_copyright_message() {
 	echo ""
@@ -27,60 +67,56 @@ script_copyright_message() {
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 }
 script_arguments_error() {
-	echo "$1" # ERROR MESSAGE
-	echo ""
-	echo "- Argument #1 indicates the type of analysis [GWAS/REGION/GENES]."
-	echo "- Argument #2 which study type [AEGS/AAAGS/CTMM]."
-	echo "- Argument #3 which reference."
-	echo "- Argument #4 which exclusion criterium was used."
-	echo "- Argument #5 is path_to the output directory."
-	echo "- Argument #6 which phenotype was analysed."
-	echo ""
-	echo "An example command would be: snptest_cleaner.v1.sh [arg1: [GWAS/REGION/GENES] ] [arg2: AEGS/AAAGS/CTMM] [arg3: reference_to_use [1kGp3v5GoNL5/1kGp1v3/GoNL4] ] [arg4: exclusion list] [arg5: path_to_output_dir]  [arg6: some_phenotype ]"
-  	echo ""
-  	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echoerror "$1" # ERROR MESSAGE
+	echoerror ""
+	echoerror "- Argument #1 is path_to the configuration file."
+	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror ""
+	echoerror "An example command would be: gwastoolkit.cleaner.sh [arg1: path_to_configuration_file] [arg2: phenotype]"
+  	echoerror ""
+  	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
   	exit 1
 }
 
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echobold "                                           GWASTOOLKIT CLEANER"
+echobold "                                   cleaning of SNPTEST analysis results"
+echobold ""
+echobold " Version    : v1.2.3"
+echobold ""
+echobold " Last update: 2017-07-07"
+echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echobold ""
+echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echobold "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
+echobold "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
+echobold ""
+echobold " Description: Cleaning up all files from a SNPTEST analysis into one file for ease "
+echobold "              of downstream (R) analyses."
+echobold ""
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
+### LOADING CONFIGURATION FILE
+source "$1" # Depends on arg1.
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                             SNPTEST_CLEANER"
-echo "                                    CLEANS UP SNPTEST ANALYSIS RESULTS"
-echo ""
-echo " Version    : v1.2.2"
-echo ""
-echo " Last update: 2017-03-10"
-echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
-echo "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
-echo ""
-echo " Description: Cleaning up all files from a SNPTEST analysis into one file for ease "
-echo "              of downstream (R) analyses."
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+### REQUIRED | GENERALS	
+CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
+PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 6 ]]; then 
-	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [6] arguments when cleaning a *** GENOME-WIDE ANALYSIS ***!"
+if [[ $# -lt 2 ]]; then 
+	echoerror "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply at least [2] arguments when cleaning *** GWASToolKit *** analyses!"
 	echo ""
 	script_copyright_message
 else
 	echo "All arguments are passed. These are the settings:"
-	# set input-data
-	ANALYSIS_TYPE=${1}
-	STUDY_TYPE=${2}
-	REFERENCE=${3}
-	EXCLUSION=${4}
-	OUTPUT_DIR=${5} 
-	cd ${OUTPUT_DIR}	
-	PHENOTYPE=${6}
+	### SET INPUT-DATA
+	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"
 	echo "The following dataset will be used..........................: ${STUDY_TYPE}"
 	echo "The reference used..........................................: ${REFERENCE}"

@@ -1,5 +1,45 @@
 #!/bin/bash
 
+### Creating display functions
+### Setting colouring
+NONE='\033[00m'
+OPAQUE='\033[2m'
+FLASHING='\033[5m'
+BOLD='\033[1m'
+ITALIC='\033[3m'
+UNDERLINE='\033[4m'
+STRIKETHROUGH='\033[9m'
+
+RED='\033[01;31m'
+GREEN='\033[01;32m'
+YELLOW='\033[01;33m'
+PURPLE='\033[01;35m'
+CYAN='\033[01;36m'
+WHITE='\033[01;37m'
+
+function echobold { #'echobold' is the function name
+    echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
+}
+function echoitalic { 
+    echo -e "${ITALIC}${1}${NONE}" 
+}
+function echonooption { 
+    echo -e "${OPAQUE}${RED}${1}${NONE}"
+}
+function echoerrorflash { 
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+}
+function echoerror { 
+    echo -e "${RED}${1}${NONE}"
+}
+# errors no option
+function echoerrornooption { 
+    echo -e "${YELLOW}${1}${NONE}"
+}
+function echoerrorflashnooption { 
+    echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
+}
+
 ### MESSAGE FUNCTIONS
 script_copyright_message() {
 	echo ""
@@ -27,106 +67,53 @@ script_copyright_message() {
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 }
 script_arguments_error() {
-	echo "$1" # ERROR MESSAGE
-	echo ""
-	echo "- Argument #1 is path_to the output directory."
-	echo "- Argument #2 is name of the phenotype."
-	echo "- Argument #3 is the maximum (largest) p-value to clump [CLUMP_P2]."
-	echo "- Argument #4 is the minimum (smallest) p-value to clump [CLUMP_P1]."
-	echo "- Argument #5 is the R^2 to use for clumping [CLUMP_R2]."
-	echo "- Argument #6 is the KB range used for clumping [CLUMP_KB]."
-	echo "- Argument #7 indicates the name of the clumping field to use (default: P) [CLUMP_FIELD]."
-	echo "- Argument #8 indicates the reference to be used [1kGp3v5GoNL5/1kGp1v3/GoNL4]."
-	echo "- Argument #9 indicates the study type to be used [AEGS/AAAGS/CTMM]."
-	echo ""
-	echo "An example command would be: snptest_clumper.v1.sh [arg1: path_to_output_dir] [arg2: phenotype] [arg3: CLUMP_P2] [arg4: CLUMP_P1] [arg5: CLUMP_R2] [arg6: CLUMP_KB] [arg7: CLUMP_FIELD] [arg8: REFERENCE]"
-	echo ""
-  	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echoerror "$1" # ERROR MESSAGE
+	echoerror ""
+	echoerror "- Argument #1 is path_to the configuration file."
+	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror ""
+	echoerror "An example command would be: gwastoolkit.clumper.sh [arg1: path_to_configuration_file] [arg2: phenotype]"
+	echoerror ""
+  	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
-	date
-  	exit 1
-
-}
-
-script_arguments_error_reference() {
-	echo "$1" # ERROR MESSAGE
-	echo ""
-	echo " You must supply the correct argument:"
-	echo " * [1kGp3v5GoNL5] -- for use of 1000G (phase 3, version 5, \"Final release\") plus GoNL5 as reference | DEFAULT."
-	echo " * [1kGp1v3]      -- for use of 1000G (phase 1, version 3) as reference."
-	echo " * [GoNL4]        -- for use of GoNL4 as reference | CURRENTLY UNAVAILABLE"
-	echo ""
-	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	# The wrong arguments are passed, so we'll exit the script now!
-  	date
   	exit 1
 }
 
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echo "                                             SNPTEST_CLUMPER"
-echo "                                  CLUMPING OF SNPTEST ANALYSIS RESULTS"
-echo ""
-echo " Version    : v1.2.4"
-echo ""
-echo " Last update: 2017-07-07"
-echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
-echo ""
-echo " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
-echo "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
-echo "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
-echo ""
-echo " Description: Clumping of a genome-wide SNPTEST analysis."
-echo ""
-echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+echobold "                                          GWASTOOLKIT CLUMPER"
+echobold "                                  clumping of SNPTEST analysis results"
+echobold ""
+echobold " Version    : v1.2.5"
+echobold ""
+echobold " Last update: 2017-07-07"
+echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
+echobold ""
+echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
+echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
+echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echobold ""
+echobold " Description: Clumping of a genome-wide SNPTEST analysis."
+echobold ""
+echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
+### LOADING CONFIGURATION FILE
+source "$1" # Depends on arg1.
+
+### REQUIRED | GENERALS	
+CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
+PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 10 ]]; then 
+if [[ $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [10] arguments when clumping a *** GENOME-WIDE ANALYSIS ***!"
+	script_arguments_error "You must supply at least [2] arguments when clumping a *** GENOME-WIDE ANALYSIS ***!"
 	echo ""
 	script_copyright_message
 else
 	echo "All arguments are passed. These are the settings:"
 	### SET INPUT-DATA
-	OUTPUT_DIR=${1} # depends on arg1
-	PHENOTYPE=${2} 
-	CLUMP_P1=${3} # e.g.5.0e-06 Significance threshold for index SNPs
-	CLUMP_P2=${4} # e.g. 0.05 Secondary significance threshold for clumped SNPs
-	CLUMP_R2=${5} # LD threshold for clumping
-	CLUMP_KB=${6} # Physical distance threshold for clumping
-	CLUMP_FIELD=${7}
-	
-	### ANALYSIS SETTINGS
-	### Set location of [imputed] genotype data
-	REFERENCE=${8} # depends on arg1  [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
-	
-	### Study type used
-	STUDY_TYPE=${9}
+	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 
-	### Study type used
-	ANALYSIS_TYPE=${10}
-	
-	### THIS SHOULD BE PART OF THE GWASToolKit
-	RESOURCES=/hpc/local/CentOS7/dhl_ec/software/GWASToolKit/RESOURCES
-	
-	### THERE SHOULD BE A CHECK ON THIS AS A PREREQUISITE
-	PLINK2=/hpc/local/CentOS7/dhl_ec/software/plink_v1.9
-	
-	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
-		if [[ ${REFERENCE} = "1kGp1v3" ]]; then
-			REFERENCE_1kGp1v3=${RESOURCES}/1000Gp1v3_EUR # 1000Gp1v3.20101123.EUR
-		elif [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-			REFERENCE_1kGp3v5GoNL5=${RESOURCES}/1000Gp3v5_EUR # 1000Gp3v5.20130502.EURs
-		elif [[ ${REFERENCE} = "GoNL4" ]]; then
-			echo "Apologies: currently it is not possible to clump based on GoNL4"
-		else
-		### If arguments are not met than the 
-			echo "Oh, computer says no! Number of arguments found "$#"."
-			script_arguments_error_reference echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-			echo ""
-			script_copyright_message
-		fi
-		
 	echo ""
 	echo "The output directory is.................................................: ${OUTPUT_DIR}"
 	echo "The phenotype to clump for is...........................................: ${PHENOTYPE}"
@@ -150,24 +137,9 @@ else
 	echo "Un-Gzipping the results for clumping..."
 	gzip -dv ${OUTPUT_DIR}/${FILENAME}.txt.gz
 	echo "Clumping..."
-	if [[ ${REFERENCE} = "1kGp1v3" ]]; then
-		echo "The reference is ${REFERENCE}."
-		### REFERENCE_1kGp1v3 # 1000Gp1v3.20101123.EUR
-		$PLINK2 --bfile $REFERENCE_1kGp1v3/1000Gp1v3.20101123.EUR --memory 168960 --clump ${OUTPUT_DIR}/${FILENAME}.txt --clump-snp-field "RSID" --clump-p1 ${CLUMP_P1} --clump-p2 ${CLUMP_P2} --clump-r2 ${CLUMP_R2} --clump-kb ${CLUMP_KB} --clump-field ${CLUMP_FIELD} --out ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped --clump-verbose --clump-annotate CodedAlleleB,OtherAlleleA,CAF,MAF,MAC,HWE,AvgMaxPostCall,Info,BETA,SE 
-		echo "The reference is ${REFERENCE}."
-	elif [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-		echo "The reference is ${REFERENCE}."
-		### REFERENCE_1kGp3v5GoNL5 # 1000Gp3v5.20130502.EUR
-		$PLINK2 --bfile $REFERENCE_1kGp3v5GoNL5/1000Gp3v5.20130502.EUR --memory 168960 --clump ${OUTPUT_DIR}/${FILENAME}.txt --clump-snp-field "RSID" --clump-p1 ${CLUMP_P1} --clump-p2 ${CLUMP_P2} --clump-r2 ${CLUMP_R2} --clump-kb ${CLUMP_KB} --clump-field ${CLUMP_FIELD} --out ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped --clump-verbose --clump-annotate CodedAlleleB,OtherAlleleA,CAF,MAF,MAC,HWE,AvgMaxPostCall,Info,BETA,SE 
-	elif [[ ${REFERENCE} = "GoNL4" ]]; then
-		echo "Apologies: currently it is not possible to clump based on GoNL4"
-	else
-	### If arguments are not met than the 
-		echo "Oh, computer says no! Number of arguments found "$#"."
-		script_arguments_error_reference echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
-		echo ""
-		script_copyright_message
-	fi
+	echo "The reference is ${REFERENCE}."
+
+	$PLINK2 --bfile ${REFERENCEDATA} --memory 168960 --clump ${OUTPUT_DIR}/${FILENAME}.txt --clump-snp-field "RSID" --clump-p1 ${CLUMP_P1} --clump-p2 ${CLUMP_P2} --clump-r2 ${CLUMP_R2} --clump-kb ${CLUMP_KB} --clump-field ${CLUMP_FIELD} --out ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped --clump-verbose --clump-annotate CodedAlleleB,OtherAlleleA,CAF,MAF,MAC,HWE,AvgMaxPostCall,Info,BETA,SE 
 		
 	echo "Done clumping; gzipping the results for [ ${FILENAME} ]..."
 	gzip -v ${OUTPUT_DIR}/${FILENAME}.txt
