@@ -203,18 +203,18 @@ else
 		PHENO_OUTPUT_DIR=${GENE_OUTPUT_DIR}/${PHENOTYPE}
 		# create results file
 		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.summary_results.txt
 
 		for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
 			# which file are we processing?
 			echo "Processing file ${FILE}..."
 			cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.summary_results.txt
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 		done
 		echo ""
-		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.summary_results.txt
 		
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "NOT AN OPTION YET!"
