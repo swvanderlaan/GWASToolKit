@@ -213,8 +213,6 @@ else
 echo "All arguments are passed and correct. These are the settings:"
 	
 ### Set input-data
-PHENOTYPE_FILE=${PHENOTYPE_FILE} 
-COVARIATE_FILE=${COVARIATE_FILE} 
 PHENOTYPES=$(cat "$PHENOTYPE_FILE") # which phenotypes to investigate anyway
 COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 

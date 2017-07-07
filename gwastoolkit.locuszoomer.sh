@@ -62,41 +62,15 @@ script_copyright_message() {
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 }
 script_arguments_error() {
-	echoerror "$1" # ANALYSIS TYPE
-	echoerror "- Argument #1  indicates whether you want to analyse a list of variants, a region, or do a GWAS [VARIANT/REGION/GWAS]."
-	echoerror "               Depending on the choice you additional arguments are expected:"
-	echoerror "               - for GWAS: the standard 9 arguments in total."
-	echoerror "               - for REGION: additional arguments, namely the [CHR], [REGION_START] and [REGION_END] in numerical fashion."
-	echoerror "               - for GENES: additional arguments, namely the [GENES] list and [RANGE] in numerical fashion."
-	echoerror "- Argument #2  the study to use, AEGS, AAAGS, or CTMM."
-	echoerror "- Argument #3  is input data to use, i.e. where the [imputed] genotypes reside: [1kGp3v5GoNL5/1kGp1v3/GoNL4]."
-	echoerror "- Argument #4  is path_to the RESULTS directory of your analysis. [INPUTDIR]"
-	echoerror "- Argument #5  is the results file PHENOTYPE (e.g. EP_composite_LA.summary_results.QC) -- this"
-	echoerror "               is used to 1) load the data and 2) write output with a similar name."
-	echoerror "- Argument #6  is the column number that holds the variantID (e.g. 2)."
-	echoerror "- Argument #7  is the column number that holds the P-values (e.g. 19)."
-	echoerror "- Argument #8  to indicate which version of LocusZoom to use [LZ12/LZ13] | DEFAULT IS LZ13."
-	echoerror "" 
-	echoerror "For GWAS:" 
-	echoerror "- Argument #9  we expect a list with variantIDs [VARIANTLIST]."
-	echoerror "- Argument #10 indicates the [RANGE] in basepairs (e.g. 500000) to plot around the variant."
+	echoerror "$1" # ERROR MESSAGE
 	echoerror ""
-	echoerror "An example command would be: lookup_data.sh arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9"
+	echoerror "- Argument #1 is path_to the configuration file."
+	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror "- Argument #3 is the gene analysed -- gene-based analysis only."
 	echoerror ""
-  	echoerror "For REGIONAL ANALYSES:"
-  	echoerror "- Argument #9 is the lookup_list_file [REGIONS_FILE]: this is a file with on each line a [VARIANT], [CHR] (e.g. 1-22 or X; "
-  	echoerror "               NOTE: GoNL4 doesn't include information for chromosome X), [REGION_START] (e.g. 12345) and "
-  	echoerror "               [REGION_END] (e.g. 678910)."
-	echoerror ""
-	echoerror "An example command would be: lookup_data.sh arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11"
-	echoerror ""
-  	echoerror "For per-GENE ANALYSES:"
-  	echoerror "- Argument #9 we expect here a [GENE]."
-	echoerror "- Argument #10 we expect here [RANGE] in basepairs (e.g. 500000) to plot around the gene."
-	echoerror ""
-	echoerror "An example command would be: lookup_data.sh arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10"
-	echoerror ""
-	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	echoerror "An example command would be: gwastoolkit.locuszoomer.sh [arg1: path_to_configuration_file] [arg2: phenotype] [arg3: gene]"
+  	echoerror ""
+  	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
   	exit 1
 }
@@ -143,20 +117,43 @@ PHENOTYPE="$2" # Depends on arg2
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** GENOME-WIDE ANALYSIS ***!"
+	script_arguments_error "You must supply [2] arguments for regional association plotting of *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [3] arguments for regional association plotting of a *** REGIONAL ANALYSIS ***!"
+	script_arguments_error "You must supply [3] arguments for regional association plotting of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [3] arguments for regional association plotting of a *** GENE ANALYSIS ***!"
+	script_arguments_error "You must supply [3] arguments for regional association plotting of *** GENE ANALYSIS *** results!"
 	script_copyright_message
 
 else
+	
+	echo "All arguments are passed. These are the settings:"
+	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then 
+		### SET INPUT-DATA
+		INPUTDIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		RESULTS=${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.txt.gz
+		
+	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
+		### SET INPUT-DATA
+		INPUTDIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		RESULTS=${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.txt.gz
+		
+	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
+		### SET INPUT-DATA
+		GENE="$3"
+		INPUTDIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
+		RESULTS=${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.QC.txt.gz
+		
+	else
+		echo "Oh, computer says no! Number of arguments found "$#"."
+		script_arguments_error "You must supply [2-3] arguments for regional association plotting of *** GWASToolKit *** results!"
+		script_copyright_message
+	fi
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo "                                             MAKE LOCUSZOOM PLOTS"
@@ -165,12 +162,13 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 
 	### Determine which reference and thereby input data to use, arg1 [1kGp3v5GoNL5/1kGp1v3/GoNL4] 
 	if [[ ${REFERENCE} = "1kGp3v5GoNL5" ]]; then
-		echo "Unfortunately it is not possible yet to make LZ with this reference."
+		echo "You're references is [${REFERENCE}]; using pop=EUR, build=hg19, and source=1000G_March2012."
 		LDMAP="--pop EUR --build hg19 --source 1000G_March2012"
 	elif [[ ${REFERENCE} = "1kGp1v3" ]]; then
+		echo "You're references is [${REFERENCE}]; using pop=EUR, build=hg19, and source=1000G_March2012."
 		LDMAP="--pop EUR --build hg19 --source 1000G_March2012"
 	elif [[ ${REFERENCE} = "GoNL4" ]]; then
-		echo "Unfortunately it is not possible yet to make LZ with this reference."
+		echo "You're references is [${REFERENCE}]; using pop=EUR, build=hg19, and source=1000G_March2012."
 		LDMAP="--pop EUR --build hg19 --source 1000G_March2012"
 	else
 	### If arguments are not met than the 
@@ -188,8 +186,6 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	fi
 
 	### SETTING VARIABLES BASED ON ARGUMENTS PASSED
-	# Setting the remaining variables
-	INPUTDIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 	# Plus make a new directory which will serve as the output directory!
 	if [ ! -d ${INPUTDIR}/locuszoom ]; then
 	  	echo ""
@@ -217,7 +213,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		echo ""
 		N_VARIANTS=$(cat ${VARIANTLIST} | wc -l)
 		echo "Number of variants to plot...: ${N_VARIANTS} variants"
-		echo "Investigating range..........: ${RANGE}kb around each of these variants."
+		echo "Investigating range..........: ± ${RANGE}kb around each of these variants."
 		
 		echo ""
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -229,14 +225,14 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.QC.locuszoom
+		zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col RSID,P | tail -n +2 >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.QC.locuszoom
 		while read VARIANTS; do
 			for VARIANT in ${VARIANTS}; do
 			
 				echo "Plotting variant: ${VARIANT} ± ${RANGE}kb..."
 				cd ${OUTPUTDIR}
-				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE}kb ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+				${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --flank ${RANGE}kb ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE} (${EXCLUSION})" ${LOCUSZOOM_SETTINGS}
 			
 			done
 		done < ${VARIANTLIST}
@@ -261,8 +257,8 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom
+		zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col RSID,P | tail -n +2 >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom
 				
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			
@@ -274,7 +270,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			
 			echo "Processing ${VARIANT} locus on ${CHR} between ${START} and ${END}..."
 			cd ${OUTPUTDIR}
-			${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refsnp ${VARIANT} --chr ${CHR} --start ${START} --end ${END} ${LDMAP} theme=publication title="${VARIANT} in ${PHENOTYPE} (${EXCLUSION})" ${LOCUSZOOM_SETTINGS}
 
 		done < ${REGIONS_FILE}		
 		
@@ -285,12 +281,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		### Determine the gene to look at		
-		echo "We will lookup the following gene:"
-		GENE="$3" # depends on arg3
-		echo ${GENE}
-		echo ""
-		echo "Investigating range: ${RANGE}kb around the gene."
-		
+		echo "We will plot regional association ± ${RANGE}kb around the following [ ${GENE} ]."
 		echo ""
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		echo "Initiating lookup..."
@@ -301,12 +292,12 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		### rs7098888 0.000686966
 		### rs9733444 0.00149974
 		echo "Making the LocusZoom input-file for the phenotype..."
-		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
-		zcat ${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz | tail -n +2 | awk '{ print $'${VARIANTID}', $'${PVALUE}' }' >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom
+		echo "MarkerName P-value" > ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom
+		zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col RSID,P | tail -n +2 >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom
 		echo "Plotting variant: ${GENE}"
 		
 			cd ${OUTPUTDIR}
-			${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGE}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE}" ${LOCUSZOOM_SETTINGS}
+			${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGELZ}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE} (${EXCLUSION})" ${LOCUSZOOM_SETTINGS}
 		
 		echo ""
 		echo "All finished. Done making regional association plots for ${PHENOTYPE} data."

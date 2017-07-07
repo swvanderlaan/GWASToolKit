@@ -108,52 +108,49 @@ CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-
-### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** GENOME-WIDE ANALYSIS ***!"
+	script_arguments_error "You must supply [2] arguments for cleaning of *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** VARIANT ANALYSIS ***!"
+	script_arguments_error "You must supply [2] arguments for cleaning of *** VARIANT ANALYSIS *** results!"
 	script_copyright_message
 
 elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of a *** REGIONAL ANALYSIS ***!"
+	script_arguments_error "You must supply [2] arguments for cleaning of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [3] arguments for regional association plotting of a *** GENE ANALYSIS ***!"
+	script_arguments_error "You must supply [3] arguments for cleaning of *** GENE ANALYSIS *** results!"
 	script_copyright_message
 
 else
+	
 	echo "All arguments are passed. These are the settings:"
-	
-	if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
+	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 	
-	elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then 
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 	
-	elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 		
-	elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
 		### SET INPUT-DATA
 		GENE="$3"
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
 	else
 		echo "Oh, computer says no! Number of arguments found "$#"."
-		script_arguments_error "You must supply [3] arguments for regional association plotting of a *** GENE ANALYSIS ***!"
+		script_arguments_error "You must supply [2-3] arguments for cleaning of *** GWASToolKit *** results!"
 		script_copyright_message
-
 	fi
 	
 	echo "The following analysis type will be run.....................: ${ANALYSIS_TYPE}"

@@ -71,8 +71,9 @@ script_arguments_error() {
 	echoerror ""
 	echoerror "- Argument #1 is path_to the configuration file."
 	echoerror "- Argument #2 is the phenotype analysed."
+	echoerror "- Argument #3 is the gene analysed -- gene-based analysis only."
 	echoerror ""
-	echoerror "An example command would be: gwastoolkit.qc.sh [arg1: path_to_configuration_file] [arg2: phenotype]"
+	echoerror "An example command would be: gwastoolkit.qc.sh [arg1: path_to_configuration_file] [arg2: phenotype] [arg3: gene]"
   	echoerror ""
   	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   	# The wrong arguments are passed, so we'll exit the script now!
@@ -104,16 +105,42 @@ CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 2 ]]; then 
+if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply at least [2] arguments when performing quality control on *** GWASToolKit *** results!"
-	echo ""
+	script_arguments_error "You must supply [2] arguments for cleaning of *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
-else
-	echo "All arguments are passed. These are the settings:"
-	### SET INPUT-DATA
-	OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+	
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [2] arguments for cleaning of *** REGIONAL ANALYSIS *** results!"
+	script_copyright_message
+	
+elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [3] arguments for cleaning of *** GENE ANALYSIS *** results!"
+	script_copyright_message
 
+else
+	
+	echo "All arguments are passed. These are the settings:"
+	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		
+	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
+		
+	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
+		### SET INPUT-DATA
+		GENE="$3"
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
+	else
+		echo "Oh, computer says no! Number of arguments found "$#"."
+		script_arguments_error "You must supply [2-3] arguments for cleaning of *** GWASToolKit *** results!"
+		script_copyright_message
+	fi
+	
 	echo "The output directory is...................: ${OUTPUT_DIR}"
 	echo "The phenotypes is.........................: ${PHENOTYPE}"
 	echo "The minimum info-score filter is..........: ${INFO}"
@@ -131,15 +158,16 @@ else
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
-	RESULTS=${OUTPUT_DIR}/*.summary_results.txt.gz
+	RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.txt.gz"
 	echo ${RESULTS}
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}
-	echo ""
+	echo "Number of pre-QC variants:"
+	zcat ${RESULTS} | wc -l
+	
 	### COLUMN NAMES & NUMBERS
 	###     1    2   3  4            5            6              7    8      9     10     11     12  13  14  15  16 17  18 19
 	### ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE
-
 	echo ""
 	echo "Filtering data, using the following criteria: "
 	echo "  * ${INFO} <= INFO < 1 "
@@ -162,7 +190,7 @@ else
 	echo ""
 	echo ""
 	echo "Zipping up..."
-	gzip -v ${OUTPUT_DIR}/${FILENAME}.QC.txt
+	gzip -fv ${OUTPUT_DIR}/${FILENAME}.QC.txt
 	echo ""
 	echo ""
 
