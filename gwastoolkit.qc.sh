@@ -84,9 +84,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                         GWASTOOLKIT QUALITY CONTROL"
 echobold "                                 quality control of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.1.3"
+echobold " Version    : v1.1.4"
 echobold ""
-echobold " Last update: 2017-07-07"
+echobold " Last update: 2017-07-11"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -110,7 +110,7 @@ if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then
 	script_arguments_error "You must supply [2] arguments for cleaning of *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
 	
-elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [2] arguments for cleaning of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
@@ -123,18 +123,12 @@ elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then
 else
 	
 	echo "All arguments are passed. These are the settings:"
-	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then 
+	if [[ ${ANALYSIS_TYPE} = "GWAS" || ${ANALYSIS_TYPE} = "REGION" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 		# what is the basename of the file?
 		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz"
-	
-	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
-		### SET INPUT-DATA
-		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
-		# what is the basename of the file?
-		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz"
-		
+			
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
 		### SET INPUT-DATA
 		GENE="$3"
@@ -164,7 +158,6 @@ else
 	echo ""
 	echo ""
 	echo "Plotting reformatted FILTERED data."
-	echo ${RESULTS}
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}
 	echo "Number of pre-QC variants:"

@@ -100,9 +100,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT WRAPPER"
 echobold "                                  WRAPPING UP SNPTEST ANALYSIS RESULTS"
 echobold ""
-echobold " Version    : v1.2.3"
+echobold " Version    : v1.2.4"
 echobold ""
-echobold " Last update: 2017-07-07"
+echobold " Last update: 2017-07-11"
 echobold " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -134,9 +134,9 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 2 ]]; then
 	script_arguments_error "You must supply [2] arguments when wrapping up *** VARIANT ANALYSIS *** results!"
 	script_copyright_message
 		
-elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 3 ]]; then 
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [3] arguments when wrapping up *** REGIONAL ANALYSIS *** results!"
+	script_arguments_error "You must supply [2] arguments when wrapping up *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
@@ -167,35 +167,35 @@ else
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 		# create results file
 		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 
 		for CHR in $(seq 1 22) X; do
 			# which chromosome are we processing?
 			echo "Processing chromosome ${CHR}..."
 			cat ${PHENO_OUTPUT_DIR}/*.chr${CHR}.out | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 		done
 		echo ""
-		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 
-	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" || ${ANALYSIS_TYPE} = "REGION" ]]; then
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 		# create results file
 		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 
 		for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
 			# which file are we processing?
 			echo "Processing file ${FILE}..."
 			cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 		done
 		echo ""
-		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt
+		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 	
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		GENELOCUS="$3"
@@ -215,10 +215,7 @@ else
 		done
 		echo ""
 		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.summary_results.txt
-		
-	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
-		echo "NOT AN OPTION YET!"
-	
+			
 	else
 		### If arguments are not met then this error message will be displayed 
 		script_arguments_error_analysis_type
