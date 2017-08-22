@@ -88,11 +88,12 @@ script_copyright_message() {
 echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echobold "                                      GWASToolKit: Resource Creator"
 echobold ""
-echobold "* Version:      v0.0.1"
+echobold "* Version:      v0.0.2"
 echobold ""
-echobold "* Last update:  2017-07-07"
+echobold "* Last update:  2017-02-08"
 echobold "* Written by:   Sander W. van der Laan | s.w.vanderlaan@gmail.com."
 echobold "* Testers:      Jessica van Setten."
+echobold "* Testers:      Tim Bezemer."
 echobold "* Description:  Downloads, parses and creates the necessary resources for GWASToolKit."
 echobold ""
 echobold "* REQUIRED: "
@@ -171,9 +172,10 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	### 585	ENST00000335137.3	chr1	+	69090	70008	69090	70008	1	69090,	70008,	0	OR4F5	cmpl	cmpl	0,
 	
 	echo "* parsing [ GENCODE ] ... "
-	zcat ${RESOURCES}/GENCODE_wgEncodeBasicV19_GRCh37_hg19_Feb2009.txt.gz | awk '{ print $3, $5, $6, $13, $2, $4}' | awk -F" " '{gsub(/chr/, "", $1)}1' | tail -n +2 > ${RESOURCES}/gencode_v19_GRCh37_hg19_Feb2009.txt 
-	gzip -fv ${RESOURCES}/gencode_v19_GRCh37_hg19_Feb2009.txt 
-	rm -fv ${RESOURCES}/GENCODE_wgEncodeBasicV19_GRCh37_hg19_Feb2009.txt.gz
+	#zcat ${RESOURCES}/GENCODE_wgEncodeBasicV19_GRCh37_hg19_Feb2009.txt.gz | awk '{ print $3, $5, $6, $13, $2, $4}' | awk -F" " '{gsub(/chr/, "", $1)}1' | tail -n +2 > ${RESOURCES}/gencode_v19_GRCh37_hg19_Feb2009.txt 
+	${RESOURCES}/parser.genelist.py ${RESOURCES}/GENCODE_wgEncodeBasicV19_GRCh37_hg19_Feb2009.txt.gz ${RESOURCES}/gencode_v19_GRCh37_hg19_Feb2009.txt
+	#gzip -fv ${RESOURCES}/gencode_v19_GRCh37_hg19_Feb2009.txt 
+	#rm -fv ${RESOURCES}/GENCODE_wgEncodeBasicV19_GRCh37_hg19_Feb2009.txt.gz
 	
 	echo "* downloading [ refseq ] ... "
 	wget http://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz -O ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz
@@ -182,9 +184,11 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	### 585	NR_024540	chr1	-	14361	29370	29370	29370	11	14361,14969,15795,16606,16857,17232,17605,17914,18267,24737,29320,	14829,15038,15947,16765,17055,17368,17742,18061,18366,24891,29370,	0	WASH7P	unk	unk	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 
 	echo "* parsing [ refseq ] ... "
-	zcat ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz | awk '{ print $3, $5, $6, $13, $2, $4 }' | awk -F" " '{gsub(/chr/, "", $1)}1' > ${RESOURCES}/refseq_GRCh37_hg19_Feb2009.txt
-	gzip -fv ${RESOURCES}/refseq_GRCh37_hg19_Feb2009.txt
-	rm -fv ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz
+	#zcat ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz | awk '{ print $3, $5, $6, $13, $2, $4 }' | awk -F" " '{gsub(/chr/, "", $1)}1' > ${RESOURCES}/refseq_GRCh37_hg19_Feb2009.txt
+	#gzip -fv ${RESOURCES}/refseq_GRCh37_hg19_Feb2009.txt
+	#rm -fv ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz
+	${RESOURCES}/parser.genelist.py ${RESOURCES}/refGene_GRCh37_hg19_Feb2009.txt.gz ${RESOURCES}/refseq_GRCh37_hg19_Feb2009.txt
+
 	echo ""	
 	echo "All done submitting jobs for downloading and parsing gene lists! 🖖"
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"

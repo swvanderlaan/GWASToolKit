@@ -99,9 +99,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.5"
+echobold " Version    : v1.3.6"
 echobold ""
-echobold " Last update: 2017-08-02"
+echobold " Last update: 2017-08-10"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -245,7 +245,7 @@ else
 			##### Create cleaner bash-script to send to qsub
 			echo "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			##### Submit cleaner script
-# 			qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLEANER} -l ${QTIMEGWASCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+ 			qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLEANER} -l ${QTIMEGWASCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 
 		done
 
