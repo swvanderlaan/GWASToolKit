@@ -7,22 +7,21 @@
 ### #!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
 
 cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    QQ Plotter -- GWASToolKit
+    Effect Size Plotter -- GWASToolKit
     \n
-    * Version: v1.2.5
+    * Version: v1.3.5
     * Last edit: 2017-08-22
     * Created by: Sander W. van der Laan | s.w.vanderlaan@gmail.com
     \n
-    * Description:  QQ-Plotter for GWAS (meta-analysis) results. Can produce 
-    output in different colours and image-formats. One column is expected
-    containing the test-statistic (Z-score, Chi^2, or P-value). 
-    NO HEADER.
+    * Description:  EffectSize-plotter for GWAS (meta-analysis) results. Can produce output 
+    in different colours and image-formats. One column is expected with the
+    effect size (beta) and NO HEADER! It will produce a histogram of the 'beta'±4*SD.
     The script should be usuable on both any Linux distribution with R 3+ installed, Mac OS X and Windows.
     
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
 
-# usage: ./qqplot.R -p projectdir -r resultfile -o outputdir -s stattype -f imageformat [OPTIONAL: -v verbose (DEFAULT) -q quiet]
-#        ./qqplot.R --projectdir projectdir --resultfile resultfile --outputdir outputdir --stattype stattype --imageformat imageformat [OPTIONAL: --verbose verbose (DEFAULT) -quiet quiet]
+# usage: ./effectsize_plotter.R -p projectdir -r resultfile -o outputdir -f imageformat [OPTIONAL: -v verbose (DEFAULT) -q quiet]
+#        ./effectsize_plotter.R --projectdir projectdir --resultfile resultfile --outputdir outputdir --imageformat imageformat [OPTIONAL: --verbose verbose (DEFAULT) -quiet quiet]
 
 cat("\n* Clearing the environment...\n\n")
 #--------------------------------------------------------------------------
@@ -86,13 +85,8 @@ option_list = list(
               help="Path to the project directory."),
   make_option(c("-r", "--resultfile"), action="store", default=NA, type='character',
               help="Path to the results directory, relative to the project directory."),
-  make_option(c("-s", "--stattype"), action="store", default=NA, type='character',
-              help="The statistics type input for the QQ-plot: 
-              \n- Z:      Z-scores
-              \n- CHISQ:  Chi^2 statistic
-              \n- PVAL:   P-values."),
   make_option(c("-f", "--imageformat"), action="store", default=NA, type='character',
-              help="The image format (PDF (width=10, height=10), PNG/TIFF/EPS (width=800, height=800) of the Manhattan plot."),
+              help="The image format (PDF (width=10, height=10), PNG/TIFF/EPS (width=800, height=800)."),
   make_option(c("-o", "--outputdir"), action="store", default=NA, type='character',
               help="Path to the output directory."),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
@@ -101,48 +95,43 @@ option_list = list(
               help="Make the program not be verbose.")
   #make_option(c("-c", "--cvar"), action="store", default="this is c",
   #            help="a variable named c, with a default [default %default]")  
-  )
+)
 opt = parse_args(OptionParser(option_list=option_list))
 
 #--------------------------------------------------------------------------
 ### FOR LOCAL DEBUGGING
-#opt$projectdir="/Users/swvanderlaan/PLINK/analyses/meta_gwasfabp4/epic_nl"
-#opt$outputdir="/Users/swvanderlaan/PLINK/analyses/meta_gwasfabp4/epic_nl"
-#opt$stattype="PVAL"
-#opt$imageformat="PDF"
-#opt$resultfile="/Users/swvanderlaan/PLINK/analyses/meta_gwasfabp4/epic_nl/EPICNL.WHOLE.FABP4adjBMIeGFR.20160629.QQ.txt"
+# opt$projectdir="/Volumes/MyBookStudioII/Backup/PLINK/analyses/meta_gwasfabp4/METAFABP4_1000G/RAW/EPICNL_m1"
+# opt$outputdir="/Volumes/MyBookStudioII/Backup/PLINK/analyses/meta_gwasfabp4/METAFABP4_1000G/RAW/EPICNL_m1"
+# opt$imageformat="PNG"
+# opt$resultfile="/Volumes/MyBookStudioII/Backup/PLINK/analyses/meta_gwasfabp4/METAFABP4_1000G/RAW/EPICNL_m1/EPICNL_m1.RAW.HISTOGRAM_BETA.txt"
 
 if (opt$verbose) {
-  # if (opt$verbose) {
-  # you can use either the long or short name
-  # so opt$a and opt$avar are the same.
-  # show the user what the variables are
-  cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+  ### You can use either the long or short name; so opt$a and opt$avar are the same.
+  ### Show the user what the variables are.
+  cat("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
   cat("Checking the settings.")
   cat("\nThe project directory....................: ")
   cat(opt$projectdir)
-  cat("\n\nThe results file.........................: ")
+  cat("\nThe results file.........................: ")
   cat(opt$resultfile)
-  cat("\n\nThe output directory.....................: ")
+  cat("\nThe output directory.....................: ")
   cat(opt$outputdir)
-  cat("\n\nThe statistics type......................: ")
-  cat(opt$stattype)
-  cat("\n\nThe image format.........................: ")
+  cat("\nThe color style..........................: ")
   cat(opt$imageformat)
   cat("\n\n")
   
 }
-cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
-cat("Wow. We are finally starting \"QQ-Plotter\". ")
+cat("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+cat("Wow. We are finally starting \"Effect Size Plotter\". ")
 #--------------------------------------------------------------------------
 ### START OF THE PROGRAM
 # main point of program is here, do this whether or not "verbose" is set
-if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is.na(opt$stattype) & !is.na(opt$imageformat)) {
+if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is.na(opt$imageformat)) {
   ### set studyname
   study <- file_path_sans_ext(basename(opt$resultfile)) # argument 2
-  cat(paste("We are going to \nmake the QQ-plot of your (meta-)GWAS results. \nData are taken from.....: '",study,"'\nand will be outputed in.....: '", opt$outputdir, "'.\n",sep=''))
+  cat(paste("We are going to \nmake Effect Size plot of your (meta-)GWAS results. \nData are taken from.....: '",study,"'\nand will be outputed in.....: '", opt$outputdir, "'.\n",sep=''))
   cat("\n\n")
-
+  
   #--------------------------------------------------------------------------
   ### GENERAL SETUP
   Today=format(as.Date(as.POSIXlt(Sys.time())), "%Y%m%d")
@@ -154,69 +143,9 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
   OUT_loc = opt$outputdir # argument 4
   
   #--------------------------------------------------------------------------
-  #### DEFINE THE PLOT FUNCTION
-  
-  ### Note about color: To make the confidence interval transparent, 
-  ### it's given as rgb, with the transparency as last argument. 
-  ### To look up rgb values for base colors (in 8-bit) do col2rgb, e.g. col2rgb("grey90").
-  plotQQ <- function(z, color, confidence=T, confidence.col=rgb(229,229,229,60,maxColorValue=256), confidence.border="#E55738"){
-    p <- 2*pnorm(-abs(z))
-    p <- sort(p)
-    expected <- c(1:length(p))
-    lobs <- -(log10(p))
-    lexp <- -(log10(expected / (length(expected)+1)))
-    
-    # Calculate confidence intervals
-    find_conf_intervals = function(row){
-      i = row[1]
-      len = row[2]
-      if (i < 1000 | i %% 100 == 0){
-        return(c(-log10(qbeta(0.95,i,len-i+1)), -log10(qbeta(0.05,i,len-i+1))))
-      } else { # Speed up
-        return(c(NA,NA))
-      }
-    }
-    
-    # Find approximate confidence intervals
-    if (isTRUE(confidence)){
-      cat("\nPlotting confidence intervals.")
-      ci = apply(cbind( 1:length(lexp), rep(length(lexp),length(lexp))), MARGIN=1, FUN=find_conf_intervals)
-      bks = append(seq(1000,length(lexp),100),length(lexp)+1)
-      for (i in 1:(length(bks)-1)){
-        ci[1, bks[i]:(bks[i+1]-1)] = ci[1, bks[i]]
-        ci[2, bks[i]:(bks[i+1]-1)] = ci[2, bks[i]]
-      }
-      colnames(ci) = names(lexp)
-      # Extrapolate to make plotting prettier (doesn't affect interpretation at data points)
-      slopes = c((ci[1,1] - ci[1,2]) / (lexp[1] - lexp[2]), (ci[2,1] - ci[2,2]) / (lexp[1] - lexp[2]))
-      extrap_x = append(lexp[1]+xspace, lexp) #extrapolate slightly for plotting purposes only
-      extrap_y = cbind( c(ci[1,1] + slopes[1]*xspace, ci[2,1] + slopes[2]*xspace), ci)
-      polygon(c(extrap_x, rev(extrap_x)), c(extrap_y[1,], rev(extrap_y[2,])), col = confidence.col[1], border = confidence.border[1], lty = 2)  
-    }
-    
-    # Plots all points with p < 1e-3 (0.001)
-    cat("\nPlotting all points p < 1e-3 (0.001).")
-    p_sig = subset(p,p<0.001)
-    points(lexp[1:length(p_sig)], lobs[1:length(p_sig)], pch=21, cex=0.4, col=color, bg=color)
-    
-    # Samples 2,500 points from p > 1e-3
-    cat("\nSampling 2,500 points from p < 1e-3 (0.001).")
-    n=2500
-    i<- c(length(p)- c(0,round(log(2:(n-1))/log(n)*length(p))),1)
-    lobs_bottom=subset(lobs[i],lobs[i] <= 3)
-    lexp_bottom=lexp[i[1:length(lobs_bottom)]]
-    
-    print(length(lobs_bottom))
-    print(length(lexp_bottom))
-    
-    points(lexp_bottom, lobs_bottom, pch=21, cex=0.4, col=color, bg=color)
-    
-  }
-  
-  #--------------------------------------------------------------------------
   ### LOADING RESULTS FILE
   ### Location of is set by 'opt$resultfile' # argument 2
-  cat("\n\nLoading results file and removing NA's...")
+  cat("Loading results file and removing NA's...")
 
   ### Checking file type -- is it gzipped or not?
   data_connection <- file(opt$resultfile)
@@ -240,29 +169,14 @@ of the data. Double back, please.\n\n",
   cat("\n* Removing NA's...")
   data <- na.omit(rawdata)
   
-  # determine statistics type
-  if (opt$stattype == "Z") # set by 'opt$stattype' # argument 3
-    z=data$V1
-  
-  if (opt$stattype == "CHISQ")
-    z=sqrt(data$V1)
-  
-  if (opt$stattype == "PVAL")
-    z=qnorm(data$V1/2)
-  
-  maxY <- round(max(-log10(data$V1))+1)
-  
+  cat("\nCalculating mean and ± 4 s.d. ...")
+  meanBETA=mean(data$V1)
+  meanBETA_min4SD=meanBETA-(4*sd(data$V1))
+  meanBETA_plus4SD=meanBETA+(4*sd(data$V1))
+    
   #--------------------------------------------------------------------------
-  ### CALCULATES LAMBDA AND # variants
-  cat("\n\nCalculating lambda from data.\n")
-  lambda = round(median(z^2)/qchisq(0.5, df = 1),3)
-  lambda
-  n_snps = formatC(length(z), format="d", big.mark=',')
-  n_snps
-  
-  #--------------------------------------------------------------------------
-  ### PLOTS AXES AND NULL DISTRIBUTION
-  cat("\n\nDetermining what type of image should be produced and plotting axes with null distribution.")
+  ### PLOT INFO-SCORE PLOT
+  cat("\n\nDetermining what type of image should be produced...")
   if (opt$imageformat == "PNG") 
     png(paste0(opt$outputdir,"/",study,".png"), width = 800, height = 800)
   
@@ -275,31 +189,14 @@ of the data. Double back, please.\n\n",
   if (opt$imageformat == "PDF") 
     pdf(paste0(opt$outputdir,"/",study,".pdf"), width = 10, height = 10)
   
-  cat("\n- Setting up plot area.")
-  # Setting xspace doesn't affect the interpretation of the 
-  # QQ-plot, it's merely a way to visualize the polygon of the CI.
-  xspace = 100
-  cat("\n- Setting up plot area.")
-  #Plot expected p-value distribution line
-  plot(c(0, maxY), c(0, maxY), col = "#E55738", lwd = 1, type = "l", 
-       xlab = expression(Expected~~-log[10](italic(p)-value)), ylab = expression(Observed~~-log[10](italic(p)-value)), 
-       las=1, 
-       xaxs = "i", yaxs = "i", bty = "l", 
-       main = "QQ-plot")
-  #axis(1,at=c(0,1,2,3,4,5,6,7,8,9,10,11,12),labels=c("0","1","2","3","4","5","6","7","8","9","10","11","12"))
-  #axis(2,at=c(0,1,2,3,4,5,6,7,8,9,10,11,12),labels=c("0","1","2","3","4","5","6","7","8","9","10","11","12"))
-  
   #--------------------------------------------------------------------------
-  ### PLOTS DATA
-  cat("\n- Plotting data.") 	
-  plotQQ(z,"black");
-  
-  #--------------------------------------------------------------------------
-  ### PROVIDES LEGEND
-  cat("\n- Adding legend and closing image.")
-  legend(.5,maxY,legend = c("Expected","Observed","95% CI",lambda,paste(c(formatC(length(z), format="d", big.mark = ',')), "variants")), pch = c(23,23,23,32,32), cex = 0.8, pt.bg = c("#E55738","black", rgb(205,55,0,15,maxColorValue=256),"black","black"),bty = "n", title = "Legend", title.adj = 0)->leg
-  points(leg$text$x[4]-0.12,leg$text$y[4],pch=108,font=5)
-  points(leg$text$x[5]-0.12,leg$text$y[5],pch=35,font=1)
+  ### START PLOTTING  
+  cat("\n\nPlotting...")
+  hist(data$V1, main = expression(paste("Effect size, ", beta)), 
+       xlab = expression(beta), breaks = 100, col = uithof_color[8])
+  abline(v = meanBETA, lty = 1, lwd = 1, col = uithof_color[25])
+  abline(v = meanBETA_min4SD, lty = 2, lwd = 1, col = uithof_color[25])
+  abline(v = meanBETA_plus4SD, lty = 2, lwd = 1, col = uithof_color[25])
   
   dev.off()
   
@@ -309,22 +206,20 @@ of the data. Double back, please.\n\n",
       - --p/projectdir  : path to project directory\n
       - --r/resultfile  : path to resultfile\n
       - --o/outputdir   : path to output directory\n
-      - --s/stattype    : the test-statistic (Z-score, Chi^2, or P-value)\n
       - --f/imageformat : the image format (PDF, PNG, TIFF or PostScript)\n\n", 
       file=stderr()) # print error messages to stderr
 }
 
 #--------------------------------------------------------------------------
 ### CLOSING MESSAGE
-cat(paste("All done plotting a QQ-plot of",study,".\n"))
+cat(paste("\n\nAll done making the Effect Size plot of",study,".\n"))
 cat(paste("\nToday's: ",Today, "\n"))
 cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
 
 #--------------------------------------------------------------------------
 #
 # ### SAVE ENVIRONMENT | FOR DEBUGGING
-# save.image(paste0(opt$outputdir,"/",Today,"_",study,"_DEBUG_QQPLOT.RData"))
-
+# save.image(paste0(opt$outputdir,"/",Today,"_",study,"_DEBUG_EFFECTSIZE_PLOTTER.RData"))
 
 ###	UtrechtSciencePark Colours Scheme
 ###
