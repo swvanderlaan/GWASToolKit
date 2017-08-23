@@ -104,9 +104,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                             GWASTOOLKIT SUMMARISER"
 echobold "                                          SUMMARISES ANALYSIS RESULTS"
 echobold ""
-echobold " Version    : v1.3.2"
+echobold " Version    : v1.3.3"
 echobold ""
-echobold " Last update: 2017-07-07"
+echobold " Last update: 2017-08-23"
 echobold " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -130,17 +130,22 @@ PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 1 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [1] argument for regional association plotting of *** GENOME-WIDE ANALYSIS *** results!"
+	script_arguments_error "You must supply [1] argument for summarizing of *** GENOME-WIDE ANALYSIS *** results!"
+	script_copyright_message
+
+elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 1 ]]; then 
+	echo "Oh, computer says no! Number of arguments found "$#"."
+	script_arguments_error "You must supply [1] arguments for summarizing of *** VARIANT ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of *** REGIONAL ANALYSIS *** results!"
+	script_arguments_error "You must supply [1] arguments for summarizing of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [2] arguments for regional association plotting of *** GENE ANALYSIS *** results!"
+	script_arguments_error "You must supply [1] arguments for summarizing of *** GENE ANALYSIS *** results!"
 	script_copyright_message
 
 else
