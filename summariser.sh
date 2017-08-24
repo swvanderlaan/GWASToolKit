@@ -138,14 +138,14 @@ elif [[ ${ANALYSIS_TYPE} = "VARIANT" && $# -lt 1 ]]; then
 	script_arguments_error "You must supply [1] arguments for summarizing of *** VARIANT ANALYSIS *** results!"
 	script_copyright_message
 	
-elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 1 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [1] arguments for summarizing of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
 	
 elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 2 ]]; then 
 	echo "Oh, computer says no! Number of arguments found "$#"."
-	script_arguments_error "You must supply [1] arguments for summarizing of *** GENE ANALYSIS *** results!"
+	script_arguments_error "You must supply [2] arguments for summarizing of *** GENE ANALYSIS *** results!"
 	script_copyright_message
 
 else
@@ -155,6 +155,10 @@ else
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results # depends on arg1
 		
+	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then 
+		### SET INPUT-DATA
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results # depends on arg1
+	
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then 
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results # depends on arg1
@@ -166,7 +170,7 @@ else
 		
 	else
 		echo "Oh, computer says no! Number of arguments found "$#"."
-		script_arguments_error "You must supply [2-3] arguments for regional association plotting of *** GWASToolKit *** results!"
+		script_arguments_error "You must supply [1-2] arguments for summarizing of *** GWASToolKit *** results!"
 		script_copyright_message
 	fi
 	
@@ -208,11 +212,11 @@ else
 		for PHENOTYPE in ${PHENOTYPES}; do
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			echo "* Copying results for [ ${PHENOTYPE} ]..."
-			cp -fv ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz ${SUMMARY}/
+			cp -fv ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz ${SUMMARY}/
 		
 			echo ""
 			echo "* Concatenating results for [ ${PHENOTYPE} ]..."
-			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} '{ print PHENOTYPE_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
+			zcat ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz | tail -n +2 | awk -v PHENOTYPE_RESULT=${PHENOTYPE} '{ print PHENOTYPE_RESULT, $0 }' OFS=" "  >> ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
 				
 		done
 		echo " * Gzipping the summarised data..."
