@@ -138,6 +138,19 @@ script_arguments_error_normalization() {
 	# The wrong arguments are passed, so we'll exit the script now!
   	exit 1
 }
+script_arguments_error_condition() {
+	echoerror "$1" 
+	echoerror ""
+	echoerror "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
+	echoerror ""
+	echoerror " You must supply the correct argument:"
+	echoerror " * [NORMAL/CONDITION] -- SNPTEST can either run a normal analysis, or condition on a (list of) "
+	echoerror "                         variant(s). Note that we also expect a file with a (list of) variant(s)."
+	echoerror ""
+	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+	# The wrong arguments are passed, so we'll exit the script now!
+  	exit 1
+}
 script_arguments_error_analysis_type() {
 	echoerror "$1" 
 	echoerror ""
@@ -160,9 +173,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                            GWASTOOLKIT ANALYZER"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.2.13"
+echobold " Version    : v1.2.14"
 echobold ""
-echobold " Last update: 2017-08-22"
+echobold " Last update: 2017-08-23"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -212,9 +225,13 @@ else
 	
 echo "All arguments are passed and correct. These are the settings:"
 	
-### Set input-data
+### Set input-data # ADD IN ERROR WHEN THESE FILES ARE NOT GIVEN
 PHENOTYPES=$(cat "$PHENOTYPE_FILE") # which phenotypes to investigate anyway
 COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
+
+### Set normal or conditional analysis; a list of variant(s) to condition on should be given, refer to SNPTEST documentation
+### Example: rsid1 add rsid2 gen rsid3 add
+CONDITIONLIST=$(cat "$CONDITIONLIST") 
 
 ### Set location of the individual, regional and GWAS scripts
 	
@@ -239,11 +256,12 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECTDIR}/${PROJECTNAME}"
 		echo "The following list of variants will be used.............................: ${VARIANTLIST}"
+		echo "The analysis will be conditioned on the following (list of) variant(s)..: ${CONDITIONLIST}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 		echo "These are you mailsettings..............................................: ${MAILSETTINGS}"
 		### Starting of the script
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		echo "                                     SUBMIT ACTUAL GENOME-WIDE ANALYSIS"
+		echo "                                     SUBMIT GENOME-WIDE ANALYSIS"
 		echo ""
 		echo "Please be patient as we are creating jobs to submit genome-wide analysis of each phenotype..."
 		echo "We started at: "$(date)
@@ -268,11 +286,12 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECTDIR}/${PROJECTNAME}"
 		echo "The following list of variants will be used.............................: ${VARIANTLIST}"
+		echo "The analysis will be conditioned on the following (list of) variant(s)..: ${CONDITIONLIST}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 		echo "These are you mailsettings..............................................: ${MAILSETTINGS}"
 		### Starting of the script
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		echo "                                    SUBMIT ACTUAL INDIVIDUAL VARIANT ANALYSIS"
+		echo "                                    SUBMIT INDIVIDUAL VARIANT ANALYSIS"
 		echo ""
 		echo "Please be patient as we are creating jobs to submit individual variant analysis of each phenotype..."
 		echo "We started at: "$(date)
@@ -297,11 +316,12 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 		echo "The analysis will be run using the following covariates.................: ${COVARIATES}"
 		echo "The project directory is................................................: ${PROJECTDIR}/${PROJECTNAME}"
 		echo "The chromosomal region will be analysed.................................: chromosome ${CHR}:${REGION_START}-${REGION_END}"
+		echo "The analysis will be conditioned on the following (list of) variant(s)..: ${CONDITIONLIST}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 		echo "These are you mailsettings..............................................: ${MAILSETTINGS}"
 		### Starting of the script
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		echo "                                      SUBMIT ACTUAL REGIONAL ANALYSIS"
+		echo "                                      SUBMIT REGIONAL ANALYSIS"
 		echo ""
 		echo "Please be patient as we are creating jobs to submit regional analysis of each phenotype..."
 		echo "We started at: "$(date)
@@ -332,13 +352,14 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 			echo "     * ${GENE}"
 		done
 		echo ""
+		echo "The analysis will be conditioned on the following (list of) variant(s)..: ${CONDITIONLIST}"
 		echo "The following range around genes will be taken..........................: ${RANGE}"
 		echo "The following gene list will be used....................................: ${HG19_GENES}"
 		echo "The following e-mail address will be used for communication.............: ${YOUREMAIL}"
 		echo "These are you mailsettings..............................................: ${MAILSETTINGS}"
 		### Starting of the script
 		echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-		echo "                                      SUBMIT ACTUAL PER-GENE ANALYSIS"
+		echo "                                      SUBMIT PER-GENE ANALYSIS"
 		echo ""
 		echo "Please be patient as we are creating jobs to submit regional analysis of each phenotype..."
 		echo "We started at: "$(date)
@@ -423,11 +444,29 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 			
 				echo "Analysing the phenotype [ ${PHENOTYPE} ] for [ ${VARIANT}: on chromosome ${CHR} ]."
 				if [[ ${STANDARDIZE} = "STANDARDIZE" ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					if [[ ${CONDITION} = "NORMAL" ]]; then
+						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					elif [[ ${CONDITION} = "CONDITION" ]]; then
+						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					else 
+						### If arguments are not met then this error message will be displayed
+						script_arguments_error_condition
+					fi
+				
 				elif [[ ${STANDARDIZE} = "RAW" ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					if [[ ${CONDITION} = "NORMAL" ]]; then
+						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					elif [[ ${CONDITION} = "CONDITION" ]]; then
+						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.bgen ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+					else 
+						### If arguments are not met then this error message will be displayed
+						script_arguments_error_condition
+					fi
+
 				else
 					### If arguments are not met then this error message will be displayed
 					script_arguments_error_normalization

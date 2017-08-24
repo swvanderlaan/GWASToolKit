@@ -100,9 +100,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT WRAPPER"
 echobold "                                  WRAPPING UP SNPTEST ANALYSIS RESULTS"
 echobold ""
-echobold " Version    : v1.2.4"
+echobold " Version    : v1.2.5"
 echobold ""
-echobold " Last update: 2017-07-11"
+echobold " Last update: 2017-08-24"
 echobold " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -196,7 +196,7 @@ else
 		done
 		echo ""
 		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
-	
+
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		GENELOCUS="$3"
 		GENE_OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENELOCUS}

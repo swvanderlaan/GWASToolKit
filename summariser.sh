@@ -106,7 +106,7 @@ echobold "                                          SUMMARISES ANALYSIS RESULTS"
 echobold ""
 echobold " Version    : v1.3.3"
 echobold ""
-echobold " Last update: 2017-08-23"
+echobold " Last update: 2017-08-24"
 echobold " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -195,7 +195,7 @@ else
 		echo "*** NOT IMPLEMENTED YET ***"
 		
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
-	
+
 		if [[ ! -d ${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE} ]]; then
 			echo "Summary directory doesn't exist: making it."
 			mkdir -v ${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE}
@@ -205,10 +205,10 @@ else
 			SUMMARY=${PROJECTDIR}/${PROJECTNAME}/summary.${ANALYSIS_TYPE}
 		fi
 		echo ""
-	
+		
 		echo "Summarising data..."
 		echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${SUMMARY}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.summary.txt
-
+	
 		for PHENOTYPE in ${PHENOTYPES}; do
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			echo "* Copying results for [ ${PHENOTYPE} ]..."
