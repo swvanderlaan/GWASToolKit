@@ -4,7 +4,7 @@ This repository contains various scripts in Perl, BASH, and Python scripts to us
 
 Scripts will work within the context of a certain Linux environment (in this case a CentOS7 system on a SUN Grid Engine background). 
 
-All scripts are annotated for debugging purposes - and future reference. The only script the user should edit is the `run_analysis.sh` script, and depending on the analyses to be run, some text-files.
+All scripts are annotated for debugging purposes - and future reference. 
 
 The installation procedure is quite straightforward, and only entails two steps consisting of command one-liners that are *easy* to read. You can copy/paste each example command, per block of code. For some steps you need administrator privileges. Follow the steps in consecutive order.
 
@@ -47,6 +47,18 @@ if [ -d ~/git/GWASToolKit/.git ]; then \
 	fi
 ```
 
+--------------
+
+#### USAGE 
+The only script the user should use is the `gwastoolkit.analyzer.sh` script in conjunction with a configuration file `gwastoolkit.conf`, and depending on the analyses to be run, some text-files. 
+
+By typing...
+
+```
+bash gwastoolkit.analyzer.sh gwastoolkit.conf
+```
+
+...the user will control what analysis will be done. Simply typing `bash gwastoolkit.analyzer.sh` will produce an extensive error-message explaining what arguments are expected.
 
 --------------
 
