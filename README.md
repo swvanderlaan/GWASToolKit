@@ -1,5 +1,7 @@
 GWASToolKit
 ============
+[![DOI](https://zenodo.org/badge/55601542.svg)](https://zenodo.org/badge/latestdoi/55601542)
+
 This repository contains various scripts in Perl, BASH, and Python scripts to use in genome-wide association studies, single variant analyses, regional analyses, and gene-centered analyses using data of the Athero-Express Genomics Studies 1 and 2 (AEGS), AAA-Express Genomics Study (AAAGS), or CTMM Genomics Study (CTMM).
 
 All scripts are annotated for debugging purposes - and future reference. The scripts will work within the context of a certain Linux environment (in this case a CentOS7 system on a SUN Grid Engine background). As such we have tested GWASToolKit on CentOS6.6, CentOS7, and OS X El Capitan (version 10.11.[x]). 
