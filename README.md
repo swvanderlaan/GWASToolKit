@@ -2,27 +2,7 @@ GWASToolKit
 ============
 This repository contains various scripts in Perl, BASH, and Python scripts to use in genome-wide association studies, single variant analyses, regional analyses, and gene-centered analyses using data of the Athero-Express Genomics Studies 1 and 2 (AEGS), AAA-Express Genomics Study (AAAGS), or CTMM Genomics Study (CTMM).
 
-Scripts will work within the context of a certain Linux environment (in this case a CentOS7 system on a SUN Grid Engine background). 
-
-All scripts are annotated for debugging purposes - and future reference. 
-
-The installation procedure is quite straightforward, and only entails two steps consisting of command one-liners that are *easy* to read. You can copy/paste each example command, per block of code. For some steps you need administrator privileges. Follow the steps in consecutive order.
-
-```
-these `mono-type font` illustrate commands illustrate terminal commands. You can copy & paste these.
-```
-
-To make it easier to copy and paste, long commands that stretch over multiple lines are structered as follows:
-
-```
-Multiline commands end with a dash \
-	indent 4 spaces, and continue on the next line. \
-	Copy & paste these whole blocks of code.
-```
-
-Although we made it easy to just select, copy and paste and run these blocks of code, it is not a good practise to blindly copy and paste commands. Try to be aware about what you are doing. And never, never run `sudo` commands without a good reason to do so. 
-
-We have tested GWASToolKit on CentOS6.6, CentOS7, and OS X El Capitan (version 10.11.[x]). 
+All scripts are annotated for debugging purposes - and future reference. The scripts will work within the context of a certain Linux environment (in this case a CentOS7 system on a SUN Grid Engine background). As such we have tested GWASToolKit on CentOS6.6, CentOS7, and OS X El Capitan (version 10.11.[x]). 
 
 
 --------------
