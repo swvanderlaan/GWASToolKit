@@ -75,13 +75,13 @@ The user must supply a variant list with chromosome and base pair position per v
 
 #### Regional analyses
 
-The user must supply a region of interest in a file. The final analyses results will be concatenated into a summary file. 
+The user must supply a region of interest in a file. The final analyses results will be concatenated into a summary file. Regional association plots will automatically be generated. 
 
 --------------
 
 #### Per-Gene analyses
 
-The user must supply a variant list with chromosome and base pair position per variant. The final analyses results will be concatenated into a summary file.
+The user must supply a variant list with chromosome and base pair position per variant. The final analyses results will be concatenated into a summary file. Regional association plots will automatically be generated.
 
 
 --------------
