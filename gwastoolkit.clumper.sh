@@ -83,14 +83,15 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT CLUMPER"
 echobold "                                  clumping of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.2.5"
+echobold " Version    : v1.2.6"
 echobold ""
-echobold " Last update: 2017-07-07"
+echobold " Last update: 2017-10-05"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
+echobold "              - Tim Bezemer (t.bezemer@umcutrecht.nl)"
 echobold ""
 echobold " Description: Clumping of a genome-wide SNPTEST analysis."
 echobold ""
@@ -120,6 +121,7 @@ else
 	echo "We will use the following reference.....................................: ${REFERENCE}"
 	echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 	echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
+	echo "The following exclusion is used.........................................: ${EXCLUSION}"
 	echo "Maximum (largest) p-value to clump......................................: ${CLUMP_P2}"
 	echo "Minimum (smallest) p-value to clump.....................................: ${CLUMP_P1}"
 	echo "R^2 to use for clumping.................................................: ${CLUMP_R2}"
@@ -130,7 +132,7 @@ else
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "Preparing clumping of genome-wide analysis results using the P-values."	
 	# what is the basename of the file?
-	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.txt.gz
+	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.txt.gz
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: [ ${FILENAME} ]."
 	echo ""
