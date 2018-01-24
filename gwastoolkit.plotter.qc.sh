@@ -129,7 +129,7 @@ else
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
-	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz
+	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.txt.gz
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}
 	echo ""
