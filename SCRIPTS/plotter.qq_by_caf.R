@@ -49,7 +49,7 @@ install.packages.auto <- function(x) {
     # Update installed packages - this may mean a full upgrade of R, which in turn
     # may not be warrented. 
     #update.packages(ask = FALSE) 
-    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
+    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, lib = \"/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/lib64/R/library\", repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
   }
   if(isTRUE(x %in% .packages(all.available = TRUE))) { 
     eval(parse(text = sprintf("require(\"%s\")", x)))
