@@ -1,4 +1,4 @@
-#!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
+#!/usr/local/bin/Rscript --vanilla
 
 ### Mac OS X version
 ### #!/usr/local/bin/Rscript --vanilla
@@ -9,8 +9,8 @@
 cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     QQ by CAF Plotter -- GWASToolKit
     \n
-    * Version: v1.1.6
-    * Last edit: 2017-08-22
+    * Version: v1.1.7
+    * Last edit: 2018-01-24
     * Created by: Sander W. van der Laan | s.w.vanderlaan@gmail.com
     \n
     * Description: QQ-Plotter for GWAS (meta-analysis) results stratified 

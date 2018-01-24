@@ -83,9 +83,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT PLOTTER"
 echobold "                                       plotting of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.1.5"
+echobold " Version    : v1.1.6"
 echobold ""
-echobold " Last update: 2017-08-22"
+echobold " Last update: 2018-01-24"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -128,7 +128,7 @@ else
 	echo ""
 	echo "Plotting reformatted UNFILTERED data. Processing the following dataset: "
 	# what is the basename of the file?
-	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}*.summary_results.txt.gz
+	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz
 	echo "* debug * ${RESULTS}"
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}

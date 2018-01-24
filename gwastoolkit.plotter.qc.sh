@@ -83,9 +83,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT PLOTTER -- AFTER QC"
 echobold "                              plotting of SNPTEST analysis results after quality control"
 echobold ""
-echobold " Version    : v1.1.4"
+echobold " Version    : v1.1.5"
 echobold ""
-echobold " Last update: 2017-07-07"
+echobold " Last update: 2018-01-24"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -129,7 +129,7 @@ else
 	echo ""
 	echo "Plotting reformatted FILTERED data."
 	# what is the basename of the file?
-	RESULTS=${OUTPUT_DIR}/*.summary_results.QC.txt.gz
+	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz
 	FILENAME=$(basename ${RESULTS} .txt.gz)
 	echo "The basename is: "${FILENAME}
 	echo ""

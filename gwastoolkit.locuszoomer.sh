@@ -96,9 +96,9 @@ echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo "                                           GWASTOOLKIT LOCUSZOOMER"
 echo "                                regional association plotting of clumped results"
 echo ""
-echo " Version    : v1.5.0"
+echo " Version    : v1.5.1"
 echo ""
-echo " Last update: 2017-07-07"
+echo " Last update: 2018-01-24"
 echo " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echo ""
 echo " Description: Plot a LocusZoom for (imputed) (meta-)ExomeChip or (meta-)GWAS hits "
@@ -203,7 +203,7 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		### Which variant to look at.
 		echo "We will lookup the following variants:"
-		VARIANTLIST="${INPUTDIR}/${PHENOTYPE}.summary_results.QC.${CLUMP_R2}.indexvariants.txt" 
+		VARIANTLIST="${INPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.summary_results.QC.${CLUMP_R2}.indexvariants.txt" 
 		while read VARIANTS; do 
 			for VARIANT in ${VARIANTS}; do
 			echo "* ${VARIANT}"
@@ -236,6 +236,10 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 			
 			done
 		done < ${VARIANTLIST}
+		
+		# gzipping locuszoom input
+		gzip -v ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom 
+		
 		echo ""
 		echo "All finished. Done making regional association plots for ${PHENOTYPE} data."
 		echo ""
@@ -274,6 +278,9 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 
 		done < ${REGIONS_FILE}		
 		
+		# gzipping locuszoom input
+		gzip -v ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom 
+		
 		echo ""
 		echo "All finished. Done making regional association plots for ${PHENOTYPE} data."
 		echo ""
@@ -296,8 +303,11 @@ echo "                                             MAKE LOCUSZOOM PLOTS"
 		zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col RSID,P | tail -n +2 >> ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom
 		echo "Plotting variant: ${GENE}"
 		
-			cd ${OUTPUTDIR}
-			${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGELZ}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE} (${EXCLUSION})" ${LOCUSZOOM_SETTINGS}
+		cd ${OUTPUTDIR}
+		${LOCUSZOOM13} --metal ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom --markercol MarkerName --delim space --refgene ${GENE} --flank ${RANGELZ}kb ${LDMAP} theme=publication title="${GENE} in ${PHENOTYPE} (${EXCLUSION})" ${LOCUSZOOM_SETTINGS}
+		
+		# gzipping locuszoom input
+		gzip -v ${OUTPUTDIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.locuszoom 
 		
 		echo ""
 		echo "All finished. Done making regional association plots for ${PHENOTYPE} data."
