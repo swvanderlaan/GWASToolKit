@@ -32,7 +32,7 @@ if [ -d ~/git/GWASToolKit/.git ]; then \
 --------------
 
 #### USAGE 
-The only script the user should use is the `gwastoolkit.analyzer.sh` script in conjunction with a configuration file `gwastoolkit.conf`, and depending on the analyses to be run, some text-files. 
+The only script the user should use is the `gwastoolkit.analyzer.sh` script in conjunction with a configuration file `gwastoolkit.conf`. 
 
 By typing...
 
@@ -69,7 +69,9 @@ The user must supply a variant list with chromosome and base pair position per v
 --------------
 
 #### TO DO
+There are definitely improvements needed. Below of things I'd like to add or edit in the (near) future.
 
+- edit the variant selection to work with non-rsID variants
 - add proper `--help` flag
 - clean up codes further, especially with respect to the various error-flags
 - add in checks of the environment, similar to `slideToolkit` scripts
