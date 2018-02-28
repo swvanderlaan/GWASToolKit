@@ -173,9 +173,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                            GWASTOOLKIT ANALYZER"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.2.14"
+echobold " Version    : v1.3.0"
 echobold ""
-echobold " Last update: 2017-08-23"
+echobold " Last update: 2018-02-28"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -231,8 +231,15 @@ COVARIATES=$(cat "$COVARIATE_FILE") # covariate list
 
 ### Set normal or conditional analysis; a list of variant(s) to condition on should be given, refer to SNPTEST documentation
 ### Example: rsid1 add rsid2 gen rsid3 add
-CONDITIONLIST=$(cat "$CONDITIONLIST") 
-
+if [[ ${CONDITION} = "CONDITION" ]]; then
+	CONDITIONLIST=$(cat "$CONDITIONLIST") 
+	
+elif [[ ${CONDITION} = "NORMAL" ]]; then
+	CONDITIONLIST="We will not condition on (a) variant(s)."
+else
+	### If arguments are not met then this error message will be displayed 
+	script_arguments_error_condition
+fi
 ### Set location of the individual, regional and GWAS scripts
 	
 	### Report back these variables
