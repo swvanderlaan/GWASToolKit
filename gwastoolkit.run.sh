@@ -70,7 +70,7 @@ script_arguments_error() {
 	echoerror "$1" # Additional message
 	echoerror "- Argument #1 is path_to/filename of the configuration file."
 	echoerror ""
-	echoerror "An example command would be: gwastoolkit.run.sh [arg1]"
+	echoerror "An example command would be: gwastoolkit [arg1]"
 	echoerror "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
  	echo ""
 	script_copyright_message
@@ -99,9 +99,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.7"
+echobold " Version    : v1.3.8"
 echobold ""
-echobold " Last update: 2017-08-24"
+echobold " Last update: 2018-03-29"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
