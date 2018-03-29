@@ -100,9 +100,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT WRAPPER"
 echobold "                                  WRAPPING UP SNPTEST ANALYSIS RESULTS"
 echobold ""
-echobold " Version    : v1.2.5"
+echobold " Version    : v1.2.6"
 echobold ""
-echobold " Last update: 2017-08-24"
+echobold " Last update: 2018-03-29"
 echobold " Written by:  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -182,20 +182,44 @@ else
 
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" || ${ANALYSIS_TYPE} = "REGION" ]]; then
 		PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
-		# create results file
-		###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
-		echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+		
+		if [[ ${METHOD} = "newml" ]]; then
+			# create results file
+			###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB InfoImputed Info all_AA all_AB all_BB TotalN MAC MAF CAF P_LRT" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
 
-		for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
-			# which file are we processing?
-			echo "Processing file ${FILE}..."
-			cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
-			tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
-			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+			for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
+				# which file are we processing?
+				echo "Processing file ${FILE}..."
+				cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,all_impute_info,all_info,all_AA,all_AB,all_BB,all_total,all_maf,frequentist_add_lrt_pvalue | 
+				tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+				echo ""
+			done
 			echo ""
-		done
-		echo ""
-		gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+			gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+
+		elif [[ ${METHOD} = "expected" || ${METHOD} = "score" ]]; then
+			# create results file
+			###   1     2    3   4  5            6            7              8    9      10     11     12     CALC 13 CALC 14 15  16 17 # AUTOSOMAL & X CHROMOSOMES
+			echo "ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+
+			for FILE in $(ls ${PHENO_OUTPUT_DIR}/*.out); do
+				# which file are we processing?
+				echo "Processing file ${FILE}..."
+				cat ${FILE} | grep -v "#" | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col alternate_ids,rsid,chromosome,position,alleleA,alleleB,average_maximum_posterior_call,info,cohort_1_AA,cohort_1_AB,cohort_1_BB,all_total,all_maf,cohort_1_hwe,frequentist_add_pvalue,frequentist_add_beta_1,frequentist_add_se_1 | 
+				tail -n +2 | awk ' { print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, (2*$12*$13), $13, (((2*$11)+$10)/(2*$12)), $14, $15, $16, $17 } ' >> ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+				echo ""
+			done
+			echo ""
+			gzip -vf ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt
+		
+		else
+						### If arguments are not met then this error message will be displayed
+						script_arguments_error_multinominal
+		fi
+
 
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		GENELOCUS="$3"
