@@ -96,10 +96,10 @@ script_arguments_error_analysis_type() {
 }
 
 echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-echobold "                                               GWASTOOLKIT"
+echobold "                                               GWASTOOLKIT -- *development version*"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.8"
+echobold " Version    : v1.3.9-development"
 echobold ""
 echobold " Last update: 2018-03-29"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
