@@ -1,16 +1,16 @@
-#!/usr/local/bin/Rscript --vanilla
+#!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
 
 ### Mac OS X version
 ### #!/usr/local/bin/Rscript --vanilla
 
 ### Linux version
-### #!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
+### #!/hpc/local/CentOS7/dhl_ec/software/R-3.3.3/bin/Rscript --vanilla
 
 cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    QQ by TYPE Plotter -- GWASToolKit
+    QQ by TYPE Plotter -- MetaGWASToolKit
     \n
     * Version: v1.1.7
-    * Last edit: 2018-01-24
+    * Last edit: 2019-12-14
     * Created by: Sander W. van der Laan | s.w.vanderlaan@gmail.com
     \n
     * Description: QQ-Plotter for GWAS (meta-analysis) results stratified 
@@ -50,7 +50,7 @@ install.packages.auto <- function(x) {
     # Update installed packages - this may mean a full upgrade of R, which in turn
     # may not be warrented. 
     #update.packages(ask = FALSE) 
-    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, lib = \"/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/lib64/R/library\", repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
+    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
   }
   if(isTRUE(x %in% .packages(all.available = TRUE))) { 
     eval(parse(text = sprintf("require(\"%s\")", x)))
@@ -168,7 +168,7 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
     # Plots all points with p < 1e-3 (0.001)
     cat("  - plotting all points p < 1e-3 (0.001).\n")
     p_sig = subset(p,p<0.001)
-    points(lexp[1:length(p_sig)], lobs[1:length(p_sig)], pch=19, cex=0.5, col=color, bg=color)
+    points(lexp[1:length(p_sig)], lobs[1:length(p_sig)], pch = 21, cex = 1.75, col = color, bg = color)
     
     # Samples 10,000 points from p > 1e-3
     cat("  - sampling 10,000 points from p < 1e-3 (0.001).\n")
@@ -184,7 +184,7 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
     #cat(length(lobs_bottom))
     #cat(length(lexp_bottom))
     
-    points(lexp_bottom, lobs_bottom, pch=19, cex=cex, col=color, bg=color)
+    points(lexp_bottom, lobs_bottom, pch = 21, cex = cex, col = color, bg = color)
   }
   
   #--------------------------------------------------------------------------
@@ -264,6 +264,7 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
        xlab = expression(Expected~~-log[10](italic(p)-value)), ylab = expression(Observed~~-log[10](italic(p)-value)),
        xlim = c(0, maxY), ylim = c(0, maxY), las = 1,
        xaxs = "i", yaxs = "i", bty = "l",
+       cex.axis = 2, cex.lab = 1.75, cex.main = 3,
        main=c(substitute(paste("QQ-plot stratified by variant type - ",lambda," = ", lam),list(lam = lambdavalue)),expression()))
   
   #--------------------------------------------------------------------------

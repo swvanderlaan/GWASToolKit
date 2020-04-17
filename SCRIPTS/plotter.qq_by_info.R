@@ -1,16 +1,16 @@
-#!/usr/local/bin/Rscript --vanilla
+#!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
 
 ### Mac OS X version
 ### #!/usr/local/bin/Rscript --vanilla
 
 ### Linux version
-### #!/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/bin/Rscript --vanilla
+### #!/hpc/local/CentOS7/dhl_ec/software/R-3.3.3/bin/Rscript --vanilla
 
 cat("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    QQ by INFO-score Plotter -- GWASToolKit
+    QQ by INFO-score Plotter -- MetaGWASToolKit
     \n
     * Version: v1.1.7
-    * Last edit: 2018-01-24
+    * Last edit: 2019-12-14
     * Created by: Sander W. van der Laan | s.w.vanderlaan@gmail.com
     \n
     * Description: QQ-Plotter for GWAS (meta-analysis) results stratified 
@@ -50,7 +50,7 @@ install.packages.auto <- function(x) {
     # Update installed packages - this may mean a full upgrade of R, which in turn
     # may not be warrented. 
     #update.packages(ask = FALSE) 
-    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, lib = \"/hpc/local/CentOS7/dhl_ec/software/R-3.4.0/lib64/R/library\", repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
+    eval(parse(text = sprintf("install.packages(\"%s\", dependencies = TRUE, repos = \"http://cran-mirror.cs.uu.nl/\")", x)))
   }
   if(isTRUE(x %in% .packages(all.available = TRUE))) { 
     eval(parse(text = sprintf("require(\"%s\")", x)))
@@ -169,7 +169,7 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
        # Plots all points with p < 1e-3 (0.001)
        cat("  - plotting all points p < 1e-3 (0.001).\n")
        p_sig = subset(p,p<0.001)
-       points(lexp[1:length(p_sig)], lobs[1:length(p_sig)], pch=19, cex=0.5, col=color, bg=color)
+       points(lexp[1:length(p_sig)], lobs[1:length(p_sig)], pch = 21, cex = 1.75, col = color, bg = color)
        
        # Samples 10,000 points from p > 1e-3
        cat("  - sampling 10,000 points from p < 1e-3 (0.001).\n")
@@ -185,7 +185,7 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
        #cat(length(lobs_bottom))
        #cat(length(lexp_bottom))
        
-       points(lexp_bottom, lobs_bottom, pch=19, cex=cex, col=color, bg=color)
+       points(lexp_bottom, lobs_bottom, pch = 21, cex = cex, col = color, bg = color)
      }
      
      #--------------------------------------------------------------------------
@@ -271,30 +271,31 @@ if(!is.na(opt$projectdir) & !is.na(opt$resultfile) & !is.na(opt$outputdir) & !is
           xlab = expression(Expected~~-log[10](italic(p)-value)), ylab = expression(Observed~~-log[10](italic(p)-value)),
           xlim = c(0, maxY), ylim = c(0, maxY), las = 1,
           xaxs = "i", yaxs = "i", bty = "l",
+          cex.axis = 2, cex.lab = 1.75, cex.main = 3,
           main = c(substitute(paste("QQ-plot stratified by imputation quality - ",lambda," = ", lam),list(lam = lambdavalue)),expression()))
      
      #--------------------------------------------------------------------------
      ### PLOTS DATA
      cat("\n* Plotting data.")
      cat("\n- sample of all data.\n")
-     plotQQ(z, "black", 0.5);
+     plotQQ(z, "black", 1.25);
      cat("\n- sample of data with 0.0 < info < 0.2.\n")
-     plotQQ(z_lo1, "#595A5C", 0.5);
+     plotQQ(z_lo1, "#595A5C", 1.25);
      cat("\n- sample of data with 0.2 < info < 0.4.\n")
-     plotQQ(z_lo2, "#1290D9", 0.5);
+     plotQQ(z_lo2, "#1290D9", 1.25);
      cat("\n- sample of data with 0.4 < info < 0.6.\n")
-     plotQQ(z_lo3, "#DB003F", 0.5);
+     plotQQ(z_lo3, "#DB003F", 1.25);
      cat("\n- sample of data with 0.6 < info < 0.8.\n")
-     plotQQ(z_lo4, "#9FC228", 0.5);
+     plotQQ(z_lo4, "#9FC228", 1.25);
      cat("\n- sample of data with 0.8 < info < 1.0.\n")
-     plotQQ(z_lo5, "#E35493", 0.5);
+     plotQQ(z_lo5, "#E35493", 1.25);
      cat("\n- sample of data with info > 1.0.\n")
-     plotQQ(z_lo6, "#FBB820", 0.5);
+     plotQQ(z_lo6, "#FBB820", 1.25);
      
      #--------------------------------------------------------------------------
      ### PROVIDES LEGEND
      cat("\n* Adding legend and closing image.")
-     legend(0.5, maxY, legend=c("Expected","Observed",
+     legend(1.25, maxY, legend=c("Expected","Observed",
                               paste("0.0 < INFO < 0.2 [",format(length(z_lo1),big.mark = ","),"]"),
                               paste("0.2 < INFO < 0.4 [",format(length(z_lo2),big.mark = ","),"]"),
                               paste("0.4 < INFO < 0.6 [",format(length(z_lo3),big.mark = ","),"]"),
