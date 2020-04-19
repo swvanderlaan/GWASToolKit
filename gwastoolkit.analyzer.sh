@@ -392,12 +392,12 @@ fi
 
 	### Make and/or set the output directory
 	if [ ! -d ${PROJECTDIR}/${PROJECTNAME}/snptest_results ]; then
-  		echo "The output directory does not exist. Making and setting it."
-  		mkdir -v ${PROJECTDIR}/${PROJECTNAME}/snptest_results
-  		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results
+		echo "The output directory does not exist. Making and setting it."
+		mkdir -v ${PROJECTDIR}/${PROJECTNAME}/snptest_results
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results
 	else
-  		echo "The output directory already exists. Setting it."
-  		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results
+		echo "The output directory already exists. Setting it."
+		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results
 	fi
 
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
@@ -406,32 +406,33 @@ fi
 		for PHENOTYPE in ${PHENOTYPES}; do
 		### Make and/or set the output directory
 			if [ ! -d ${OUTPUT_DIR}/${PHENOTYPE} ]; then
-  				echo "The output directory does not exist. Making and setting it."
-  				mkdir -v ${OUTPUT_DIR}/${PHENOTYPE}
-  				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+				echo "The output directory does not exist. Making and setting it."
+				mkdir -v ${OUTPUT_DIR}/${PHENOTYPE}
+				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			else
-  				echo "The output directory already exists. Setting it."
-  				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+				echo "The output directory already exists. Setting it."
+				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			fi
+
 		echo "Analysing the phenotype ${PHENOTYPE}."
 			#for CHR in $(seq 1 22) X; do
-      for CHR in 22 X; do # for testing
-				echo "Processing the following chromosome ${CHR}."
+			for CHR in 22 X; do # for testing
+			echo "Processing the following chromosome ${CHR}."
 				if [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} != "X" ]]; then
 					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+					#qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
 				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} != "X"  ]]; then
 					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-
-        elif [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} == "X"  ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.#!/bin/sh
-        elif [[ ${STANDARDIZE} == "RAW" && ${CHR} == "X"  ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-
-        else
+					#qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+	
+				elif [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} == "X"  ]]; then
+							echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+							#qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.#!/bin/sh
+				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} == "X"  ]]; then
+							echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} -exclude_samples ${EXCLUSION_LIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+							#qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+	
+				else
 					### If arguments are not met then this error message will be displayed
 					script_arguments_error_normalization
 				fi
@@ -454,12 +455,12 @@ fi
 		for PHENOTYPE in ${PHENOTYPES}; do
 		### Make and/or set the output directory
 			if [ ! -d ${OUTPUT_DIR}/${PHENOTYPE} ]; then
-  				echo "The output directory does not exist. Making and setting it."
-  				mkdir -v ${OUTPUT_DIR}/${PHENOTYPE}
-  				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+				echo "The output directory does not exist. Making and setting it."
+				mkdir -v ${OUTPUT_DIR}/${PHENOTYPE}
+				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			else
-  				echo "The output directory already exists. Setting it."
-  				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
+				echo "The output directory already exists. Setting it."
+				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			fi
 			while IFS='' read -r VARIANTOFINTEREST || [[ -n "$VARIANTOFINTEREST" ]]; do
 				### EXAMPLE VARIANT LIST
