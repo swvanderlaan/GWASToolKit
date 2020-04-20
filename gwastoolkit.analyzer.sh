@@ -415,8 +415,8 @@ fi
 			fi
 
 		echo "Analysing the phenotype ${PHENOTYPE}."
-			#for CHR in $(seq 1 22) X; do
-			for CHR in 22 X; do # for testing
+			# for CHR in $(seq 1 22) X; do
+			for CHR in $(seq 1 22); do
 			echo "Processing the following chromosome ${CHR}."
 				if [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} != "X" ]]; then
 					# We will work with the 'filtering' option: `-[in|ex]clude_samples_where <name> [=|==|!=] <value>`
