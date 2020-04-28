@@ -20,23 +20,23 @@ WHITE='\033[01;37m'
 function echobold { #'echobold' is the function name
     echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
 }
-function echoitalic { 
-    echo -e "${ITALIC}${1}${NONE}" 
+function echoitalic {
+    echo -e "${ITALIC}${1}${NONE}"
 }
-function echonooption { 
+function echonooption {
     echo -e "${OPAQUE}${RED}${1}${NONE}"
 }
-function echoerrorflash { 
-    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+function echoerrorflash {
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}"
 }
-function echoerror { 
+function echoerror {
     echo -e "${RED}${1}${NONE}"
 }
 # errors no option
-function echoerrornooption { 
+function echoerrornooption {
     echo -e "${YELLOW}${1}${NONE}"
 }
-function echoerrorflashnooption { 
+function echoerrorflashnooption {
     echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
 }
 
@@ -84,9 +84,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                         GWASTOOLKIT QUALITY CONTROL"
 echobold "                                 quality control of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.1.4"
+echobold " Version    : v1.1.5"
 echobold ""
-echobold " Last update: 2017-07-11"
+echobold " Last update: 2020-04-26"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -100,55 +100,55 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### LOADING CONFIGURATION FILE
 source "$1" # Depends on arg1.
 
-### REQUIRED | GENERALS	
+### REQUIRED | GENERALS
 CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then 
+if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 2 ]]; then
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [2] arguments for cleaning of *** GENOME-WIDE ANALYSIS *** results!"
 	script_copyright_message
-	
-elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then 
+
+elif [[ ${ANALYSIS_TYPE} = "REGION" && $# -lt 2 ]]; then
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [2] arguments for cleaning of *** REGIONAL ANALYSIS *** results!"
 	script_copyright_message
-	
-elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then 
+
+elif [[ ${ANALYSIS_TYPE} = "GENES" && $# -lt 3 ]]; then
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply [3] arguments for cleaning of *** GENE ANALYSIS *** results!"
 	script_copyright_message
 
 else
-	
+
 	echo "All arguments are passed. These are the settings:"
-	if [[ ${ANALYSIS_TYPE} = "GWAS" || ${ANALYSIS_TYPE} = "REGION" ]]; then 
+	if [[ ${ANALYSIS_TYPE} = "GWAS" || ${ANALYSIS_TYPE} = "REGION" ]]; then
 		### SET INPUT-DATA
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${PHENOTYPE} # depends on arg1
 		# what is the basename of the file?
 		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.txt.gz"
-			
-	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then 
+
+	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		### SET INPUT-DATA
 		GENE="$3"
 		OUTPUT_DIR=${PROJECTDIR}/${PROJECTNAME}/snptest_results/${GENE}/${PHENOTYPE} # depends on arg1
 		# what is the basename of the file?
 		RESULTS="${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.summary_results.txt.gz"
-		
+
 	else
 		echo "Oh, computer says no! Number of arguments found "$#"."
 		script_arguments_error "You must supply [2-3] arguments for cleaning of *** GWASToolKit *** results!"
 		script_copyright_message
 	fi
-	
+
 	echo "The output directory is...................: ${OUTPUT_DIR}"
 	echo "The phenotypes is.........................: ${PHENOTYPE}"
 	echo "The minimum info-score filter is..........: ${INFO}"
 	echo "The minimum minor allele count is.........: ${MAC}"
 	echo "The minimum coded allele frequency is.....: ${CAF}"
 	echo "The lower/upper limit of the BETA/SE is...: ${BETA_SE}"
-	echo ""	
+	echo ""
 	# PLOT GWAS RESULTS
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 	echo "                                            STARTING QUALITY CONTROL"
@@ -162,11 +162,14 @@ else
 	echo "The basename is: "${FILENAME}
 	echo "Number of pre-QC variants:"
 	zcat ${RESULTS} | wc -l
-	
+
 	### COLUMN NAMES & NUMBERS
 	###     1    2   3  4            5            6              7    8      9     10     11     12  13  14  15  16 17  18 19
 	### ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE
-	echo ""
+	### . 1:10177 01 10177 A AC 1 1 223 11 0 234 11 0.0235043 0.0235043 1 0.454287 0.237531 0.31689
+	### . 1:10235 01 10235 T TA 1 1 234 0 0 234 0 0 0 1 NA NA NA
+	### . 1:10352 01 10352 T TA 1 1 212 21 1 234 23 0.0491453 0.0491453 0.433423 0.869445 0.0353989 0.215128
+  echo ""
 	echo "Filtering data, using the following criteria: "
 	echo "  * ${INFO} <= INFO < 1 "
 	echo "  * CAF > ${CAF} "
@@ -177,7 +180,7 @@ else
 	### COLUMN NAMES & NUMBERS
 	###     1    2   3  4            5            6              7    8      9     10     11     12  13  14  15  16 17  18 19
 	### ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE
-	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | awk '( $8 >= '${INFO}' && $8 < 1 && $13 >= '${MAC}' &&  $15 >= '${CAF}' && $17 != "NA" && $17 <= 1 && $17 >= 0 && $18 != "NA" && $18 < '${BETA_SE}' && $18 > -'${BETA_SE}' && $19 != "NA" && $19 < '${BETA_SE}' && $19 > -'${BETA_SE}' )' >> ${OUTPUT_DIR}/${FILENAME}.QC.txt
+	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | awk '( "'$8'" >= '${INFO}' && "'$8'" < 1 && "'$13'" >= '${MAC}' &&  "'$15'" >= '${CAF}' && "'$17'" != "NA" && "'$17'" <= 1 && "'$17'" >= 0 && "'$18'" != "NA" && "'$18'" < '${BETA_SE}' && "'$18'" > -'${BETA_SE}' && "'$19'" != "NA" && "'$19'" < '${BETA_SE}' && "'$19'" > -'${BETA_SE}' )' >> ${OUTPUT_DIR}/${FILENAME}.QC.txt
 	echo "Number of QC'd variants:"
 	cat ${OUTPUT_DIR}/${FILENAME}.QC.txt | wc -l
 	echo "Head of QC'd file:"
