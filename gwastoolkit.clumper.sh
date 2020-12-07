@@ -20,23 +20,23 @@ WHITE='\033[01;37m'
 function echobold { #'echobold' is the function name
     echo -e "${BOLD}${1}${NONE}" # this is whatever the function needs to execute, note ${1} is the text for echo
 }
-function echoitalic { 
-    echo -e "${ITALIC}${1}${NONE}" 
+function echoitalic {
+    echo -e "${ITALIC}${1}${NONE}"
 }
-function echonooption { 
+function echonooption {
     echo -e "${OPAQUE}${RED}${1}${NONE}"
 }
-function echoerrorflash { 
-    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}" 
+function echoerrorflash {
+    echo -e "${RED}${BOLD}${FLASHING}${1}${NONE}"
 }
-function echoerror { 
+function echoerror {
     echo -e "${RED}${1}${NONE}"
 }
 # errors no option
-function echoerrornooption { 
+function echoerrornooption {
     echo -e "${YELLOW}${1}${NONE}"
 }
-function echoerrorflashnooption { 
+function echoerrorflashnooption {
     echo -e "${YELLOW}${BOLD}${FLASHING}${1}${NONE}"
 }
 
@@ -100,12 +100,12 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ### LOADING CONFIGURATION FILE
 source "$1" # Depends on arg1.
 
-### REQUIRED | GENERALS	
+### REQUIRED | GENERALS
 CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
 PHENOTYPE="$2" # Depends on arg2
 
 ### START of if-else statement for the number of command-line arguments passed ###
-if [[ $# -lt 2 ]]; then 
+if [[ $# -lt 2 ]]; then
 	echo "Oh, computer says no! Number of arguments found "$#"."
 	script_arguments_error "You must supply at least [2] arguments when clumping a *** GENOME-WIDE ANALYSIS ***!"
 	echo ""
@@ -128,9 +128,9 @@ else
 	echo "The KB range used for clumping..........................................: ${CLUMP_KB}"
 	echo "Indicate the name of the clumping field to use (default: p-value, P)....: ${CLUMP_FIELD}"
 	echo ""
-	
+
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	echo "Preparing clumping of genome-wide analysis results using the P-values."	
+	echo "Preparing clumping of genome-wide analysis results using the P-values."
 	# what is the basename of the file?
 	RESULTS=${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.summary_results.QC.txt.gz
 	FILENAME=$(basename ${RESULTS} .txt.gz)
@@ -141,32 +141,37 @@ else
 	echo "Clumping..."
 	echo "The reference is ${REFERENCE}."
 
-	$PLINK2 --bfile ${REFERENCEDATA} --memory 168960 --clump ${OUTPUT_DIR}/${FILENAME}.txt --clump-snp-field "RSID" --clump-p1 ${CLUMP_P1} --clump-p2 ${CLUMP_P2} --clump-r2 ${CLUMP_R2} --clump-kb ${CLUMP_KB} --clump-field ${CLUMP_FIELD} --out ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped --clump-verbose --clump-annotate CodedAlleleB,OtherAlleleA,CAF,MAF,MAC,HWE,AvgMaxPostCall,Info,BETA,SE 
-		
+
+  MEM_PLINK=${QMEMGWASCLUMP/G/}
+  MEM_PLINK2=$((MEM_PLINK * 1024))
+  echo "Memory used for plink was ${MEM_PLINK2} MB."
+
+	$PLINK2 --bfile ${REFERENCEDATA} --memory ${MEM_PLINK2} --clump ${OUTPUT_DIR}/${FILENAME}.txt --clump-snp-field "RSID" --clump-p1 ${CLUMP_P1} --clump-p2 ${CLUMP_P2} --clump-r2 ${CLUMP_R2} --clump-kb ${CLUMP_KB} --clump-field ${CLUMP_FIELD} --out ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped --clump-verbose --clump-annotate CodedAlleleB,OtherAlleleA,CAF,MAF,MAC,HWE,AvgMaxPostCall,Info,BETA,SE
+
 	echo "Done clumping; gzipping the results for [ ${FILENAME} ]..."
 	gzip -v ${OUTPUT_DIR}/${FILENAME}.txt
 	echo ""
-	
+
 	echo "After clumping, pull out the index variants..."
 	grep "INDEX" ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.clumped.clumped | awk ' { print $2 } ' > ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.indexvariants.txt
-	echo "Number of index variants..." 
+	echo "Number of index variants..."
 	cat ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.indexvariants.txt | wc -l
-	
+
 	echo ""
 	echo "Copying to a working file..."
 	cp -v ${OUTPUT_DIR}/${FILENAME}.${CLUMP_R2}.indexvariants.txt ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo
 	echo ""
-	
+
 	echo "Counting the total of number of index variants to look at."
 	cat ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo | wc -l
 	cat ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo | sort -u > ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt
 	#rm -v ${OUTPUT_DIR}/${FILENAME}.clumped_hits.txt.foo
 	echo ""
-	
+
 	echo "Making a list of TOP-variants based on p < ${CLUMP_P1}."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | awk '$1=="ALTID" || $17<='${CLUMP_P1}'' > ${OUTPUT_DIR}/${FILENAME}.TOP_based_on_p${CLUMP_P1}.txt
 	echo ""
-	
+
 ### END of if-else statement for the number of command-line arguments passed ###
 fi
 
