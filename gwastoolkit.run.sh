@@ -166,6 +166,11 @@ else
 	fi
 	PROJECT=${PROJECTDIR}/${PROJECTNAME}
 
+  # Using date to track an ANALYSIS
+
+  DATE_TRACK=`printf '%(%Y%m%d_%H%M%S)T\n' -1`
+  echo "${DATE_TRACK}"
+
 	# Loading covariate and phenotype files
 	PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
 	COVARIATES=$(cat ${COVARIATE_FILE}) # covariate list
@@ -212,80 +217,92 @@ else
 
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "Creating jobs to perform GWAS on your phenotype(s)..."
- 		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE}
-
-		### Create QC bash-script to send to qsub
+    ### Sending analizer.sh to sbatch
+    ${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
+    ### Create QC bash-script to send to qsub
 		for PHENOTYPE in ${PHENOTYPES}; do
 
 			PHENO_OUTPUT_DIR=${PROJECT}/snptest_results/${PHENOTYPE}
 
-			echo "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit QC script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
-			qsub -S /bin/bash -N QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWAS} -l ${QTIMEGWAS} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_QC=$(sbatch --parsable -J QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWAS} -t ${QTIMEGWAS} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 			echo ""
 
 			### Create plotter bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.plotter.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit plotter script
-			qsub -S /bin/bash -N PLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASPLOT} -l ${QTIMEGWASPLOT} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_PLOTTER=$(sbatch --parsable -J PLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOT} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 			echo ""
 
 			### Create QC plotter bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.plotter.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit QC plotter script
-			qsub -S /bin/bash -N QCPLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASPLOTQC} -l ${QTIMEGWASPLOTQC} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_QCPLOTTER=$(sbatch --parsable -J QCPLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOTQC} -t ${QTIMEGWASPLOTQC} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 			echo ""
 
 			#### Create clumper bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.clumper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.clumper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			#### Submit clumper script
-			qsub -S /bin/bash -N CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLUMP} -l ${QTIMEGWASCLUMP} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_CLUMPER=$(sbatch --parsable -J CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLUMP} -t ${QTIMEGWASCLUMP} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 			echo ""
 
 			##### Create locuszoom bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			##### Submit locuszoom script
-			qsub -S /bin/bash -N LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_LZ=$(sbatch --parsable -J LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_CLUMPER} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASLZOOM} -t ${QTIMEGWASLZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 
 			##### Create cleaner bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			##### Submit cleaner script
- 			qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMGWASCLEANER} -l ${QTIMEGWASCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+ 			JOB_ID_CLEANER=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_LZ} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLEANER} -t ${QTIMEGWASCLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
 
 		done
 
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 
-		echo "Creating jobs to perform an individual variant analysis on your phenotype(s)..."
-		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE}
+    ### Sending analizer.sh
+    ${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
 
+    JOB_IDS_c=0
+    ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
+    JOB_IDS_PHENO=""
 		for PHENOTYPE in ${PHENOTYPES}; do
 
 			PHENO_OUTPUT_DIR=${PROJECT}/snptest_results/${PHENOTYPE}
 
 			##### Create cleaner bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVARCLEANER} -l ${QTIMEVARCLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			JOB_ID_CLEANER_i=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMVARCLEANER} -t ${QTIMEVARCLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+      if [[ ${JOB_IDS_c} == 0 ]]; then
+        JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
+        JOB_IDS_c=$((JOB_IDS_c + 1))
+      else
+        JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
+        JOB_IDS_c=$((JOB_IDS_c + 1))
+      fi
 		done
 			###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
-			echo "${GWASTOOLKITDIR}/summariser.sh ${CONFIGURATIONFILE} " > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/summariser.sh ${CONFIGURATIONFILE} " > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.sh
 			###### Submit summariser script
-			qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.sh
+			JOB_ID_SUMMARISER=$(sbatch  --parsable -J SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} --depend=afterany:${JOB_IDS_PHENO} -o ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.log -e ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.errors --mem=${QMEMGWASLZOOM} -t ${QTIMEGWASLZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.sh)
 
 	elif [[ ${ANALYSIS_TYPE} = "REGION" ]]; then
 		echo "Creating jobs to perform a regional analysis on your phenotype(s)..."
-		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE}
+		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
 
 		echo ""
 		echo "NOTE: no QC, plotting and cleaning is implemented yet. This will be there in the next version - similar to 'GENES' option."
 
 	elif [[ ${ANALYSIS_TYPE} = "GENES" ]]; then
 		echo "Creating jobs to perform a per-analysis on your phenotype(s)..."
-		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE}
+		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
 
 		### Create QC bash-script to send to qsub
+    JOB_IDS_c=0
+    ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
+    JOB_IDS_PHENO=""
 		while IFS='' read -r GENEOFINTEREST || [[ -n "$GENEOFINTEREST" ]]; do
 			for GENE in ${GENEOFINTEREST}; do
 				for PHENOTYPE in ${PHENOTYPES}; do
@@ -294,22 +311,29 @@ else
 					PHENO_OUTPUT_DIR=${GENE_OUTPUT_DIR}/${PHENOTYPE}
 
 					##### Create qc bash-script to send to qsub
-					echo "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
 					### Submit qc script
 					### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-					qsub -S /bin/bash -N QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -hold_jid WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors -l ${QMEMGENEQC} -l ${QTIMEGENEQC} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					JOB_ID_QC=$(sbatch --parsable -J QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors --mem=${QMEMGENEQC} -t ${QTIMEGENEQC} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh)
 
 					##### Create locuszoom bash-script to send to qsub
-					echo "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
 					##### Submit locuszoom script
 					#### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-					qsub -S /bin/bash -N LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -hold_jid QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors -l ${QMEMGENELZOOM} -l ${QTIMEGENELZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					JOB_ID_LZ=$(sbatch --parsable -J LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors --mem=${QMEMGENELZOOM} -t ${QTIMEGENELZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh)
 
 					##### Create cleaner bash-script to send to qsub
-					echo "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
 					##### Submit cleaner script
-					qsub -S /bin/bash -N CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} -hold_jid LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors -l ${QMEMGENECLEANER} -l ${QTIMEGENECLEANER} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+					JOB_ID_CLEANER_i=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} --depend=afterany:${JOB_ID_LZ} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors --mem=${QMEMGENECLEANER} -t ${QTIMEGENECLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh)
 					echo ""
+          if [[ ${JOB_IDS_c} == 0 ]]; then
+            JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          else
+            JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          fi
 				done
 			done
 		done < ${GENES_FILE}
@@ -319,9 +343,9 @@ else
 				GENE_OUTPUT_DIR=${PROJECT}/snptest_results/${GENE}
 
 				###### Create summariser bash-script to send to qsub
-				echo "${GWASTOOLKITDIR}/summariser.sh ${CONFIGURATIONFILE} ${GENE}" > ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/summariser.sh ${CONFIGURATIONFILE} ${GENE}" > ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
 				###### Submit summariser script
-				qsub -S /bin/bash -N SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} -hold_jid CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} -o ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors -l ${QMEMGWASLZOOM} -l ${QTIMEGWASLZOOM} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${GENE_OUTPUT_DIR} ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
+				sbatch  --parsable -J SUMMARISER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} --depend=afterany:${JOB_IDS_PHENO} -o ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors --mem=${QMEMGWASLZOOM} -t ${QTIMEGWASLZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${GENE_OUTPUT_DIR} ${GENE_OUTPUT_DIR}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh
 
 			done
 		done < ${GENES_FILE}

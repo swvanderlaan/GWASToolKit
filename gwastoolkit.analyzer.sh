@@ -217,6 +217,7 @@ source "$1" # Depends on arg1.
 
 ### REQUIRED | GENERALS
 CONFIGURATIONFILE="$1" # Depends on arg1 -- but also on where it resides!!!
+DATE_TRACK="$2"
 
 ### START of if-else statement for the number of command-line arguments passed ###
 if [[ ${ANALYSIS_TYPE} = "GWAS" && $# -lt 1 ]]; then
@@ -403,6 +404,8 @@ fi
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
 		echo "Submit jobs to perform GWAS on your phenotype(s)..."
 		### Run SNPTEST for each phenotype
+    FINAL_JOB_ID=""
+    FINAL_JOB_ID_c=0
 		for PHENOTYPE in ${PHENOTYPES}; do
 		### Make and/or set the output directory
 			if [ ! -d ${OUTPUT_DIR}/${PHENOTYPE} ]; then
@@ -413,7 +416,9 @@ fi
 				echo "The output directory already exists. Setting it."
 				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			fi
-
+      JOB_IDS_c=0
+      ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
+      JOB_IDS=""
 		echo "Analysing the phenotype ${PHENOTYPE}."
 			# for CHR in $(seq 1 22) X; do
 			for CHR in $(seq 1 22); do
@@ -422,20 +427,47 @@ fi
 					# We will work with the 'filtering' option: `-[in|ex]clude_samples_where <name> [=|==|!=] <value>`
 					# instead of `-[in]exclude_samples`
 					# This brings more flexibility, and less error prone in terms of making lists
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} != "X"  ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
+          if [[ ${JOB_IDS_c} == 0 ]]; then
+            JOB_IDS="${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          else
+            JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          fi
+        elif [[ ${STANDARDIZE} == "RAW" && ${CHR} != "X"  ]]; then
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
+          if [[ ${JOB_IDS_c} == 0 ]]; then
+            JOB_IDS="${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          else
+            JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          fi
 				elif [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} == "X"  ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.#!/bin/sh
-					echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
+          if [[ ${JOB_IDS_c} == 0 ]]; then
+            JOB_IDS="${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          else
+            JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          fi
+          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} == "X"  ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
-					echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
+					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
+          if [[ ${JOB_IDS_c} == 0 ]]; then
+            JOB_IDS="${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          else
+            JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+            JOB_IDS_c=$((JOB_IDS_c + 1))
+          fi
+          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 
 				else
 					### If arguments are not met then this error message will be displayed
@@ -447,16 +479,26 @@ fi
 				echo ""
 			done
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-			#qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEM} -l ${QTIME} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			echo ""
+      echo "Using ${JOB_IDS} as dependency for the wrapper of ${PHENOTYPE}"
+      WRAP_JOB_ID_i=$(sbatch --parsable -J WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_IDS} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEM} -t ${QTIME} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+      if [[ ${FINAL_JOB_ID_c} == 0 ]]; then
+        FINAL_JOB_ID="${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      else
+        FINAL_JOB_ID="${FINAL_JOB_ID},${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      fi
+      echo ""
 
 		done
 	elif [[ ${ANALYSIS_TYPE} == "VARIANT" ]]; then
 		echo "Submit jobs to perform individual variant analysis on your phenotype(s)..."
 		### Run SNPTEST for each phenotype
+    FINAL_JOB_ID=""
+    FINAL_JOB_ID_c=0
 		for PHENOTYPE in ${PHENOTYPES}; do
 		### Make and/or set the output directory
 			if [ ! -d ${OUTPUT_DIR}/${PHENOTYPE} ]; then
@@ -467,6 +509,9 @@ fi
 				echo "The output directory already exists. Setting it."
 				PHENO_OUTPUT_DIR=${OUTPUT_DIR}/${PHENOTYPE}
 			fi
+      JOB_IDS_c=0
+      ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
+      JOB_IDS=""
 			while IFS='' read -r VARIANTOFINTEREST || [[ -n "$VARIANTOFINTEREST" ]]; do
 				### EXAMPLE VARIANT LIST
 				### rs12344 12 9029381
@@ -477,17 +522,30 @@ fi
 				VARIANTFORFILE=$(echo "${LINE}" | awk '{ print $1 }' | sed 's/\:/_/g')
 				CHR=$(echo "${LINE}" | awk '{ print $2 }')
 				BP=$(echo "${LINE}" | awk '{ print $3 }')
-
 				echo "Analysing the phenotype [ ${PHENOTYPE} ] for [ ${VARIANT}: on chromosome ${CHR} ]."
 
 				if [[ ${METHOD} = "newml" ]]; then
 
 					if [[ ${CONDITION} == "NORMAL" ]]; then
-						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -baseline_phenotype ${BASELINEPHENOTYPE} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -baseline_phenotype ${BASELINEPHENOTYPE} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+            if [[ ${JOB_IDS_c} == 0 ]]; then
+              JOB_IDS="${JOB_IDS_i}"
+              JOB_IDS_c=$((JOB_IDS_c + 1))
+            else
+              JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+              JOB_IDS_c=$((JOB_IDS_c + 1))
+            fi
 					elif [[ ${CONDITION} == "CONDITION" ]]; then
-						echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -baseline_phenotype ${BASELINEPHENOTYPE} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-						qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -baseline_phenotype ${BASELINEPHENOTYPE} -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+						JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+            if [[ ${JOB_IDS_c} == 0 ]]; then
+              JOB_IDS="${JOB_IDS_i}"
+              JOB_IDS_c=$((JOB_IDS_c + 1))
+            else
+              JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+              JOB_IDS_c=$((JOB_IDS_c + 1))
+            fi
 					else
 						### If arguments are not met then this error message will be displayed
 						script_arguments_error_condition
@@ -497,11 +555,25 @@ fi
 
 					if [[ ${STANDARDIZE} == "STANDARDIZE" ]]; then
 						if [[ ${CONDITION} == "NORMAL" ]]; then
-							echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-							qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+              if [[ ${JOB_IDS_c} == 0 ]]; then
+                JOB_IDS="${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              else
+                JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              fi
 						elif [[ ${CONDITION} == "CONDITION" ]]; then
-							echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-							qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+              if [[${JOB_IDS_c} == 0]]; then
+                JOB_IDS="${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              else
+                JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              fi
 						else
 							### If arguments are not met then this error message will be displayed
 							script_arguments_error_condition
@@ -509,11 +581,25 @@ fi
 
 					elif [[ ${STANDARDIZE} == "RAW" ]]; then
 						if [[ ${CONDITION} == "NORMAL" ]]; then
-							echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-							qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+              if [[ ${JOB_IDS_c} == 0 ]]; then
+                JOB_IDS="${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              else
+                JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              fi
 						elif [[ ${CONDITION} == "CONDITION" ]]; then
-							echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
-							qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -assume_chromosome ${CHR} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -snpid ${VARIANT} -condition_on ${CONDITIONLIST} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh
+							JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${VARIANTFORFILE}.chr${CHR}.sh)
+              if [[ ${JOB_IDS_c} == 0 ]]; then
+                JOB_IDS="${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              else
+                JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
+                JOB_IDS_c=$((JOB_IDS_c + 1))
+              fi
 						else
 							### If arguments are not met then this error message will be displayed
 							script_arguments_error_condition
@@ -530,21 +616,30 @@ fi
 				fi
 
 			done < ${VARIANTLIST}
-
+      ### echo "${JOB_IDS}"
 			echo ""
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
-			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMVAR} -l ${QTIMEVAR} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			WRAP_JOB_ID_i=$(sbatch --parsable -J WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_IDS} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMVAR} -t ${QTIMEVAR} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+      if [[ ${FINAL_JOB_ID_c} == 0 ]]; then
+        FINAL_JOB_ID="${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      else
+        FINAL_JOB_ID="${FINAL_JOB_ID},${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      fi
 			echo ""
 
 		done
 	elif [[ ${ANALYSIS_TYPE} == "REGION" ]]; then
 		echo "Submit jobs to perform a regional analysis on your phenotype(s)..."
 		### Run SNPTEST for each phenotype
+    FINAL_JOB_ID=""
+    FINAL_JOB_ID_c=0
 		for PHENOTYPE in ${PHENOTYPES}; do
 		### Make and/or set the output directory
 			if [ ! -d ${OUTPUT_DIR}/${PHENOTYPE} ]; then
@@ -557,11 +652,11 @@ fi
 			fi
 			echo "Analysing the phenotype [ ${PHENOTYPE} ] and all variants in the region [ chr${CHR}:${REGION_START}-${REGION_END} ]."
 			if [[ ${STANDARDIZE} == "STANDARDIZE" ]]; then
-				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.out " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
-				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.out " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				JOB_IDS=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh)
 			elif [[ ${STANDARDIZE} == "RAW" ]]; then
-				echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.out " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
-				qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range ${REGION_START}-${REGION_END} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.out " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh
+				JOB_IDS=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}_${REGION_START}_${REGION_END}.sh)
 			else
 				### If arguments are not met then this error message will be displayed
 				script_arguments_error_normalization
@@ -571,10 +666,17 @@ fi
 			echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			echo ""
 			### Create wrap-up bash-script to send to qsub
-			echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			### Submit wrap-up script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N AEGS_GWAS' are finished
- 			qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors -l ${QMEMREG} -l ${QTIMEREG} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+ 			WRAP_JOB_ID_i=$(sbatch --parsable -J WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_IDS} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMREG} -t ${QTIMEREG} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+      if [[ ${FINAL_JOB_ID_c} == 0 ]]; then
+        FINAL_JOB_ID="${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      else
+        FINAL_JOB_ID="${FINAL_JOB_ID},${WRAP_JOB_ID_i}"
+        FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+      fi
 			echo ""
 
 		done
@@ -605,6 +707,8 @@ fi
 
 		echo ""
 		### Run SNPTEST for each gene and phenotype
+    FINAL_JOB_ID=""
+    FINAL_JOB_ID_c=0
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			LINE=${REGIONOFINTEREST}
 			GENELOCUS=$(echo "${LINE}" | awk '{print $1}')
@@ -636,11 +740,11 @@ fi
 				echo "Analysing the phenotype [ ${PHENOTYPE} ] and all variants on the [ ${GENELOCUS} locus on ${CHR}:${START}-${END} ]."
 
 				if [[ ${STANDARDIZE} == "STANDARDIZE" ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -quantile_normalise_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					JOB_IDS=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh)
 				elif [[ ${STANDARDIZE} = "RAW" ]]; then
-					echo "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
-					qsub -S /bin/bash -N ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEM} -l ${QTIME} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -range '${START}'-'${END}' -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+					JOB_IDS=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh)
 				else
 					### If arguments are not met then this error message will be displayed
 					script_arguments_error_normalization
@@ -650,10 +754,17 @@ fi
 				echo "/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 				echo ""
 				### Create wrap-up bash-script to send to qsub
-				echo "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENELOCUS} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.wrapper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} ${GENELOCUS} " > ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
 				### Submit wrap-up script
 				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-				qsub -S /bin/bash -N WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -hold_jid ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors -l ${QMEMGENE} -l ${QTIMEGENE} -M ${YOUREMAIL} -m ${MAILSETTINGS} -wd ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh
+				WRAP_JOB_ID_i=$(sbatch --parsable -J WRAP_UP.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE} --depend=afterany:${JOB_IDS} -o ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.errors --mem=${QMEMGENE} -t ${QTIMEGENE} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/wrap_up.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENELOCUS}_${RANGE}.sh)
+        if [[ ${FINAL_JOB_ID_c} == 0 ]]; then
+          FINAL_JOB_ID="${WRAP_JOB_ID_i}"
+          FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+        else
+          FINAL_JOB_ID="${FINAL_JOB_ID},${WRAP_JOB_ID_i}"
+          FINAL_JOB_ID_c=$((FINAL_JOB_ID_c + 1))
+        fi
 				echo ""
 
 			done
@@ -663,6 +774,12 @@ fi
 		### If arguments are not met then this error message will be displayed
 		script_arguments_error_analysis_type
 	fi
+
+  printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+  ### Submit wrap-up script
+  ### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
+  sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+
 	echo "Man, oh man, I'm done with submitting! That was a lot..."
 	echo ""
 	echo ""
