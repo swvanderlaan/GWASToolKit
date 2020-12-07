@@ -2,9 +2,9 @@ GWASToolKit
 ============
 [![DOI](https://zenodo.org/badge/55601542.svg)](https://zenodo.org/badge/latestdoi/55601542)
 
-This repository contains various scripts in Perl, BASH, and Python scripts to use in genome-wide association studies, single variant analyses, regional analyses, and gene-centered analyses. The genotypes are expected to be imputed using [IMPUTE2](http://mathgen.stats.ox.ac.uk/impute/impute_v2.html) and the core of the collection of scripts makes use of [SNPTEST v2.5](https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html). 
+This repository contains various scripts in Perl, BASH, and Python scripts to use in genome-wide association studies, single variant analyses, regional analyses, and gene-centered analyses. The genotypes are expected to be imputed using [IMPUTE2](http://mathgen.stats.ox.ac.uk/impute/impute_v2.html) and the core of the collection of scripts makes use of [SNPTEST v2.5.4+](https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html)and [QCTOOL v2.0.2+](https://www.well.ox.ac.uk/~gav/qctool/#overview). 
 
-All scripts are annotated for debugging purposes - and future reference. The scripts will work within the context of a certain Linux environment (in this case a CentOS7 system on a SUN Grid Engine background). As such we have tested GWASToolKit on CentOS6.6, CentOS7, and OS X El Capitan (version 10.11.[x]). 
+All scripts are annotated for debugging purposes - and future reference. The scripts will work within the context of a certain Linux environment (in this case a _CentOS7_ system with _Simple Linux Utility for Resource Management [SLURM]_). As such we have tested GWASToolKit on CentOS6.6, CentOS7, and macOS since El Capitan (version 10.11.[x]). 
 
 
 --------------
@@ -40,7 +40,9 @@ By typing...
 bash gwastoolkit.analyzer.sh $(pwd)/gwastoolkit.conf
 ```
 
-...the user will control what analysis will be done. Simply typing `bash gwastoolkit.analyzer.sh` will produce an extensive error-message explaining what arguments are expected. Note: it is absolutely pivotal to use `$(pwd)` to indicate the whole path to the configuration file, because this is used by the script(s) for the creation of directories _etc._ 
+...the user will control what analysis will be done. Simply typing `bash gwastoolkit.analyzer.sh` will produce an extensive error-message explaining what arguments are expected. 
+
+> Note: it is absolutely pivotal to use `$(pwd)` to indicate the whole path to the configuration file, because this is used by the script(s) for the creation of directories _etc._ 
 
 --------------
 
@@ -71,16 +73,18 @@ The user must supply a variant list with chromosome and base pair position per v
 #### TO DO
 There are definitely improvements needed. Below of things I'd like to add or edit in the (near) future.
 
-- edit the variant selection to work with non-rsID variants
-- add proper `--help` flag
-- clean up codes further, especially with respect to the various error-flags
-- add in checks of the environment, similar to `slideToolkit` scripts
-- add in some code to produce a simple report
+-[x] ~~edit the variant selection to work with non-rsID variants~~ this now works based on `chromosome-basepair` position.
+-[] add proper `--help` flag
+-[] clean up codes further, especially with respect to the various error-flags
+-[] add in checks of the environment, similar to `slideToolkit` scripts
+-[] add in some code to produce a simple report
+-[] create wiki
+-[x] ~~update to SLURM~~ this was update, kudos to @ediezben.
 
 --------------
 
 #### The MIT License (MIT)
-##### Copyright (c) 2010-2017 Sander W. van der Laan | s.w.vanderlaan [at] gmail [dot] com.
+##### Copyright (c) 2010-2020 Sander W. van der Laan | s.w.vanderlaan [at] gmail [dot] com.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:   
 
