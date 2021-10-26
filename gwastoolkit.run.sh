@@ -99,9 +99,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.4.0"
+echobold " Version    : v1.4.1"
 echobold ""
-echobold " Last update: 2020-04-28"
+echobold " Last update: 2021-10-26"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -166,10 +166,10 @@ else
 	fi
 	PROJECT=${PROJECTDIR}/${PROJECTNAME}
 
-  # Using date to track an ANALYSIS
+	# Using date to track an ANALYSIS
 
-  DATE_TRACK=`printf '%(%Y%m%d_%H%M%S)T\n' -1`
-  echo "${DATE_TRACK}"
+	DATE_TRACK=`printf '%(%Y%m%d_%H%M%S)T\n' -1`
+	echo "${DATE_TRACK}"
 
 	# Loading covariate and phenotype files
 	PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway

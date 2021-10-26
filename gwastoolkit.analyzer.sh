@@ -775,10 +775,10 @@ fi
 		script_arguments_error_analysis_type
 	fi
 
-  printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
-  ### Submit wrap-up script
-  ### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-  sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+	printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+	### Submit wrap-up script
+	### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
+	sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
 
 	echo "Man, oh man, I'm done with submitting! That was a lot..."
 	echo ""
