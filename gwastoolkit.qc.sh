@@ -84,9 +84,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                         GWASTOOLKIT QUALITY CONTROL"
 echobold "                                 quality control of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.1.5"
+echobold " Version    : v1.1.6"
 echobold ""
-echobold " Last update: 2020-04-26"
+echobold " Last update: 2021-10-26"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -166,10 +166,10 @@ else
 	### COLUMN NAMES & NUMBERS
 	###     1    2   3  4            5            6              7    8      9     10     11     12  13  14  15  16 17  18 19
 	### ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE
-	### . 1:10177 01 10177 A AC 1 1 223 11 0 234 11 0.0235043 0.0235043 1 0.454287 0.237531 0.31689
-	### . 1:10235 01 10235 T TA 1 1 234 0 0 234 0 0 0 1 NA NA NA
-	### . 1:10352 01 10352 T TA 1 1 212 21 1 234 23 0.0491453 0.0491453 0.433423 0.869445 0.0353989 0.215128
-  echo ""
+	### --- 1:10177 01 10177 A AC 1 1 223 11 0 234 11 0.0235043 0.0235043 1 0.454287 0.237531 0.31689
+	### --- 1:10235 01 10235 T TA 1 1 234 0 0 234 0 0 0 1 NA NA NA
+	### --- 1:10352 01 10352 T TA 1 1 212 21 1 234 23 0.0491453 0.0491453 0.433423 0.869445 0.0353989 0.215128
+	echo ""
 	echo "Filtering data, using the following criteria: "
 	echo "  * ${INFO} <= INFO < 1 "
 	echo "  * CAF > ${CAF} "
@@ -180,7 +180,7 @@ else
 	### COLUMN NAMES & NUMBERS
 	###     1    2   3  4            5            6              7    8      9     10     11     12  13  14  15  16 17  18 19
 	### ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE
-	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | awk '( "'$8'" >= '${INFO}' && "'$8'" < 1 && "'$13'" >= '${MAC}' &&  "'$15'" >= '${CAF}' && "'$17'" != "NA" && "'$17'" <= 1 && "'$17'" >= 0 && "'$18'" != "NA" && "'$18'" < '${BETA_SE}' && "'$18'" > -'${BETA_SE}' && "'$19'" != "NA" && "'$19'" < '${BETA_SE}' && "'$19'" > -'${BETA_SE}' )' >> ${OUTPUT_DIR}/${FILENAME}.QC.txt
+	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | awk '( $8 >= '${INFO}' && $8 < 1 && $13 >= '${MAC}' &&  $15 >= '${CAF}' && $17 != "NA" && $17 <= 1 && $17 >= 0 && $18 != "NA" && $18 < '${BETA_SE}' && $18 > -'${BETA_SE}' && $19 != "NA" && $19 < '${BETA_SE}' && $19 > -'${BETA_SE}' )' >> ${OUTPUT_DIR}/${FILENAME}.QC.txt
 	echo "Number of QC'd variants:"
 	cat ${OUTPUT_DIR}/${FILENAME}.QC.txt | wc -l
 	echo "Head of QC'd file:"
