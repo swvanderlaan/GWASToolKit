@@ -421,7 +421,6 @@ fi
       ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
       JOB_IDS=""
 		echo "Analysing the phenotype ${PHENOTYPE}."
-			# for CHR in $(seq 1 22) X; do
 			for CHR in $(seq 1 22); do
 			echo "Processing the following chromosome ${CHR}."
 				if [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} != "X" ]]; then
@@ -457,7 +456,7 @@ fi
             JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
             JOB_IDS_c=$((JOB_IDS_c + 1))
           fi
-          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+          #echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} == "X"  ]]; then
 					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
 					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
@@ -468,7 +467,7 @@ fi
             JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
             JOB_IDS_c=$((JOB_IDS_c + 1))
           fi
-          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+          #echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 
 				else
 					### If arguments are not met then this error message will be displayed
