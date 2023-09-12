@@ -269,7 +269,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -299,7 +298,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -329,7 +327,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -361,7 +358,7 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
+# 		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
