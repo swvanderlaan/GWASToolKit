@@ -363,16 +363,23 @@ fi
 script_copyright_message
 
 ### MoSCoW
-### - make with arguments/configuration file
-### - make parsing results dynamic - independent of 'TRAIT_TYPE'
-### - add in VEGAS lookup function
-### - add in fastQTLanalysis option
-### - add in Variant summarizer (all results in one file)
-### - add in readme-generator-function
-### - add in gzipper-function
-### - add in a function that checks whether the covariates & phenotypes files make sense:
+### TO-DO
+### - replace LocusZoom with `RACER` -- HIGH PRIO
+### 
+### DONE
+### - make with arguments/configuration file -- DONE
+### - add in Variant summarizer (all results in one file) -- DONE
+### - add in gzipper-function -- DONE
+###
+### DEPRECATED/OBSOLETE
+### - add in readme-generator-function -- DEPRECATED/OBSOLETE idea, this is part of the r-notebook preparation
+### - add in a function that checks whether the covariates & phenotypes files make sense: -- DEPRECATED/OBSOLETE idea, this is part of the r-notebook preparation
 ###   * get median, mean, se, sd, min, max, counts
 ###   * remove covariates/phenotypes dynamically (±3sd?)
+### - make parsing results dynamic - independent of 'TRAIT_TYPE' -- DEPRECATED/OBSOLETE idea
+### - add in VEGAS lookup function -- DEPRECATED/OBSOLETE idea, we create input for MAGMA
+### - add in fastQTLanalysis option -- DEPRECATED/OBSOLETE idea
+
 
 ### Make a variant wrapper script
 ### for i in $(ls ../cad/snptest_results) ; do echo "* processing [ "$i" ]..."; echo "$i" >> phenotype.list; done
