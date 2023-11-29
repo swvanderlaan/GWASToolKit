@@ -70,16 +70,19 @@ The user must supply a variant list with chromosome and base pair position per v
 
 --------------
 
-#### TO DO
-There are definitely improvements needed. Below of things I'd like to add or edit in the (near) future.
+#### MoSCoW (must, should, could, would) - TO DO
+There are definitely improvements needed. Below of things I'd like to add or edit in the (near) future (also refer to Issues-tab).
 
 - [x] ~~edit the variant selection to work with non-rsID variants~~ this now works based on `chromosome-basepair` position.
-- [.] add proper `--help` flag
-- [.] clean up codes further, especially with respect to the various error-flags
-- [.] add in checks of the environment, similar to `slideToolkit` scripts
-- [.] add in some code to produce a simple report
-- [.] create wiki
-- [x] ~~update to SLURM~~ this was update, kudos to @ediezben.
+- [.] add proper `--help` flag -- SHOULD
+- [.] clean up codes further, especially with respect to the various error-flags -- COULD
+- [.] add in checks of the environment, similar to `slideToolKit` scripts -- COULD
+- [.] add in some code to produce a simple report -- SHOULD
+- [.] create wiki -- MUST
+- [x] ~~update to SLURM~~ this was update, kudos to [@ediezben](https://github.com/ediezben).
+- [.] clean up code using ChatGPT -- MUST
+- [.] clean up code integrating `GWASLab` -- MUST
+- [.] replace LocusZoom with `RACER` -- MUST
 
 --------------
 

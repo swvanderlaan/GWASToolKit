@@ -99,9 +99,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.4.1"
+echobold " Version    : v1.4.2"
 echobold ""
-echobold " Last update: 2021-10-26"
+echobold " Last update: 2023-11-29"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -361,27 +361,3 @@ else
 fi
 
 script_copyright_message
-
-### MoSCoW
-### TO-DO
-### - replace LocusZoom with `RACER` -- HIGH PRIO
-### 
-### DONE
-### - make with arguments/configuration file -- DONE
-### - add in Variant summarizer (all results in one file) -- DONE
-### - add in gzipper-function -- DONE
-###
-### DEPRECATED/OBSOLETE
-### - add in readme-generator-function -- DEPRECATED/OBSOLETE idea, this is part of the r-notebook preparation
-### - add in a function that checks whether the covariates & phenotypes files make sense: -- DEPRECATED/OBSOLETE idea, this is part of the r-notebook preparation
-###   * get median, mean, se, sd, min, max, counts
-###   * remove covariates/phenotypes dynamically (±3sd?)
-### - make parsing results dynamic - independent of 'TRAIT_TYPE' -- DEPRECATED/OBSOLETE idea
-### - add in VEGAS lookup function -- DEPRECATED/OBSOLETE idea, we create input for MAGMA
-### - add in fastQTLanalysis option -- DEPRECATED/OBSOLETE idea
-
-
-### Make a variant wrapper script
-### for i in $(ls ../cad/snptest_results) ; do echo "* processing [ "$i" ]..."; echo "$i" >> phenotype.list; done
-### echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt
-### for i in $(cat phenotype.list); do echo "* processing [ "$i" ]..."; zcat AEGS.VARIANT.1kGp3v5GoNL5."$i".summary_results.txt.gz | tail -n +2 | awk -v pheno=$i '{ print pheno, $0 }' OFS=","  >> AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt; done
