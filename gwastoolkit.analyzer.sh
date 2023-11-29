@@ -187,9 +187,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                            GWASTOOLKIT ANALYZER"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.6"
+echobold " Version    : v1.3.7"
 echobold ""
-echobold " Last update: 2023-09-12"
+echobold " Last update: 2023-11-29"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -777,10 +777,7 @@ fi
 	printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
 	sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
 
-	echo "Man, oh man, I'm done with submitting! That was a lot..."
-	echo ""
-	echo ""
-	echo "All finished. All qsubs submitted, results will be summarised in summary_results.txt.gz."
+	echo "Man, oh man, I'm done with submitting! That was a lot, results will be summarised in summary_results.txt.gz."
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 ### END of if-else statement for the number of command-line arguments passed ###
