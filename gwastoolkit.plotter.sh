@@ -83,9 +83,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT PLOTTER"
 echobold "                                       plotting of SNPTEST analysis results"
 echobold ""
-echobold " Version    : v1.1.6"
+echobold " Version    : v1.1.7"
 echobold ""
-echobold " Last update: 2018-01-24"
+echobold " Last update: 2023-11-29"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -141,49 +141,49 @@ else
 	### QQ-plot including 95%CI and compute lambda [P]
 	echo "Making QQ-plot including 95%CI and compute lambda..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col P | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_CI.txt
-		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_CI.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		# Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_CI.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_CI.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	
 	### QQ-plot stratified by effect allele frequency [P, EAF]
 	echo "QQ-plot stratified by effect allele frequency..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col P,CAF | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_EAF.txt
-		Rscript ${SCRIPTS}/plotter.qq_by_caf.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_EAF.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		# Rscript ${SCRIPTS}/plotter.qq_by_caf.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_EAF.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${SCRIPTS}/plotter.qq_by_caf.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_EAF.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	
 	## QQ-plot stratified by imputation quality (info -- imputation quality) [P, INFO]
 	echo "QQ-plot stratified by imputation quality..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col P,Info | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_INFO.txt
-		Rscript ${SCRIPTS}/plotter.qq_by_info.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_INFO.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		# Rscript ${SCRIPTS}/plotter.qq_by_info.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_INFO.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${SCRIPTS}/plotter.qq_by_info.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.QQplot_INFO.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	
 	### Plot the imputation quality (info) in a histogram [INFO]
 	echo "Plot the imputation quality (info) in a histogram..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col Info | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_INFO.txt 
-		Rscript ${SCRIPTS}/plotter.infoscore.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_INFO.txt -o ${OUTPUT_DIR} -f PDF
+		# Rscript ${SCRIPTS}/plotter.infoscore.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_INFO.txt -o ${OUTPUT_DIR} -f PDF
 		Rscript ${SCRIPTS}/plotter.infoscore.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_INFO.txt -o ${OUTPUT_DIR} -f PNG
 	echo ""
 	
 	### Plot the BETAs in a histogram [BETA]
 	echo "Plot the BETAs in a histogram..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col BETA | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_BETA.txt 
-		Rscript ${SCRIPTS}/plotter.effectsize.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_BETA.txt -o ${OUTPUT_DIR} -f PDF
+		# Rscript ${SCRIPTS}/plotter.effectsize.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_BETA.txt -o ${OUTPUT_DIR} -f PDF
 		Rscript ${SCRIPTS}/plotter.effectsize.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Histogram_BETA.txt -o ${OUTPUT_DIR} -f PNG
 	echo ""
 	
 	### Plot the Z-score based p-value (calculated from beta/se) and P [BETA, SE, P]
 	echo "Plot the Z-score based p-value (calculated from beta/se) and P..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col BETA,SE,P | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.PZ_Plot.txt 
-		Rscript ${SCRIPTS}/plotter.p_z.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.PZ_Plot.txt -o ${OUTPUT_DIR} -s 500000 -f PDF
+		# Rscript ${SCRIPTS}/plotter.p_z.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.PZ_Plot.txt -o ${OUTPUT_DIR} -s 500000 -f PDF
 		Rscript ${SCRIPTS}/plotter.p_z.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.PZ_Plot.txt -o ${OUTPUT_DIR} -s 500000 -f PNG
 	echo ""
 	
 	### Manhattan plot for quick inspection (truncated upto -log10(p-value)) [CHR, BP, P]
 	echo "Manhattan plot for quick inspection (truncated upto -log10(p-value)=2)..."
 	zcat ${RESULTS} | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col CHR,BP,P | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Manhattan_forQuickInspect.txt
-		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Manhattan_forQuickInspect.txt -o ${OUTPUT_DIR} -c QC -f PDF -t ${FILENAME}
+		# Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Manhattan_forQuickInspect.txt -o ${OUTPUT_DIR} -c QC -f PDF -t ${FILENAME}
 		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.Manhattan_forQuickInspect.txt -o ${OUTPUT_DIR} -c QC -f PNG -t ${FILENAME}
 	echo ""
 	
