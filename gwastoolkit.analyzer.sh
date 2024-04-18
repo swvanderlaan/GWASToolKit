@@ -187,9 +187,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                            GWASTOOLKIT ANALYZER"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.7"
+echobold " Version    : v1.3.8"
 echobold ""
-echobold " Last update: 2023-11-29"
+echobold " Last update: 2024-04-18"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -704,8 +704,8 @@ fi
 
 		echo ""
 		### Run SNPTEST for each gene and phenotype
-    FINAL_JOB_ID=""
-    FINAL_JOB_ID_c=0
+	FINAL_JOB_ID=""
+	FINAL_JOB_ID_c=0
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			LINE=${REGIONOFINTEREST}
 			GENELOCUS=$(echo "${LINE}" | awk '{print $1}')
