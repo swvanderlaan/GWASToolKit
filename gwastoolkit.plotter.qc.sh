@@ -83,9 +83,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                          GWASTOOLKIT PLOTTER -- AFTER QC"
 echobold "                              plotting of SNPTEST analysis results after quality control"
 echobold ""
-echobold " Version    : v1.1.5"
+echobold " Version    : v1.1.6"
 echobold ""
-echobold " Last update: 2018-01-24"
+echobold " Last update: 2023-11-29"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -140,15 +140,15 @@ else
 	#### QQ-plot including 95%CI and compute lambda [P]
 	echo "Making QQ-plot including 95%CI and compute lambda..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col P | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${FILENAME}.QQplot.txt
-		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
+		# Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PDF
 		Rscript ${SCRIPTS}/plotter.qq.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.QQplot.txt -o ${OUTPUT_DIR} -s PVAL -f PNG
 	echo ""
 	### Manhattan plot for publications [CHR, BP, P]
 	echo "Manhattan plot for publications ..."
 	zcat ${OUTPUT_DIR}/${FILENAME}.txt.gz | ${GWASTOOLKITDIR}/SCRIPTS/parseTable.pl --col CHR,BP,P | tail -n +2 | grep -v NA > ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt
-		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF -t ${FILENAME}
+		# Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PDF -t ${FILENAME}
 		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c FULL -f PNG -t ${FILENAME}
-		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
+		# Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PDF -t ${FILENAME}
 		Rscript ${SCRIPTS}/plotter.manhattan.R -p ${OUTPUT_DIR} -r ${OUTPUT_DIR}/${FILENAME}.Manhattan.txt -o ${OUTPUT_DIR} -c TWOCOLOR -f PNG -t ${FILENAME}
 	echo "Finished plotting, zipping up and re-organising intermediate files!"
 	rm -v ${OUTPUT_DIR}/${FILENAME}.QQplot.txt

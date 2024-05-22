@@ -187,9 +187,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                            GWASTOOLKIT ANALYZER"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.3.4"
+echobold " Version    : v1.3.8"
 echobold ""
-echobold " Last update: 2020-04-28"
+echobold " Last update: 2024-04-18"
 echobold " Written by : Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers    : - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -197,6 +197,7 @@ echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echobold "              - Jacco Schaap (j.schaap-2@umcutrecht.nl)"
 echobold "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
+echobold "              - Lennart P.L. Landsmeer (l.p.l.landsmeer-2@umcutrecht.nl)"
 echobold ""
 echobold " Description: Perform individual variant, regional or genome-wide association "
 echobold "              analysis on some phenotype(s). It will do the following:"
@@ -268,7 +269,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -298,7 +298,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -328,7 +327,6 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -360,7 +358,7 @@ fi
 		echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
 		echo "The analysis will be run using the following method.....................: ${METHOD}"
 		echo "The analysis will be run using the following exclusion .................: ${EXCLUSION}"
-		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
+# 		echo "The analysis will be run using the following exclusion list.............: ${EXCLUSION_LIST}"
 		echo "The way phenotypes are handle (normalization on/off)....................: ${STANDARDIZE}"
 		echo "The analysis will be run using the following phenotypes.................: "
 		for PHENOTYPE in ${PHENOTYPES}; do
@@ -420,7 +418,6 @@ fi
       ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
       JOB_IDS=""
 		echo "Analysing the phenotype ${PHENOTYPE}."
-			# for CHR in $(seq 1 22) X; do
 			for CHR in $(seq 1 22); do
 			echo "Processing the following chromosome ${CHR}."
 				if [[ ${STANDARDIZE} == "STANDARDIZE" && ${CHR} != "X" ]]; then
@@ -456,7 +453,7 @@ fi
             JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
             JOB_IDS_c=$((JOB_IDS_c + 1))
           fi
-          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+          #echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 				elif [[ ${STANDARDIZE} == "RAW" && ${CHR} == "X"  ]]; then
 					printf "%s\n" "#!/bin/bash" "#" "${SNPTEST} -data ${IMPUTEDDATA_CHRX}${CHR}.${GENETICEXTENSION} ${SAMPLE_FILE_CHRX} -pheno ${PHENOTYPE} -frequentist 1 -method ${METHOD} -use_raw_phenotypes -hwe -lower_sample_limit 10 -cov_names ${COVARIATES} ${EXCLUSION_CRITERIA} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.out -log ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log " > ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh
 					JOB_IDS_i=$(sbatch --parsable -J ${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE} -o ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.log -e ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.errors --mem=${QMEM} -t ${QTIME} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/${STUDY_TYPE}.${ANALYSIS_TYPE}.${REFERENCE}.${PHENOTYPE}.${EXCLUSION}.chr${CHR}.sh)
@@ -467,7 +464,7 @@ fi
             JOB_IDS="${JOB_IDS},${JOB_IDS_i}"
             JOB_IDS_c=$((JOB_IDS_c + 1))
           fi
-          echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
+          #echoerrornooption "Pending imputation of chromosome ${CHR}, analysis is not possible."
 
 				else
 					### If arguments are not met then this error message will be displayed
@@ -707,8 +704,8 @@ fi
 
 		echo ""
 		### Run SNPTEST for each gene and phenotype
-    FINAL_JOB_ID=""
-    FINAL_JOB_ID_c=0
+	FINAL_JOB_ID=""
+	FINAL_JOB_ID_c=0
 		while IFS='' read -r REGIONOFINTEREST || [[ -n "$REGIONOFINTEREST" ]]; do
 			LINE=${REGIONOFINTEREST}
 			GENELOCUS=$(echo "${LINE}" | awk '{print $1}')
@@ -775,15 +772,12 @@ fi
 		script_arguments_error_analysis_type
 	fi
 
-  printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
-  ### Submit wrap-up script
-  ### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
-  sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+	### This final part makes sure that the *after* the wrap-up the QC etc can continue.
+	### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N ${STUDY_TYPE}.${ANALYSIS_TYPE}' are finished
+	printf "%s\n" "#!/bin/bash" "#" 'echo "FINISHED analyzer.sh! Now the QC can start!"' > ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
+	sbatch --parsable -J ANALYZER.DONE.${DATE_TRACK} --depend=afterany:${FINAL_JOB_ID} -o ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.log -e ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.errors --mem=${QMEMGWAS} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} ${PROJECTDIR}/${PROJECTNAME}/done.analyzer.sh
 
-	echo "Man, oh man, I'm done with submitting! That was a lot..."
-	echo ""
-	echo ""
-	echo "All finished. All qsubs submitted, results will be summarised in summary_results.txt.gz."
+	echo "Man, oh man, I'm done with submitting! That was a lot, results will be summarised in summary_results.txt.gz."
 	echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 ### END of if-else statement for the number of command-line arguments passed ###

@@ -99,15 +99,16 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.4.0"
+echobold " Version    : v1.4.3"
 echobold ""
-echobold " Last update: 2020-04-28"
+echobold " Last update: 2024-04-18"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
 echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echobold "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
+echobold "              - Lennart P.L. Landsmeer (l.p.l.landsmeer-2@umcutrecht.nl)"
 echobold ""
 echobold " Description: Perform individual variant, regional or genome-wide association "
 echobold "              analysis on some phenotype(s). It will do the following:"
@@ -166,10 +167,10 @@ else
 	fi
 	PROJECT=${PROJECTDIR}/${PROJECTNAME}
 
-  # Using date to track an ANALYSIS
+	# Using date to track an ANALYSIS
 
-  DATE_TRACK=`printf '%(%Y%m%d_%H%M%S)T\n' -1`
-  echo "${DATE_TRACK}"
+	DATE_TRACK=`printf '%(%Y%m%d_%H%M%S)T\n' -1`
+	echo "${DATE_TRACK}"
 
 	# Loading covariate and phenotype files
 	PHENOTYPES=$(cat ${PHENOTYPE_FILE}) # which phenotypes to investigate anyway
@@ -275,13 +276,13 @@ else
 			##### Create cleaner bash-script to send to qsub
 			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
 			JOB_ID_CLEANER_i=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMVARCLEANER} -t ${QTIMEVARCLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
-      if [[ ${JOB_IDS_c} == 0 ]]; then
-        JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
-        JOB_IDS_c=$((JOB_IDS_c + 1))
-      else
-        JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
-        JOB_IDS_c=$((JOB_IDS_c + 1))
-      fi
+		if [[ ${JOB_IDS_c} == 0 ]]; then
+			JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
+			JOB_IDS_c=$((JOB_IDS_c + 1))
+		else
+			JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
+			JOB_IDS_c=$((JOB_IDS_c + 1))
+		fi
 		done
 			###### Create summariser bash-script to send to qsub -- SEE REMARKS ABOVE
 			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/summariser.sh ${CONFIGURATIONFILE} " > ${PROJECT}/summariser.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.sh
@@ -299,10 +300,10 @@ else
 		echo "Creating jobs to perform a per-analysis on your phenotype(s)..."
 		${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
 
-		### Create QC bash-script to send to qsub
-    JOB_IDS_c=0
-    ### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
-    JOB_IDS_PHENO=""
+	### Create QC bash-script to send to qsub
+	JOB_IDS_c=0
+	### This variable holds the Job_IDs which we will use for setting dependency on the wrapper script
+	JOB_IDS_PHENO=""
 		while IFS='' read -r GENEOFINTEREST || [[ -n "$GENEOFINTEREST" ]]; do
 			for GENE in ${GENEOFINTEREST}; do
 				for PHENOTYPE in ${PHENOTYPES}; do
@@ -327,13 +328,13 @@ else
 					##### Submit cleaner script
 					JOB_ID_CLEANER_i=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${EXCLUSION}.${GENE}_${RANGE} --depend=afterany:${JOB_ID_LZ} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.errors --mem=${QMEMGENECLEANER} -t ${QTIMEGENECLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.${GENE}_${RANGE}.sh)
 					echo ""
-          if [[ ${JOB_IDS_c} == 0 ]]; then
-            JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
-            JOB_IDS_c=$((JOB_IDS_c + 1))
-          else
-            JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
-            JOB_IDS_c=$((JOB_IDS_c + 1))
-          fi
+			if [[ ${JOB_IDS_c} == 0 ]]; then
+				JOB_IDS_PHENO="${JOB_ID_CLEANER_i}"
+				JOB_IDS_c=$((JOB_IDS_c + 1))
+			else
+				JOB_IDS_PHENO="${JOB_IDS_PHENO},${JOB_ID_CLEANER_i}"
+				JOB_IDS_c=$((JOB_IDS_c + 1))
+			fi
 				done
 			done
 		done < ${GENES_FILE}
@@ -360,20 +361,3 @@ else
 fi
 
 script_copyright_message
-
-### MoSCoW
-### - make with arguments/configuration file
-### - make parsing results dynamic - independent of 'TRAIT_TYPE'
-### - add in VEGAS lookup function
-### - add in fastQTLanalysis option
-### - add in Variant summarizer (all results in one file)
-### - add in readme-generator-function
-### - add in gzipper-function
-### - add in a function that checks whether the covariates & phenotypes files make sense:
-###   * get median, mean, se, sd, min, max, counts
-###   * remove covariates/phenotypes dynamically (±3sd?)
-
-### Make a variant wrapper script
-### for i in $(ls ../cad/snptest_results) ; do echo "* processing [ "$i" ]..."; echo "$i" >> phenotype.list; done
-### echo "Phenotype ALTID RSID CHR BP OtherAlleleA CodedAlleleB AvgMaxPostCall Info all_AA all_AB all_BB TotalN MAC MAF CAF HWE P BETA SE" > AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt
-### for i in $(cat phenotype.list); do echo "* processing [ "$i" ]..."; zcat AEGS.VARIANT.1kGp3v5GoNL5."$i".summary_results.txt.gz | tail -n +2 | awk -v pheno=$i '{ print pheno, $0 }' OFS=","  >> AEGS.VARIANT.1kGp3v5GoNL5.Summary.txt; done
