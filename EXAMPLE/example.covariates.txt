@@ -1,1 +1,1 @@
-Age sex PC1 PC2 PC3 PC4
+Age SEX PC1 PC2 PC3 PC4
