@@ -95,6 +95,22 @@ script_arguments_error_analysis_type() {
   			exit 1
 }
 
+script_arguments_error_gwas_type() {
+			echo "$1"
+			echo ""
+			echo "      *** ERROR *** ERROR --- $(basename "${0}") --- ERROR *** ERROR ***"
+			echo ""
+			echo " You must supply the correct argument for GWAS:"
+			echo " * [SNPTEST]      -- genome-wide association study of traits in ${PHENOTYPE_FILE} using SNPTEST."
+			echo " * [REGENIE]      -- genome-wide association study of traits in ${PHENOTYPE_FILE} using REGENIE."
+			echo ""
+			echo " Please refer to instruction above."
+			echo ""
+			echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			# The wrong arguments are passed, so we'll exit the script now!
+  			exit 1
+}
+
 echobold "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
@@ -109,6 +125,7 @@ echobold "              - Aisha Gohar (a.gohar@umcutrecht.nl)"
 echobold "              - Jessica van Setten (j.vansetten@umcutrecht.nl)"
 echobold "              - Tim Bezemer (t.bezemer-2@umcutrecht.nl)"
 echobold "              - Lennart P.L. Landsmeer (l.p.l.landsmeer-2@umcutrecht.nl)"
+echobold "              - Tim S. Peters (t.s.peters-4@umcutrecht.nl)"
 echobold ""
 echobold " Description: Perform individual variant, regional or genome-wide association "
 echobold "              analysis on some phenotype(s). It will do the following:"
@@ -217,49 +234,152 @@ else
 	### SUBMIT SNPTEST_PHENO
 
 	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
-		echo "Creating jobs to perform GWAS on your phenotype(s)..."
-    ### Sending analizer.sh to sbatch
-    ${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
-    ### Create QC bash-script to send to qsub
-		for PHENOTYPE in ${PHENOTYPES}; do
+		if [[ ${GWAS_TYPE} = "SNPTEST" ]]; then
+			echo "Creating jobs to perform SNPTEST GWAS on your phenotype(s)..."
+			### Sending analizer.sh to sbatch
+			${GWASTOOLKITDIR}/gwastoolkit.analyzer.sh ${CONFIGURATIONFILE} ${DATE_TRACK}
+			### Create QC bash-script to send to qsub
+			for PHENOTYPE in ${PHENOTYPES}; do
 
-			PHENO_OUTPUT_DIR=${PROJECT}/snptest_results/${PHENOTYPE}
+				PHENO_OUTPUT_DIR=${PROJECT}/snptest_results/${PHENOTYPE}
 
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			### Submit QC script
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				### Submit QC script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_QC=$(sbatch --parsable -J QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWAS} -t ${QTIMEGWAS} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo ""
+
+				### Create plotter bash-script to send to qsub
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				### Submit plotter script
+				JOB_ID_PLOTTER=$(sbatch --parsable -J PLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOT} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo ""
+
+				### Create QC plotter bash-script to send to qsub
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				### Submit QC plotter script
+				JOB_ID_QCPLOTTER=$(sbatch --parsable -J QCPLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOTQC} -t ${QTIMEGWASPLOTQC} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo ""
+
+				#### Create clumper bash-script to send to qsub
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.clumper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				#### Submit clumper script
+				JOB_ID_CLUMPER=$(sbatch --parsable -J CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLUMP} -t ${QTIMEGWASCLUMP} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo ""
+
+				##### Create locuszoom bash-script to send to qsub
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				##### Submit locuszoom script
+				JOB_ID_LZ=$(sbatch --parsable -J LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_CLUMPER} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASLZOOM} -t ${QTIMEGWASLZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+
+				##### Create cleaner bash-script to send to qsub
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
+				##### Submit cleaner script
+				JOB_ID_CLEANER=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_LZ} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLEANER} -t ${QTIMEGWASCLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+
+			done
+
+		elif [[ ${GWAS_TYPE} = "REGENIE" ]]; then
+			echo "Creating jobs to perform REGENIE GWAS on your phenotype(s)..."
+
+			### vcf.gx -> pgen ??
+
+			### merge seperate pgen chromosomes into one
+
+			### Create QC Pre-processing bash-script to send to sbatch
+			echo "SUBMITTING JOB: Regenie Quality Control (Pre-processing)"
+			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.qc.sh ${CONFIGURATIONFILE} " > ${PROJECT}/regenie.qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+			### Submit QC Pre-processing script
 			### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
-			JOB_ID_QC=$(sbatch --parsable -J QC.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWAS} -t ${QTIMEGWAS} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+			JOB_ID_QC=$(sbatch --parsable -J REGENIE.QC.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE} -t ${QTIMEGWASREGENIE} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.qc.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
 			echo ""
 
-			### Create plotter bash-script to send to qsub
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			### Submit plotter script
-			JOB_ID_PLOTTER=$(sbatch --parsable -J PLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:$(squeue --noheader --format %i --name ANALYZER.DONE.${DATE_TRACK}) -o ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOT} -t ${QTIMEGWASPLOT} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/plotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
-			echo ""
+			##### Running REGENIE for BINARY Traits
+			if [ -n "$PHENOTYPE_BINARY" ]; then
+				echo "*** BINARY Phenotypes found ***"
+				echo "-	SUBMITTING JOB: Regenie Step 1"
+				##### Regenie step 1
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.step1.sh ${CONFIGURATIONFILE} BINARY " > ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_BT_STEP1=$(sbatch --parsable -J REGENIE.BT.STEP1.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_QC} -o ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE1} -t ${QTIMEGWASREGENIE1} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_BT_STEP1=$(sbatch --parsable -J REGENIE.BT.STEP1.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE1} -t ${QTIMEGWASREGENIE1} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
 
-			### Create QC plotter bash-script to send to qsub
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.plotter.qc.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			### Submit QC plotter script
-			JOB_ID_QCPLOTTER=$(sbatch --parsable -J QCPLOTTER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASPLOTQC} -t ${QTIMEGWASPLOTQC} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/qcplotter.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
-			echo ""
+				echo "-	SUBMITTING JOB: Regenie Step 2"
+				##### Regenie step 2 
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.step2.sh ${CONFIGURATIONFILE} BINARY " > ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_BT_STEP2=$(sbatch --parsable -J REGENIE.BT.STEP2.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_REGENIE_BT_STEP1} -o ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE2} -t ${QTIMEGWASREGENIE2} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_BT_STEP2=$(sbatch --parsable -J REGENIE.BT.STEP2.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE2} -t ${QTIMEGWASREGENIE2} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
 
-			#### Create clumper bash-script to send to qsub
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.clumper.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			#### Submit clumper script
-			JOB_ID_CLUMPER=$(sbatch --parsable -J CLUMPER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_QC} -o ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLUMP} -t ${QTIMEGWASCLUMP} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/clumper.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
-			echo ""
+				echo "-	SUBMITTING JOB: Regenie Wrapper"
+				##### Regenie wrapup
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.wrapper.sh ${CONFIGURATIONFILE} BINARY " > ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_BT_WRAPPER=$(sbatch --parsable -J REGENIE.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_REGENIE_BT_STEP2} -o ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIEWRAP} -t ${QTIMEGWASREGENIEWRAP} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_BT_WRAPPER=$(sbatch --parsable -J REGENIE.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIEWRAP} -t ${QTIMEGWASREGENIEWRAP} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.BT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
+				echo ""
+			else
+				echo "*** No BINARY Phenotypes give ***"
+				echo ""
+			fi
+			
+			##### Running REGENIE for QUANTATIVE Traits
+			if [ -n "$PHENOTYPE_QUANTATIVE" ]; then
+				echo "*** QUANTATIVE Phenotypes found ***"
+				echo "-	SUBMITTING JOB: Regenie Step 1"
+				##### Regenie step 1
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.step1.sh ${CONFIGURATIONFILE} QUANTATIVE " > ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_QT_STEP1=$(sbatch --parsable -J REGENIE.QT.STEP1.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_QC} -o ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE1} -t ${QTIMEGWASREGENIE1} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_QT_STEP1=$(sbatch --parsable -J REGENIE.QT.STEP1.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE1} -t ${QTIMEGWASREGENIE1} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.step1.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
 
-			##### Create locuszoom bash-script to send to qsub
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.locuszoomer.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			##### Submit locuszoom script
-			JOB_ID_LZ=$(sbatch --parsable -J LZ.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_CLUMPER} -o ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASLZOOM} -t ${QTIMEGWASLZOOM} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/locuszoom.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo "-	SUBMITTING JOB: Regenie Step 2"
+				##### Regenie step 2
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.step2.sh ${CONFIGURATIONFILE} QUANTATIVE " > ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_QT_STEP2=$(sbatch --parsable -J REGENIE.QT.STEP2.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_REGENIE_QT_STEP1} -o ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE2} -t ${QTIMEGWASREGENIE2} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_QT_STEP2=$(sbatch --parsable -J REGENIE.QT.STEP2.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIE2} -t ${QTIMEGWASREGENIE2} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.step2.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
 
-			##### Create cleaner bash-script to send to qsub
-			printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.cleaner.sh ${CONFIGURATIONFILE} ${PHENOTYPE} " > ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh
-			##### Submit cleaner script
- 			JOB_ID_CLEANER=$(sbatch --parsable -J CLEANER.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION} --depend=afterany:${JOB_ID_LZ} -o ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.log -e ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.errors --mem=${QMEMGWASCLEANER} -t ${QTIMEGWASCLEANER} --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PHENO_OUTPUT_DIR} ${PHENO_OUTPUT_DIR}/cleaner.${STUDY_TYPE}.${ANALYSIS_TYPE}.${PHENOTYPE}.${EXCLUSION}.sh)
+				echo "-	SUBMITTING JOB: Regenie Wrapper"
+				##### Regenie wrapup
+				printf "%s\n" "#!/bin/bash" "#" "${GWASTOOLKITDIR}/gwastoolkit.regenie.wrapper.sh ${CONFIGURATIONFILE} QUANTATIVE " > ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh
+				### Submit QC Pre-processing script
+				### The option '-hold_jid' indicates that the following qsub will not start until all jobs with '-N SOMENAMEFORTHESCRIPT' are finished
+				JOB_ID_REGENIE_QT_WRAPPER=$(sbatch --parsable -J REGENIE.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE} --depend=afterany:${JOB_ID_REGENIE_QT_STEP2} -o ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIEWRAP} -t ${QTIMEGWASREGENIEWRAP} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				
+				# DEBUG
+				# JOB_ID_REGENIE_QT_WRAPPER=$(sbatch --parsable -J REGENIE.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE} -o ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.log -e ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.errors --mem=${QMEMGWASREGENIEWRAP} -t ${QTIMEGWASREGENIEWRAP} -c 8 --mail-user=${YOUREMAIL} --mail-type=${MAILSETTINGS} -D ${PROJECT} ${PROJECT}/regenie.QT.wrapper.${STUDY_TYPE}.${ANALYSIS_TYPE}.sh)
+				echo ""
+				echo ""
+			else
+				echo "No QUANTATIVE Phenotypes give"
+				echo ""
+			fi
+		else
+			### If arguments are not met then this error message will be displayed
+			script_arguments_error_gwas_type
 
-		done
+		fi
 
 	elif [[ ${ANALYSIS_TYPE} = "VARIANT" ]]; then
 
