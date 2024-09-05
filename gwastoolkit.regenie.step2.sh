@@ -198,6 +198,7 @@ else
 		--firth --approx --pThresh 0.01\
 		--pred ${STEP1_QT_OUTPUT_DIR}/aegscombo_topmed_step1_pred.list \
 		--bsize="${REGENIE_STEP2_BZISE}" \
+		--info MACH_R2 \
 		--out ${STEP2_QT_OUTPUT_DIR}/aegscombo_step2_topmed_r3_f10_b38.chr${chr}; done
 		
 	elif [ "${TRAIT_TYPE}" == 'BINARY' ]; then
@@ -224,6 +225,7 @@ else
 		--firth --approx --pThresh 0.01\
 		--pred ${STEP1_BT_OUTPUT_DIR}/aegscombo_topmed_step1_pred.list \
 		--bsize="${REGENIE_STEP2_BZISE}" \
+		--info MACH_R2 \
 		--bt \
 		--out ${STEP2_BT_OUTPUT_DIR}/aegscombo_step2_topmed_r3_f10_b38.chr${chr}; done
 	fi
