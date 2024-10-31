@@ -2,6 +2,8 @@ GWASToolKit
 ============
 [![DOI](https://zenodo.org/badge/55601542.svg)](https://zenodo.org/badge/latestdoi/55601542)
 
+[![Languages](https://skillicons.dev/icons?i=bash,r,py)](https://skillicons.dev) 
+
 This repository contains various scripts in Perl, BASH, and Python scripts to use in genome-wide association studies, single variant analyses, regional analyses, and gene-centered analyses. The genotypes are expected to be imputed using [IMPUTE2](http://mathgen.stats.ox.ac.uk/impute/impute_v2.html) and the core of the collection of scripts makes use of [SNPTEST v2.5.4+](https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html)and [QCTOOL v2.0.2+](https://www.well.ox.ac.uk/~gav/qctool/#overview). 
 
 All scripts are annotated for debugging purposes - and future reference. The scripts will work within the context of a certain Linux environment (in this case a _CentOS7_ system with _Simple Linux Utility for Resource Management [SLURM]_). As such we have tested GWASToolKit on CentOS6.6, CentOS7, and macOS since El Capitan (version 10.11.[x]). 
