@@ -115,9 +115,9 @@ echobold "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echobold "                                               GWASTOOLKIT"
 echobold "           individual variant, per-gene, regional, or genome-wide association study of a trait"
 echobold ""
-echobold " Version    : v1.4.3"
+echobold " Version    : v1.4.4"
 echobold ""
-echobold " Last update: 2024-04-18"
+echobold " Last update: 2026-01-21"
 echobold " Written by :  Sander W. van der Laan (s.w.vanderlaan-2@umcutrecht.nl)."
 echobold ""
 echobold " Testers:     - Saskia Haitjema (s.haitjema@umcutrecht.nl)"
@@ -201,6 +201,9 @@ else
 	echo "The analysis scripts are located here...................................: ${GWASTOOLKITDIR}"
 	echo "The following dataset will be used......................................: ${STUDY_TYPE}"
 	echo "The following analysis type will be run.................................: ${ANALYSIS_TYPE}"
+	if [[ ${ANALYSIS_TYPE} = "GWAS" ]]; then
+		echo "The following GWAS method will be used.................................: ${GWAS_TYPE}"
+	fi
 	echo "The reference used, either 1kGp3v5+GoNL5, 1kGp1v3, GoNL4................: ${REFERENCE}"
 	echo "The analysis will be run using the following method.....................: ${METHOD}"
 	echo ""
