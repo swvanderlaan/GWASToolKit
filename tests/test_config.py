@@ -196,10 +196,14 @@ class TestInvalidConfigs(ConfigTestCase):
 
 class TestFileChecks(ConfigTestCase):
     def test_missing_files_are_reported(self):
-        # The example configuration points to cluster paths that do not exist here.
+        # Point to paths that exist nowhere, so the test gives the same result on any machine
+        # (on the cluster the paths of the example configuration do exist).
         self.settings["project"]["dir"] = "/no/such/directory"
+        self.settings["analysis"]["sample_file"] = "/no/such/directory/samples.sample"
+        self.settings["datasets"]["aegs_topmed_r3_b38_eur_nl"]["path"] = "/no/such/directory/data.chr{chr}.vcf.gz"
         problems = "\n".join(check_files(self.load(self.settings)))
         self.assertIn("project.dir: directory not found", problems)
+        self.assertIn("sample file: file not found", problems)
         self.assertIn("chromosome 22", problems)
 
     def test_existing_files_pass(self):
