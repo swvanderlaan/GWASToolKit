@@ -3,3 +3,9 @@ RESOURCES
 .DS_Store
 .claude/
 claude/
+__pycache__/
+*.egg-info/
+*.gwastoolkit.log
+*_make_test_data.log
+tests/output/
+.snakemake/

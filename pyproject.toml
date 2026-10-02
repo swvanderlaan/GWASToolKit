@@ -1,0 +1,33 @@
+# Packaging information for GWASToolKit.
+# Install into the active environment with:  pip install -e .
+# This makes the `gwastoolkit` command available.
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gwastoolkit"
+description = "Association analyses on imputed genotype data: genome-wide, per variant, per region or per gene."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sander W. van der Laan" }]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2",
+    "pyyaml",
+    "polars",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/swvanderlaan/GWASToolKit"
+
+[project.scripts]
+gwastoolkit = "gwastoolkit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["gwastoolkit*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "gwastoolkit.VERSION" }

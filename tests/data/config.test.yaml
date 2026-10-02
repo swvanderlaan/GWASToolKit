@@ -1,0 +1,84 @@
+################################################################################
+# GWASToolKit -- configuration for the FAKE test dataset in tests/data
+#
+# All paths are relative to the root of the repository, so use this file from
+# there:
+#   gwastoolkit validate --config tests/data/config.test.yaml
+#
+# The dataset is simulated (see tests/data/make_test_data.py); nothing in it
+# comes from real people. The programs under `site` are given by name only and
+# are expected to be on your PATH.
+################################################################################
+
+site:
+  software: "."
+  gwastoolkit: "."
+  snptest: "snptest"
+  plink2: "plink2"
+  regenie: "regenie"
+  harmonia: "."
+
+slurm:
+  email: "your.name@example.org"
+  mail_type: "NONE"
+
+project:
+  dir: "tests"
+  name: "output"
+
+analysis:
+  mode: "GWAS"
+  engine: "snptest"
+  dataset: "fake_b38"
+  sample_file: ""                 # empty: use the default sample file of the study
+  phenotype_file: "tests/data/phenotypes.txt"
+  covariate_file: "tests/data/covariates.txt"
+  exclusion_name: "EXCL_DEFAULT"
+  exclusion_column: "SELECTION"
+  exclusion_value: "not_selected"
+  standardize: "RAW"
+  method: "auto"
+
+targets:
+  variant_file: "tests/data/variantlist.txt"
+  region:                          # 100 kb around the planted BMI variant
+    chr: "21"
+    start: 20185673
+    end: 20285673
+  gene_file: "tests/data/genelist.txt"
+  range: 50000
+
+qc:
+  min_info: 0.3
+  min_mac: 6
+  min_maf: 0.005
+  max_abs_beta_se: 100
+
+regenie:
+  covariates_quantitative: ["Age", "PC1", "PC2"]
+  covariates_categorical: ["SEX"]
+  phenotypes_quantitative: ["BMI", "NULLQT"]
+  phenotypes_binary: ["T2D"]
+
+references:
+  b38:
+    genes: "tests/data/genes.fake_b38.txt.gz"
+    ld_reference: ""
+
+studies:
+  FAKE:
+    description: "Simulated study for testing"
+    sample_file: "tests/data/fake.sample"
+
+datasets:
+  fake_b38:
+    study: "FAKE"
+    description: "Simulated data: 500 samples, chromosomes 21 and 22 only"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "tests/data/fake.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: 500
+    chromosomes: [21, 22]

@@ -1,0 +1,4 @@
+phenotype	variant_id	chr	pos	effect_allele	true_effect	scale	gene
+BMI	chr21:20235673:G:T	chr21	20235673	T	2.0	units per allele	FAKEGENE1
+T2D	chr22:30222157:C:T	chr22	30222157	T	1.0	log odds per allele	FAKEGENE2
+NULLQT	none	NA	NA	NA	0	no genetic effect	NA

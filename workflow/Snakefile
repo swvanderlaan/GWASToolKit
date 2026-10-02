@@ -1,0 +1,325 @@
+################################################################################
+# GWASToolKit -- Snakemake workflow
+#
+# VERSION_NAME : GWASToolKit workflow
+# VERSION      : 3.0.0-dev
+# VERSION_DATE : 2026-10-02
+#
+# The MIT License (MIT)
+# Copyright (c) 2010-2026 Sander W. van der Laan | s.w.vanderlaan [at] gmail [dot] com
+#
+# WHAT THIS VERSION DOES
+#   The four modes (GWAS, VARIANT, REGION, GENES) with engine SNPTEST:
+#     1. VARIANT, REGION and GENES only: extract the targets from the genotype
+#        data, once, into a small file.
+#     2. Run SNPTEST per target, chromosome and phenotype.
+#     3. Convert each result to the standard table.
+#     4. Merge the chromosomes into one table per target and phenotype.
+#     5. VARIANT, REGION and GENES only: one table with all phenotypes together.
+#     6. Write every final table as Parquet as well.
+#   QC, plots and clumping, and the other engines, follow.
+#
+# HOW TO RUN (from the root of the repository)
+#   gwastoolkit run --config <config.yaml> --dry-run     # show what would be done
+#   gwastoolkit run --config <config.yaml>               # run on this machine
+#   gwastoolkit run --config <config.yaml> --slurm       # submit the jobs to SLURM
+#
+#   `gwastoolkit run` is a thin wrapper; the Snakemake command it runs is:
+#   snakemake --snakefile workflow/Snakefile --configfile <config.yaml> --cores 1
+#
+# SNAKEMAKE IN FIVE LINES
+#   * A workflow is a list of RULES. A rule says: from these INPUT files, make
+#     these OUTPUT files, with this SHELL command.
+#   * You never say in which order things run. You ask for the final files
+#     (rule `all`), and Snakemake works backwards: which rule makes this file,
+#     and what does that rule need?
+#   * {target}, {pheno} and {chr} in file names are WILDCARDS: one rule covers
+#     all targets, phenotypes and chromosomes. They replace the loops of the
+#     Bash scripts.
+#   * Files that already exist and are up to date are not made again. After a
+#     failure, running the same command again continues where it stopped.
+#   * `resources` (memory, run time) are per rule; with --slurm they become the
+#     request of the SLURM job. They replace the QMEM*/QTIME* settings.
+################################################################################
+
+import re
+import sys
+
+from snakemake.exceptions import WorkflowError
+
+from gwastoolkit import engines
+from gwastoolkit.config import ConfigError, check_inputs, load_config, read_list
+from gwastoolkit.targets import TargetError, chromosome_order, load_targets
+
+# ------------------------------------------------------------------------------
+# Read and check the configuration
+# ------------------------------------------------------------------------------
+# The configuration file is given on the command line with --configfile. It is
+# read through GWASToolKit's own loader, so it is validated before anything runs.
+if len(workflow.configfiles) != 1:
+    raise WorkflowError("Give exactly one configuration file: --configfile <config.yaml>")
+
+try:
+    cfg = load_config(workflow.configfiles[0])
+except ConfigError as error:
+    raise WorkflowError("The configuration file is not valid:\n  * " + "\n  * ".join(error.messages))
+
+if cfg.analysis.engine != "snptest":
+    raise WorkflowError(f"Engine {cfg.analysis.engine} is not available yet; so far only snptest.")
+
+# Do the input files fit the configuration? (Phenotypes and covariates in the
+# sample file, baseline phenotype, conditioning file.)
+problems = check_inputs(cfg)
+if problems:
+    raise WorkflowError("The input files do not fit the configuration:\n  * " + "\n  * ".join(problems))
+
+# ------------------------------------------------------------------------------
+# The values the rules below use
+# ------------------------------------------------------------------------------
+MODE = cfg.analysis.mode
+DATASET = cfg.active_dataset
+ENGINE = cfg.analysis.engine
+EXCLUSION = cfg.analysis.exclusion_name
+PHENOTYPES = read_list(cfg.analysis.phenotype_file)   # e.g. ["BMI", "T2D"]
+
+# The targets: WHAT is analysed. A target has a name, a chromosome and regions
+# (see gwastoolkit/targets.py):
+#   GWAS     one target 'gwas', on every chromosome
+#   VARIANT  one target 'variants', on the chromosomes of the listed variants
+#   REGION   one target, named after the region
+#   GENES    one target per gene
+# UNITS[name][chromosome] gives the target, e.g. UNITS["FAKEGENE1"]["21"].
+try:
+    UNITS = {}
+    for target in load_targets(cfg):
+        UNITS.setdefault(target.name, {})[target.chromosome] = target
+except TargetError as error:
+    raise WorkflowError("The targets cannot be made:\n  * " + "\n  * ".join(error.messages))
+
+
+def chromosomes_of(target_name):
+    """The chromosomes a target has regions on, in the order 1, 2, ..., 22, X."""
+    return sorted(UNITS[target_name], key=chromosome_order)
+
+
+# Extract the targets into a small file first? Yes for VARIANT, REGION and
+# GENES. Not for a GWAS (whole chromosomes), and not for a conditional
+# analysis: the variants to condition on must be in the file SNPTEST reads, and
+# they may lie outside the targets. SNPTEST then reads the whole chromosome and
+# is limited to the targets with its -range option.
+EXTRACT = MODE != "GWAS" and not cfg.analysis.condition
+if EXTRACT and not DATASET.format.startswith("vcf"):
+    raise WorkflowError(f"Extracting targets is so far only available for VCF files, not for {DATASET.format}.")
+
+# The Python that runs Snakemake also runs the GWASToolKit scripts, so they
+# always come from the same environment.
+PYTHON = sys.executable
+
+# E-mail notifications: extra options for `sbatch`, from the `slurm` section of
+# the configuration, e.g. "--mail-user=you@example.org --mail-type=FAIL".
+# Empty if mail_type is NONE. Only used when running with --slurm.
+SLURM_EXTRA = cfg.slurm.sbatch_options
+
+# ------------------------------------------------------------------------------
+# File names
+# ------------------------------------------------------------------------------
+# All output goes into the project directory, in sub-directories per target:
+#   extract/  the extracted genotypes (VARIANT, REGION, GENES)
+#   raw/      the results as the engine wrote them
+#   chunks/   the same results, per chromosome, as standard tables
+#   results/  the final tables
+#   logs/     one log file per job
+OUT = cfg.project_dir
+LABEL = EXCLUSION + "." + ENGINE   # e.g. EXCL_DEFAULT.snptest
+
+REGIONS = OUT + "/extract/{target}/{target}.chr{chr}.regions.tsv"
+EXTRACTED = OUT + "/extract/{target}/{target}.chr{chr}.vcf.gz"
+RAW = OUT + "/raw/{target}/{pheno}/{target}.{pheno}.chr{chr}.snptest.out"
+CHUNK = OUT + "/chunks/{target}/{pheno}/{target}.{pheno}.chr{chr}.tsv.gz"
+# One table per target and phenotype, and one per target with all phenotypes.
+SUMMARY = OUT + "/results/{target}/{target}.{pheno}." + LABEL + ".summary"
+COMBINED = OUT + "/results/{target}/{target}.ALL_PHENOTYPES." + LABEL + ".summary"
+
+# Every final table is written as gzipped text and as Parquet.
+FORMATS = ["tsv.gz", "parquet"]
+
+
+# Wildcards may only match the names we actually have. This keeps file names unambiguous.
+wildcard_constraints:
+    target="|".join(re.escape(name) for name in UNITS),
+    pheno="|".join(re.escape(name) for name in PHENOTYPES),
+    chr="[0-9]+|X",
+
+
+# ------------------------------------------------------------------------------
+# The final files
+# ------------------------------------------------------------------------------
+# The first rule is the default target. It makes nothing itself; it lists the
+# files we want in the end. expand() fills in every target, phenotype and format.
+rule all:
+    input:
+        expand(SUMMARY + ".{format}", target=UNITS, pheno=PHENOTYPES, format=FORMATS),
+        # A GWAS table per phenotype is large; all phenotypes together only for the other modes.
+        expand(COMBINED + ".{format}", target=UNITS, format=FORMATS) if MODE != "GWAS" else [],
+
+
+# These rules are quick and run on the machine you start Snakemake on, not as a SLURM job.
+localrules: all, regions
+
+
+# ------------------------------------------------------------------------------
+# Step 1 (VARIANT, REGION, GENES): extract the targets from the genotype data
+# ------------------------------------------------------------------------------
+# First write the regions of a target as a file: chromosome, start, end.
+rule regions:
+    output:
+        REGIONS,
+    params:
+        # Listed as a parameter so that Snakemake notices when the targets change.
+        regions=lambda wildcards: UNITS[wildcards.target][wildcards.chr].regions,
+    run:
+        with open(output[0], "w") as handle:
+            handle.write(UNITS[wildcards.target][wildcards.chr].regions_text(DATASET.contig_prefix))
+
+
+# Then let bcftools copy those regions into a small VCF file. This is the only
+# time the large genotype files are read in these modes.
+rule extract:
+    input:
+        genotypes=lambda wildcards: DATASET.path_for(wildcards.chr),
+        regions=REGIONS,
+    output:
+        EXTRACTED,
+    log:
+        OUT + "/logs/extract/{target}.chr{chr}.log",
+    params:
+        command=lambda wildcards, input, output: engines.bcftools_extract_command(
+            cfg, wildcards.chr, input.regions, output[0]
+        ),
+    resources:
+        mem_mb=4000,
+        runtime=240,
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{params.command} > {log} 2>&1"
+
+
+# ------------------------------------------------------------------------------
+# Step 2: association analysis with SNPTEST, per target, chromosome and phenotype
+# ------------------------------------------------------------------------------
+def genotypes_for(wildcards):
+    """The genotype file SNPTEST reads: the extracted file, or the whole chromosome."""
+    if EXTRACT:
+        return expand(EXTRACTED, target=wildcards.target, chr=wildcards.chr)[0]
+    return DATASET.path_for(wildcards.chr)
+
+
+def ranges_for(wildcards):
+    """The -range values for SNPTEST: only needed when it reads a whole chromosome for a target."""
+    if MODE == "GWAS" or EXTRACT:
+        return None
+    return UNITS[wildcards.target][wildcards.chr].ranges
+
+
+rule snptest:
+    input:
+        # Functions instead of fixed names: which file is needed depends on the mode.
+        genotypes=genotypes_for,
+        samples=cfg.sample_file,
+    output:
+        RAW,
+    log:
+        OUT + "/logs/snptest/{target}.{pheno}.chr{chr}.log",
+    params:
+        # The SNPTEST command is built in one place: gwastoolkit/engines.py.
+        command=lambda wildcards, input, output: engines.snptest_command(
+            cfg, wildcards.pheno, wildcards.chr, output[0],
+            genotypes=input.genotypes, variant_ranges=ranges_for(wildcards),
+        ),
+    resources:
+        mem_mb=8000,                         # memory, in megabytes
+        runtime=60 if EXTRACT else 720,      # maximum run time, in minutes
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{params.command} > {log} 2>&1"
+
+
+# ------------------------------------------------------------------------------
+# Step 3: convert each SNPTEST result to the standard table
+# ------------------------------------------------------------------------------
+rule standardise:
+    input:
+        RAW,
+    output:
+        CHUNK,
+    log:
+        OUT + "/logs/standardise/{target}.{pheno}.chr{chr}.log",
+    resources:
+        mem_mb=2000,
+        runtime=30,
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{PYTHON} -m gwastoolkit.adapters.snptest --input {input} --output {output} "
+        "--phenotype {wildcards.pheno} --chromosome {wildcards.chr} > {log} 2>&1"
+
+
+# ------------------------------------------------------------------------------
+# Step 4: merge the chromosomes into one table per target and phenotype
+# ------------------------------------------------------------------------------
+rule merge:
+    input:
+        # For one target and phenotype, this rule needs the tables of all
+        # chromosomes of that target.
+        lambda wildcards: expand(
+            CHUNK, target=wildcards.target, pheno=wildcards.pheno, chr=chromosomes_of(wildcards.target)
+        ),
+    output:
+        SUMMARY + ".tsv.gz",
+    log:
+        OUT + "/logs/merge/{target}.{pheno}.log",
+    resources:
+        mem_mb=2000,
+        runtime=60,
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{PYTHON} -m gwastoolkit.merge --input {input} --output {output} > {log} 2>&1"
+
+
+# ------------------------------------------------------------------------------
+# Step 5 (VARIANT, REGION, GENES): one table per target with all phenotypes
+# ------------------------------------------------------------------------------
+rule combine:
+    input:
+        lambda wildcards: expand(SUMMARY + ".tsv.gz", target=wildcards.target, pheno=PHENOTYPES),
+    output:
+        COMBINED + ".tsv.gz",
+    log:
+        OUT + "/logs/combine/{target}.log",
+    resources:
+        mem_mb=2000,
+        runtime=30,
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{PYTHON} -m gwastoolkit.merge --input {input} --output {output} > {log} 2>&1"
+
+
+# ------------------------------------------------------------------------------
+# Step 6: write every final table as Parquet too
+# ------------------------------------------------------------------------------
+# {table} is the file name without its extension; this rule serves both the
+# per-phenotype tables and the tables with all phenotypes.
+rule parquet:
+    input:
+        OUT + "/results/{target}/{table}.summary.tsv.gz",
+    output:
+        OUT + "/results/{target}/{table}.summary.parquet",
+    log:
+        OUT + "/logs/parquet/{target}/{table}.log",
+    wildcard_constraints:
+        table="[^/]+",
+    resources:
+        mem_mb=16000,   # the whole table is held in memory
+        runtime=60,
+        slurm_extra=SLURM_EXTRA,
+    shell:
+        "{PYTHON} -m gwastoolkit.to_parquet --input {input} --output {output} > {log} 2>&1"

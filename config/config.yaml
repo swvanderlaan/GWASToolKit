@@ -1,0 +1,405 @@
+################################################################################
+# GWASToolKit -- configuration file
+#
+# VERSION_NAME : GWASToolKit configuration
+# VERSION      : 3.0.0-dev
+# VERSION_DATE : 2026-10-02
+#
+# The MIT License (MIT)
+# Copyright (c) 2010-2026 Sander W. van der Laan | s.w.vanderlaan [at] gmail [dot] com
+#
+# HOW TO USE THIS FILE
+#   * Copy this file to your project directory and edit the copy.
+#   * Lines starting with '#' are comments.
+#   * Do not end directory paths with a '/' (forward slash).
+#   * To switch to another dataset, change the single line `dataset:` in the
+#     `analysis` section to one of the names listed under `datasets` below.
+#
+# This file replaces the sourced Bash configuration `gwastoolkit.conf` of
+# GWASToolKit v1.x. The old file is kept in `_archive_old_workflow/` for
+# reference until the rewrite is validated.
+#
+# Check your file with:  gwastoolkit validate --config <your file>
+################################################################################
+
+# ------------------------------------------------------------------------------
+# SITE -- where the software lives on this machine or cluster
+# ------------------------------------------------------------------------------
+site:
+  # Root directory of the shared software installation.
+  software: "/hpc/local/Rocky8/dhl_ec/software"
+  # Where GWASToolKit itself resides.
+  gwastoolkit: "/hpc/local/Rocky8/dhl_ec/software/GWASToolKit"
+  # Association engines and helper programs.
+  snptest: "/hpc/local/Rocky8/dhl_ec/software/snptest_v2.5.4"
+  # snptest: "/hpc/local/Rocky8/dhl_ec/software/snptest_v2.5.6"
+  plink2: "/hpc/local/Rocky8/dhl_ec/software/plink2"
+  regenie: "/hpc/local/Rocky8/dhl_ec/software/mambaforge3/envs/gwasregenie/bin/regenie"
+  # Harmonia (https://github.com/CirculatoryHealth/gwas2cojo): post-GWAS
+  # harmonisation, annotation and QC. Called as an external tool.
+  harmonia: "/hpc/local/Rocky8/dhl_ec/software/gwas2cojo"
+  # bcftools extracts the variants, regions and genes from the genotype data.
+  # It is part of the GWASToolKit environment, so its name is enough.
+  bcftools: "bcftools"
+
+# ------------------------------------------------------------------------------
+# SLURM -- e-mail notifications about jobs
+# (memory and run time per step are set per rule in the workflow, not here)
+# ------------------------------------------------------------------------------
+slurm:
+  # Your e-mail address. SLURM sends a message per job, depending on `mail_type`.
+  email: "your.name@example.org"
+  # When to send an e-mail:
+  #   NONE    never
+  #   BEGIN   when a job starts
+  #   END     when a job ends
+  #   FAIL    when a job fails (recommended: a GWAS has hundreds of jobs)
+  #   REQUEUE when a job is put back in the queue
+  #   ALL     all of the above
+  # Several can be combined with commas, for example "END,FAIL".
+  mail_type: "FAIL"
+
+# ------------------------------------------------------------------------------
+# PROJECT -- where the results go
+# ------------------------------------------------------------------------------
+project:
+  # Main analysis directory; it must exist.
+  dir: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP"
+  # Name of the project; a sub-directory with this name is created in `dir`.
+  name: "PCSK9_GWAS"
+
+# ------------------------------------------------------------------------------
+# ANALYSIS -- what to run
+# ------------------------------------------------------------------------------
+analysis:
+  # One of: GWAS, VARIANT, REGION, GENES.
+  mode: "GWAS"
+  # One of: snptest (default), plink2, plink1, regenie.
+  engine: "snptest"
+
+  # THE DATASET TO ANALYSE -- must be one of the names under `datasets` below.
+  # The dataset determines the study, the genome build, the file format and
+  # the matching reference files (gene coordinates, LD reference).
+  dataset: "aegs_topmed_r3_b38_eur_nl"
+
+  # Sample file (SNPTEST format) holding phenotypes and covariates.
+  # Leave empty ("") to use the default sample file of the study, if it has
+  # one (see `studies` below). Sex-stratified analyses use their own sample file.
+  sample_file: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP/20251104.PCSK9.AEGS123.sample"
+  # Sample file for chromosome X, if it differs from the one above.
+  sample_file_chrx: ""
+
+  # File with the phenotypes to analyse, one per line.
+  phenotype_file: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP/phenotypes.gwas.txt"
+  # File with the covariates, space-separated on one line (e.g. `Age SEX PC1 PC2`).
+  covariate_file: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP/covariates.txt"
+
+  # Sample exclusion. `exclusion_name` is a label used in output file names
+  # (no spaces, capitals), e.g. EXCL_DEFAULT, EXCL_FEMALES, EXCL_MALES.
+  # `exclusion_column` and `exclusion_value` say which samples to drop: every
+  # sample for which the column in the sample file equals the value.
+  exclusion_name: "EXCL_DEFAULT"
+  exclusion_column: "SELECTION"
+  exclusion_value: "not_selected"
+
+  # How continuous phenotypes are handled:
+  #   RAW          as they are in the sample file.
+  #   STANDARDIZE  quantile-normalised (ranks mapped to a normal distribution).
+  #   SCALE        scaled to mean 0 and variance 1 (what SNPTEST does by default).
+  standardize: "RAW"
+
+  # SNPTEST method: auto, expected, score or newml.
+  #   auto     (default) expected for mode GWAS; newml for VARIANT, REGION and GENES.
+  #   expected regression on the expected allele count (dosage): fast, and the
+  #            same model that PLINK 2 and REGENIE use.
+  #   score    score test: fast, but effect sizes are less reliable for rare or
+  #            poorly imputed variants.
+  #   newml    full maximum likelihood, taking the uncertainty of the imputed
+  #            genotypes into account: the most accurate, but slower.
+  method: "auto"
+  # Only with method newml, for a categorical phenotype with more than two
+  # categories: the category the others are compared against, for example
+  # "control". Leave empty ("") otherwise.
+  baseline_phenotype: ""
+
+  # Conditional analysis: set `condition` to true and give a file with the
+  # variant(s) to condition on (SNPTEST format, e.g. `rsid1 add rsid2 add`).
+  condition: false
+  condition_file: ""
+
+  # Minimum number of samples with data for a variant to be tested.
+  lower_sample_limit: 10
+
+# ------------------------------------------------------------------------------
+# TARGETS -- what to analyse in the VARIANT, REGION and GENES modes
+# ------------------------------------------------------------------------------
+targets:
+  # VARIANT: file with one variant per line: `variant_id chromosome position`,
+  # or a file with a header naming a chromosome column (Chr) and a position
+  # column (BP). Variants are looked up by position.
+  variant_file: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP/variantlist.txt"
+  # REGION: one region.
+  region:
+    chr: "1"
+    start: 154376264
+    end: 154476264
+  # GENES: file with one gene symbol per line.
+  gene_file: "/hpc/dhl_ec/projects/AE_TEMPLATE/SNP/genelist.txt"
+  # Number of base pairs to add on either side of a gene (GENES) and to show
+  # around a lead variant in regional plots (GWAS). 500000 = 500 kb.
+  range: 500000
+
+# ------------------------------------------------------------------------------
+# QC -- filters applied to the association results
+# ------------------------------------------------------------------------------
+qc:
+  # Minimum imputation quality (INFO); variants with INFO up to and including 1 are kept.
+  min_info: 0.3
+  # Minimum minor allele count.
+  min_mac: 6
+  # Minimum minor allele frequency. Note: v1.x filtered on the coded allele
+  # frequency (CAF >= 0.005), which let through variants with a CAF close to 1.
+  min_maf: 0.005
+  # Variants with an absolute effect size or standard error at or above this are removed.
+  max_abs_beta_se: 100
+
+# ------------------------------------------------------------------------------
+# CLUMPING -- GWAS mode only
+# ------------------------------------------------------------------------------
+clumping:
+  # Index variants must have a p-value at or below p1.
+  p1: 0.000005
+  # Variants clumped with an index variant must have a p-value at or below p2.
+  p2: 1
+  r2: 0.2
+  kb: 500
+
+# ------------------------------------------------------------------------------
+# REGENIE -- only used when `engine: regenie`
+# ------------------------------------------------------------------------------
+regenie:
+  # Filters for the variants used in step 1 (whole-genome regression).
+  step1_call_rate: 0.10      # PLINK --geno
+  step1_maf: 0.10            # PLINK --maf
+  step1_hwe: 0.001           # PLINK --hwe
+  step1_prune: "100 10 0.2"  # PLINK --indep-pairwise: window, step, r2
+  step1_block_size: 1000
+  step2_block_size: 1000
+  # File with genomic ranges to leave out of step 1 (e.g. MHC, inversions).
+  # Must be in the same genome build as the dataset.
+  exclude_range_file: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/exclude_problematic_range_b38.txt"
+  # REGENIE needs to know which covariates and phenotypes are quantitative
+  # and which are binary/categorical.
+  covariates_quantitative: ["Age", "PC1", "PC2", "ORyear"]
+  covariates_categorical: ["SEX"]
+  phenotypes_quantitative: []
+  phenotypes_binary: ["IPH", "IPH_CLAM"]
+
+# ------------------------------------------------------------------------------
+# REFERENCES -- per genome build
+# The build of the chosen dataset decides which block is used, so data and
+# reference files can never be of different builds.
+# Paths are relative to `site.gwastoolkit` unless they start with '/'.
+# ------------------------------------------------------------------------------
+references:
+  b37:
+    # Gene coordinates, needed for mode GENES: `chromosome start end symbol`
+    # per line, no header. Make the files for both builds once with:
+    #   gwastoolkit make-gene-list
+    # (GENCODE release 47; for b37 the same release mapped to GRCh37.)
+    # A list restricted with --gene-types has the types in its name, e.g.
+    # genes.gencode_v47lift37.protein_coding.b37.txt.gz
+    # The PLINK gene list of v1.x also fits: "RESOURCES/glist-hg19.gz".
+    genes: "RESOURCES/genes.gencode_v47lift37.b37.txt.gz"
+    # LD reference for clumping (PLINK file prefix).
+    ld_reference: "RESOURCES/1000Gp3v5_EUR/1000Gp3v5.20130502.EUR"
+  b38:
+    genes: "RESOURCES/genes.gencode_v47.b38.txt.gz"
+    # To be created by the preparation step of the workflow.
+    ld_reference: ""
+
+# ------------------------------------------------------------------------------
+# STUDIES -- defaults shared by all datasets of one study
+# ------------------------------------------------------------------------------
+studies:
+  AEGS:
+    description: "Athero-Express Genomics Study"
+    # Sample files for AEGS are made per project; set `analysis.sample_file`.
+    sample_file: ""
+  AAAGS:
+    description: "Abdominal Aortic Aneurysm Genomics Study"
+    sample_file: "/hpc/dhl_ec/data/_aaa_originals/pheno_cov_exclusions/aaags_phenocov.sample"
+  CTMMGS:
+    description: "CTMM Genomics Study"
+    sample_file: "/hpc/dhl_ec/data/_ctmm_originals/pheno_cov_exclusions/ctmm_phenocov.sample"
+
+# ------------------------------------------------------------------------------
+# DATASETS -- the registry of imputed genotype data
+#
+# Each dataset has:
+#   study          : one of the names under `studies`.
+#   description    : what it is, in words.
+#   build          : genome build, b37 or b38.
+#   format         : file format: vcf.gz, bgen, gen.gz or gen.
+#   genotype_field : for VCF files, the field holding the genotype
+#                    probabilities (GP) -- leave empty for other formats.
+#   contig_prefix  : how chromosomes are named INSIDE the files:
+#                    "" for '1', "chr" for 'chr1'.
+#   path           : path to the per-chromosome files; {chr} is replaced by
+#                    the chromosome number (1-22).
+#   path_chrx      : same for chromosome X, if available ("" if not).
+#   n_samples      : number of samples, if known (for information only).
+#   chromosomes    : (optional) the autosomes the dataset has files for;
+#                    leave out for the usual 1-22.
+#
+# Entries marked 'TO CONFIRM' were taken over from gwastoolkit.conf (v1.4.4),
+# where the file format was not recorded; check them before first use.
+# ------------------------------------------------------------------------------
+datasets:
+
+  ### AEGS -- TOPMed r3, f10, b38 ---------------------------------------------
+  # (b38 codes chromosomes as 'chr[#]', for example 'chr1')
+
+  # DEFAULT: unrelated, European/NL-only samples.
+  aegs_topmed_r3_b38_eur_nl:
+    study: "AEGS"
+    description: "TOPMed r3 (b38); unfiltered variants; unrelated, European/NL-only samples"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/_topmed_r3_f10_b38/aegscombo.topmed_r3_f10_b38.split_norm_af_filter.eur_nl.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: 1989
+
+  # Unrelated samples of all ancestries (European/NL plus non-European/non-NL).
+  aegs_topmed_r3_b38_unrelated:
+    study: "AEGS"
+    description: "TOPMed r3 (b38); unfiltered variants; unrelated, European/NL-only and non-European/non-NL samples"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/_topmed_r3_f10_b38/aegscombo.topmed_r3_f10_b38.split_norm_af_filter.eurnl_noneur_nonnl.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: 2054
+
+  # Unrelated, non-European/non-NL samples only.
+  aegs_topmed_r3_b38_noneur_nonnl:
+    study: "AEGS"
+    description: "TOPMed r3 (b38); unfiltered variants; unrelated, non-European/non-NL samples"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/_topmed_r3_f10_b38/aegscombo.topmed_r3_f10_b38.split_norm_af_filter.noneur_nonnl.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: 65
+
+  # Complete data: includes related samples and samples that failed QC.
+  aegs_topmed_r3_b38_complete:
+    study: "AEGS"
+    description: "TOPMed r3 (b38); unfiltered variants; complete, includes related and failed-QC samples"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/_topmed_r3_f10_b38/aegscombo.topmed_r3_f10_b38.split_norm_af_filter.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: null
+
+  # Strictly filtered variants (R2 > 0.9, MAF > 0.001), for QC purposes.
+  aegs_topmed_r3_b38_complete_cleaned:
+    study: "AEGS"
+    description: "TOPMed r3 (b38); variants filtered on R2 > 0.9 and MAF > 0.001; complete, includes related and failed-QC samples"
+    build: "b38"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: "chr"
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_QC_imputation_2023/aegscombo/_topmed_r3_f10_b38/aegscombo.topmed_r3_f10_b38.split_norm_af_filter_cleaned.chr{chr}.vcf.gz"
+    path_chrx: ""
+    n_samples: null
+
+  ### AEGS -- 1000G phase 3 and HRC r1.1 combined, b37 ------------------------
+  # (b37 codes chromosomes as '[#]', for example '1')
+
+  aegs_1kgp3_hrc_r11_b37:
+    study: "AEGS"
+    description: "1000G phase 3 v5 and HRC r1.1 combined (Michigan Imputation Server, EAGLE2), b37; chromosome X from 1000G phase 3 + GoNL5"
+    build: "b37"
+    format: "vcf.gz"
+    genotype_field: "GP"
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_EAGLE2_1000Gp3v5HRCr11/aegs.qc.1kgp3hrcr11.chr{chr}.vcf.gz"
+    path_chrx: "/hpc/dhl_ec/data/_ae_originals/AEGS_COMBINED_EAGLE2_1000Gp3v5HRCr11/_chr23_1kg_gonl5/aegs.1kgp3gonl5.chr{chr}.vcf.gz"  # TO CONFIRM: file name and format for chromosome X
+    n_samples: null
+
+  ### AAAGS -- b37 ------------------------------------------------------------
+
+  aaags_1kgp3_gonl5_b37:
+    study: "AAAGS"
+    description: "1000G phase 3 + GoNL5 (IMPUTE2), b37"
+    build: "b37"
+    format: "gen.gz"  # TO CONFIRM
+    genotype_field: ""
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_aaa_originals/AAAGS_IMPUTE2_1000Gp3_GoNL5/aaags_1kGp3GoNL5_RAW_chr{chr}.gen.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null
+
+  aaags_1kgp3_b37:
+    study: "AAAGS"
+    description: "1000G phase 3 (Michigan Imputation Server, EAGLE2), b37"
+    build: "b37"
+    format: "vcf.gz"  # TO CONFIRM
+    genotype_field: "GP"
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_aaa_originals/AAAGS_EAGLE2_1000Gp3/aaags.1kgp3.chr{chr}.vcf.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null
+
+  aaags_hrc_r11_b37:
+    study: "AAAGS"
+    description: "HRC r1.1 2016 (Michigan Imputation Server, EAGLE2), b37"
+    build: "b37"
+    format: "vcf.gz"  # TO CONFIRM
+    genotype_field: "GP"
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_aaa_originals/AAAGS_EAGLE2_HRC_r11_2016/aaags.hrc_r11_2016.chr{chr}.vcf.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null
+
+  ### CTMMGS -- b37 -----------------------------------------------------------
+
+  ctmmgs_1kgp3_gonl5_b37:
+    study: "CTMMGS"
+    description: "1000G phase 3 + GoNL5 (IMPUTE2), b37"
+    build: "b37"
+    format: "gen.gz"  # TO CONFIRM
+    genotype_field: ""
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_IMPUTE2_1000Gp3_GoNL5/ctmm_1kGp3GoNL5_RAW_chr{chr}.gen.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null
+
+  ctmmgs_1kgp3_b37:
+    study: "CTMMGS"
+    description: "1000G phase 3 (Michigan Imputation Server, EAGLE2), b37"
+    build: "b37"
+    format: "vcf.gz"  # TO CONFIRM
+    genotype_field: "GP"
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_EAGLE2_1000Gp3/ctmmgs.1kgp3.chr{chr}.vcf.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null
+
+  ctmmgs_hrc_r11_b37:
+    study: "CTMMGS"
+    description: "HRC r1.1 2016 (Michigan Imputation Server, EAGLE2), b37"
+    build: "b37"
+    format: "vcf.gz"  # TO CONFIRM
+    genotype_field: "GP"
+    contig_prefix: ""
+    path: "/hpc/dhl_ec/data/_ctmm_originals/CTMMAxiomTX_EAGLE2_HRC_r11_2016/ctmmgs.hrc_r11_2016.chr{chr}.vcf.gz"  # TO CONFIRM: file extension
+    path_chrx: ""
+    n_samples: null

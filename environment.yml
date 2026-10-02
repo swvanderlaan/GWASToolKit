@@ -1,0 +1,38 @@
+# Conda/mamba environment for GWASToolKit v3.
+#
+# Create and activate it with:
+#   mamba env create -f environment.yml
+#   mamba activate gwastoolkit
+#
+# Update an existing environment after this file has changed with:
+#   mamba env update -f environment.yml --prune
+#
+# Not installed by this file, because they are not (reliably) available through
+# conda: SNPTEST, QCTOOL, PLINK and REGENIE. On the HPC these are already
+# installed; their locations are set in the `site` section of the configuration.
+#
+# Packages are added here as the rewrite progresses (polars, GWASLab, ...).
+name: gwastoolkit
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12
+  - pip
+  # Configuration: reading (pyyaml) and validating (pydantic).
+  - pydantic>=2
+  - pyyaml
+  # Workflow: Snakemake, and the plugin that lets it submit jobs to SLURM.
+  - snakemake-minimal>=8
+  - snakemake-executor-plugin-slurm
+  # Reading, indexing and subsetting VCF files (also provides bgzip and tabix).
+  - bcftools
+  - htslib
+  # Fast tables; writes the Parquet files.
+  - polars
+  # Tests.
+  - pytest
+  - pip:
+      # Installs GWASToolKit itself in "editable" mode: changes to the code take
+      # effect immediately, and the `gwastoolkit` command becomes available.
+      - -e .

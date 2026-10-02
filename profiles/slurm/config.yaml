@@ -1,0 +1,38 @@
+################################################################################
+# GWASToolKit -- Snakemake profile for SLURM
+#
+# A profile is a set of Snakemake command-line options kept in a file.
+# It is used by:  gwastoolkit run --config <config.yaml> --slurm
+# which is the same as:  snakemake ... --profile profiles/slurm
+#
+# With this profile, Snakemake itself keeps running on the login node (use
+# `screen` or `tmux`) and submits one SLURM job per step, when its input is
+# ready. The memory and run time of each job come from the `resources` of the
+# rule in workflow/Snakefile.
+################################################################################
+
+# Submit jobs to SLURM (needs the package snakemake-executor-plugin-slurm).
+executor: slurm
+
+# At most this many jobs in the queue at the same time.
+jobs: 100
+
+# Used for rules that do not set their own resources.
+default-resources:
+  mem_mb: 4000     # megabytes
+  runtime: 60      # minutes
+  # Uncomment and fill in if your cluster needs them:
+  # slurm_account: "your_account"
+  # slurm_partition: "your_partition"
+
+# Wait this many seconds for output files to appear; shared file systems can be slow.
+latency-wait: 60
+
+# If a job was interrupted, make its (incomplete) output again.
+rerun-incomplete: true
+
+# If one job fails, keep running the jobs that do not depend on it.
+keep-going: true
+
+# Show the command of every job.
+printshellcmds: true
