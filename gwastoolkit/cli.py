@@ -167,7 +167,12 @@ def command_show(config: Config, args: argparse.Namespace) -> int:
     logger.info("Analysis")
     line("  mode", analysis.mode)
     line("  engine", analysis.engine)
-    line("  method", f"{config.method} (default for mode {analysis.mode})" if analysis.method == "auto" else config.method)
+    if analysis.method != "auto":
+        line("  method", analysis.method)
+    elif analysis.mode == "GWAS":
+        line("  method", "expected (auto: the default for mode GWAS)")
+    else:
+        line("  method", "auto: newml for binary and discrete phenotypes, expected for continuous ones")
     scaling = {"RAW": "as they are", "STANDARDIZE": "quantile-normalised", "SCALE": "scaled to mean 0, variance 1"}
     line("  continuous phenotypes", f"{analysis.standardize} ({scaling[analysis.standardize]})")
     line("  phenotype file", analysis.phenotype_file)

@@ -50,6 +50,24 @@ alternate_ids rsid chromosome position alleleA alleleB index average_maximum_pos
 """
 
 
+# SNPTEST v2.5.6 output of method newml for a binary phenotype (header and one line as written
+# by SNPTEST on the test data): other column names, a beta column with a suffix, tab-separated.
+NEWML = (
+    "# Analysis: newml\n"
+    + "\t".join("""alternate_ids rsid chromosome position alleleA alleleB incorrectly_coded all_A all_B all_AA all_AB
+    all_BB all_NULL all_total all_maf all_info all_impute_info cases_A cases_B cases_AA cases_AB cases_BB cases_NULL
+    cases_total cases_maf cases_info cases_impute_info controls_A controls_B controls_AA controls_AB controls_BB
+    controls_NULL controls_total controls_maf controls_info controls_impute_info minor_predictor_count null_ll
+    null_iterations frequentist_add_ll frequentist_add_beta_1:add/T2D=1 frequentist_add_se_1
+    frequentist_add_wald_pvalue_1 frequentist_add_degrees_of_freedom frequentist_add_lrt_pvalue
+    frequentist_add_iterations frequentist_add_fit_time comment""".split()) + "\n"
+    + "\t".join("""NA chr21:20098582:C:T chr21 20098582 C T NA 0 0 171.36 226.035 81.605 -2.54019e-13 479 0.40631
+    0.86435 0.86435 0 0 55.342 63.115 26.543 2.44249e-15 145 0.400693 0.863898 0.863898 0 0 116.018 162.92 55.062
+    5.77316e-15 334 0.408749 0.864534 0.864534 389.245 -287.746 2 -287.693 -0.0497615 0.154248 0.746993 1 0.745213
+    1 0.000 NA""".split()) + "\n"
+)
+
+
 def read_table(path):
     """Read a standard table; returns a list of dicts (one per variant)."""
     with gzip.open(path, "rt", encoding="utf-8") as handle:
@@ -124,6 +142,16 @@ class TestSnptestAdapter(unittest.TestCase):
         self.assertEqual((row["beta"], row["se"], row["p"]), ("0.587787", "0.125", "2.5e-06"))
         self.assertEqual((row["info"], row["hwe_p"], row["n"]), ("0.9", "0.03", "1000"))
         self.assertAlmostEqual(float(row["eaf"]), 0.25, places=6)
+
+    def test_newml_layout(self):
+        (row,) = self.convert(NEWML, phenotype="T2D")
+        self.assertEqual((row["variant_id"], row["chr"], row["effect_allele"]), ("chr21:20098582:C:T", "21", "T"))
+        # The beta column has a suffix (`:add/T2D=1`); the p-value is that of the likelihood ratio test.
+        self.assertEqual((row["beta"], row["se"], row["p"]), ("-0.0497615", "0.154248", "0.745213"))
+        self.assertEqual((row["info"], row["n"]), ("0.86435", "479"))
+        self.assertAlmostEqual(float(row["eaf"]), (2 * 81.605 + 226.035) / (2 * 479), places=5)
+        # newml reports no HWE test and no average maximum posterior call.
+        self.assertEqual((row["hwe_p"], row["avg_max_post_call"], row["model_status"]), ("NA", "NA", "ok"))
 
     def test_not_snptest_output(self):
         for text in ("some other file\n1 2 3\n", "# only comments\n"):
@@ -234,10 +262,15 @@ class TestSnptestCommand(unittest.TestCase):
         # Paths with spaces are quoted.
         self.assertIn("-data 'small file.bgen'", command)
 
-    def test_method_auto_is_newml_for_targeted_modes(self):
+    def test_method_auto_in_targeted_modes(self):
         self.config.analysis.mode = "REGION"
+        self.config.analysis.baseline_phenotype = "0"
+        # Binary phenotype: newml, with the baseline.
+        command = engines.snptest_command(self.config, "T2D", "22", "o.out")
+        self.assertIn("-method newml -baseline_phenotype 0 -use_raw_phenotypes", command)
+        # Continuous phenotype: expected (newml cannot analyse it), and no baseline.
         command = engines.snptest_command(self.config, "BMI", "21", "o.out", variant_ranges=["100-200"])
-        self.assertIn("-method newml -use_raw_phenotypes", command)
+        self.assertIn("-method expected -use_raw_phenotypes", command)
         self.assertNotIn("-baseline_phenotype", command)
 
 

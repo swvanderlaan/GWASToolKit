@@ -75,6 +75,13 @@ def main(argv) -> int:
         print(f"fake_snptest: phenotype {phenotype} is not in the sample file", file=sys.stderr)
         return 1
     phenotype_column = header.index(phenotype)
+    # Like SNPTEST: method newml only takes binary and discrete phenotypes.
+    phenotype_type = lines[1].split()[phenotype_column]
+    if option("-method") == "newml" and phenotype_type not in ("B", "D"):
+        print(f"!! Error in function: PerVariantComputationManager::get_phenotypes(), argument(s): "
+              f"phenotype_spec={phenotype}:{phenotype_type}: Expected a discrete phenotype (of type B or D)..",
+              file=sys.stderr)
+        return 255
     exclude_column = exclude_value = None
     if exclusion:
         # Like SNPTEST v2.5.6: only `column=value` or `column="value"`, with a single '='.

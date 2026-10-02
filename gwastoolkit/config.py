@@ -22,6 +22,7 @@ See the LICENSE file in the repository for the full license text.
 """
 
 import difflib
+import functools
 import os
 import re
 from pathlib import Path
@@ -38,8 +39,9 @@ VERSION_DATE = "2026-10-02"
 AUTOSOMES = [str(chromosome) for chromosome in range(1, 23)]
 # When SLURM can send an e-mail about a job.
 MAIL_TYPES = ["NONE", "BEGIN", "END", "FAIL", "REQUEUE", "ALL"]
-# The SNPTEST method used when `analysis.method` is "auto".
-DEFAULT_METHOD = {"GWAS": "expected", "VARIANT": "newml", "REGION": "newml", "GENES": "newml"}
+# Phenotype types (in the SNPTEST sample file) that SNPTEST's method newml can analyse:
+# binary and discrete. For a continuous phenotype (P) newml stops with an error.
+NEWML_PHENOTYPE_TYPES = ("B", "D")
 # How SNPTEST lets a variant be conditioned on (-condition_on <variant> [<model>] ...).
 CONDITION_MODELS = {"add", "dom", "rec", "het", "gen"}
 # Dataset names are used in file names, so keep them simple.
@@ -345,10 +347,10 @@ class Config(_Section):
                 problems.append("analysis.engine: 'regenie' is only available for mode GWAS")
             if not (self.regenie.phenotypes_quantitative or self.regenie.phenotypes_binary):
                 problems.append("regenie: give at least one phenotype in phenotypes_quantitative or phenotypes_binary")
-        if analysis.baseline_phenotype and self.method != "newml":
-            problems.append(
-                f"analysis.baseline_phenotype: only used with method 'newml', but the method is '{self.method}'"
-            )
+        # A baseline phenotype is only used by method newml; with "auto" that is in the modes other than GWAS.
+        uses_newml = analysis.method == "newml" or (analysis.method == "auto" and analysis.mode != "GWAS")
+        if analysis.baseline_phenotype and not uses_newml:
+            problems.append("analysis.baseline_phenotype: only used with method 'newml', which this analysis does not use")
         if analysis.condition and not analysis.condition_file:
             problems.append("analysis.condition_file: required when condition is true")
         if analysis.condition and analysis.engine != "snptest":
@@ -392,12 +394,25 @@ class Config(_Section):
         """The sample file to use: the one given for the analysis, else the study default."""
         return self.analysis.sample_file or self.active_study.sample_file
 
-    @property
-    def method(self) -> str:
-        """The SNPTEST method: as given, or for "auto" the default of the mode."""
-        if self.analysis.method == "auto":
-            return DEFAULT_METHOD[self.analysis.mode]
-        return self.analysis.method
+    def phenotype_types(self) -> Dict[str, str]:
+        """The type (P, B, D, ...) of every column of the sample file; empty if the file cannot be read."""
+        return _sample_column_types(self.sample_file)
+
+    def method_for(self, phenotype: str) -> str:
+        """
+        The SNPTEST method for one phenotype.
+
+        A method given in the configuration is used as it is. With "auto":
+          * mode GWAS: expected, for every phenotype;
+          * modes VARIANT, REGION and GENES: newml for binary and discrete
+            phenotypes (types B and D in the sample file), expected for
+            continuous phenotypes (type P), which newml cannot analyse.
+        """
+        if self.analysis.method != "auto":
+            return self.analysis.method
+        if self.analysis.mode == "GWAS":
+            return "expected"
+        return "newml" if self.phenotype_types().get(phenotype) in NEWML_PHENOTYPE_TYPES else "expected"
 
     @property
     def project_dir(self) -> str:
@@ -517,6 +532,16 @@ def collect_warnings(config: Config) -> List[str]:
     return warnings
 
 
+@functools.lru_cache(maxsize=None)
+def _sample_column_types(path: str) -> Dict[str, str]:
+    """Column name -> type of a SNPTEST sample file; empty if the file is missing or unreadable."""
+    try:
+        names, types, _ = read_sample_file_header(path)
+    except (OSError, ValueError):
+        return {}
+    return dict(zip(names, types))
+
+
 def read_sample_file_header(path):
     """Read a SNPTEST sample file; returns (column names, column types, rows of values)."""
     with open(path, "r", encoding="utf-8") as handle:
@@ -534,7 +559,8 @@ def check_inputs(config: Config) -> List[str]:
     Checked, as far as the files exist:
       * the phenotypes, the covariates and the exclusion column are columns of the sample file;
       * phenotypes have a phenotype type in the sample file (P, B or D);
-      * `baseline_phenotype` is a value that occurs for every phenotype;
+      * method newml is not asked for a continuous phenotype;
+      * `baseline_phenotype` is a value that occurs for every phenotype analysed with newml;
       * the conditioning file lists variants, each optionally followed by a model
         (add, dom, rec, het or gen).
     Returns a list of problems; an empty list means nothing was found.
@@ -562,7 +588,10 @@ def check_inputs(config: Config) -> List[str]:
             elif kind[name] not in ("P", "B", "D"):
                 problems.append(f"phenotype '{name}' has type {kind[name]} in the sample file; "
                                 "a phenotype must be P (continuous), B (binary) or D (discrete)")
-            elif analysis.baseline_phenotype:
+            elif config.method_for(name) == "newml" and kind[name] not in NEWML_PHENOTYPE_TYPES:
+                problems.append(f"phenotype '{name}' is continuous (type P); method 'newml' only analyses binary "
+                                "and discrete phenotypes (B, D). Use method 'auto' or 'expected'")
+            elif analysis.baseline_phenotype and config.method_for(name) == "newml":
                 values = {row[names.index(name)] for row in rows}
                 if analysis.baseline_phenotype not in values:
                     problems.append(f"analysis.baseline_phenotype: '{analysis.baseline_phenotype}' does not occur "

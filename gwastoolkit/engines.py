@@ -79,12 +79,14 @@ def snptest_command(
         arguments += ["-genotype_field", dataset.genotype_field]
 
     # The test: additive model (-frequentist 1) with the chosen method.
-    # `config.method` is the method given, or for "auto": expected for GWAS, newml for the other modes.
-    arguments += ["-pheno", phenotype, "-frequentist", "1", "-method", config.method]
+    # The method is the one given, or for "auto" it follows the mode and the type
+    # of the phenotype (see Config.method_for).
+    method = config.method_for(phenotype)
+    arguments += ["-pheno", phenotype, "-frequentist", "1", "-method", method]
 
     # For categorical phenotypes with more than two categories (method newml):
     # the category the others are compared against.
-    if analysis.baseline_phenotype:
+    if analysis.baseline_phenotype and method == "newml":
         arguments += ["-baseline_phenotype", analysis.baseline_phenotype]
 
     # Continuous phenotypes: as they are (RAW), quantile-normalised (STANDARDIZE),

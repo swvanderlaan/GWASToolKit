@@ -145,7 +145,9 @@ class TestWorkflow(unittest.TestCase):
         self.settings["analysis"]["mode"] = "VARIANT"
         code, output = self.run_gwastoolkit("--dry-run")
         self.assertEqual(code, 0, output)
-        self.assertIn("-method newml", output)  # the default method of the targeted modes
+        # The default in the targeted modes: newml for the binary phenotype, expected for the continuous ones.
+        self.assertIn("-pheno T2D -frequentist 1 -method newml", output)
+        self.assertIn("-pheno BMI -frequentist 1 -method expected", output)
         # SNPTEST reads the small extracted files, not the dataset.
         self.assertIn("-data " + str(self.output / "extract" / "variants" / "variants.chr21.vcf.gz"), output)
         self.assertRegex(output, r"extract\s+2")
@@ -213,6 +215,8 @@ class TestWorkflow(unittest.TestCase):
         cases.append(({"phenotype_file": str(phenotypes)}, "phenotype 'HEIGHT' is not a column"))
         # A baseline value that does not occur.
         cases.append(({"method": "newml", "baseline_phenotype": "control"}, "does not occur as a value"))
+        # Method newml for continuous phenotypes.
+        cases.append(({"method": "newml"}, "phenotype 'BMI' is continuous"))
         for changes, message in cases:
             settings = yaml.safe_load(yaml.safe_dump(self.settings))
             settings["analysis"].update(changes)

@@ -109,13 +109,16 @@ analysis:
   standardize: "RAW"
 
   # SNPTEST method: auto, expected, score or newml.
-  #   auto     (default) expected for mode GWAS; newml for VARIANT, REGION and GENES.
+  #   auto     (default) mode GWAS: expected. Modes VARIANT, REGION and GENES:
+  #            newml for binary and discrete phenotypes (types B and D in the
+  #            sample file), expected for continuous phenotypes (type P).
   #   expected regression on the expected allele count (dosage): fast, and the
   #            same model that PLINK 2 and REGENIE use.
   #   score    score test: fast, but effect sizes are less reliable for rare or
   #            poorly imputed variants.
   #   newml    full maximum likelihood, taking the uncertainty of the imputed
-  #            genotypes into account: the most accurate, but slower.
+  #            genotypes into account: the most accurate, but slower. SNPTEST
+  #            only accepts it for binary and discrete phenotypes.
   method: "auto"
   # Only with method newml, for a categorical phenotype with more than two
   # categories: the category the others are compared against, for example

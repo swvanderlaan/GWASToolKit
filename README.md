@@ -12,8 +12,8 @@ used for AAAGS and CTMMGS.
 > Python-based [Snakemake](https://snakemake.github.io) workflow, to be released as **v3.0.0**.
 > So far the workflow runs the four modes (`GWAS`, `VARIANT`, `REGION`, `GENES`) with SNPTEST, up to
 > and including the merged results tables. QC, plots, clumping and the other engines are not there
-> yet. It has been tested on the simulated test data with a stand-in for SNPTEST, not yet with
-> SNPTEST itself. For running analyses today, use the Bash scripts of **v1.4.4** (see below).
+> yet. It has been run on the simulated test data with SNPTEST v2.5.6, not yet on real data. For
+> running analyses today, use the Bash scripts of **v1.4.4** (see below).
 
 --------------
 
@@ -183,15 +183,20 @@ can be given to [GWASLab](https://github.com/Cloufield/gwaslab) directly.
 
 #### Settings and checks
 
-**SNPTEST method.** With `analysis.method: "auto"` (the default), mode `GWAS` uses `expected` and
-the modes `VARIANT`, `REGION` and `GENES` use `newml`. Set `expected`, `score` or `newml` to choose yourself.
+**SNPTEST method.** With `analysis.method: "auto"` (the default), mode `GWAS` uses `expected`. The
+modes `VARIANT`, `REGION` and `GENES` use `newml` for binary and discrete phenotypes (types `B` and
+`D` in the sample file) and `expected` for continuous phenotypes (type `P`): SNPTEST's `newml` does
+not analyse continuous phenotypes. Set `expected`, `score` or `newml` to choose yourself. With
+`newml` the p-value in the results is that of the likelihood ratio test, and SNPTEST reports no
+HWE test, so `hwe_p` is `NA`.
 
 **Phenotype scaling.** `analysis.standardize` is `RAW` (as in the sample file), `STANDARDIZE`
 (quantile-normalised) or `SCALE` (mean 0, variance 1).
 
 **Checks before anything runs.** `gwastoolkit run` (and `gwastoolkit validate --check-files`) checks
 that the phenotypes, the covariates and the exclusion column are in the sample file, that a
-`baseline_phenotype` is a value that occurs for every phenotype, and that a conditioning file is well-formed.
+`baseline_phenotype` is a value that occurs for every phenotype analysed with `newml`, that `newml`
+is not asked for a continuous phenotype, and that a conditioning file is well-formed.
 
 Two things are left to you: whether the baseline phenotype is a sensible category, and whether the
 variants you condition on are in the genotype data. For the second, run
@@ -276,7 +281,7 @@ bash _archive_old_workflow/gwastoolkit.run.sh $(pwd)/_archive_old_workflow/gwast
 - [x] A small, simulated test dataset
 - [x] Workflow for `GWAS` with SNPTEST: standard table, merge, Parquet
 - [x] `VARIANT`, `REGION` and `GENES` modes, extracting the targets once
-- [ ] Check the SNPTEST step (methods `expected` and `newml`) against real SNPTEST output on the HPC
+- [x] SNPTEST step checked against real SNPTEST v2.5.6 on the test data (methods `expected` and `newml`)
 - [x] Gene coordinates for b37 and b38 (`gwastoolkit make-gene-list`)
 - [ ] Shared preparation: format conversion and a b38 LD reference
 - [ ] Engine adapters: PLINK 2, PLINK 1.9, REGENIE (SNPTEST is done)

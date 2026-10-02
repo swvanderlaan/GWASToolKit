@@ -65,8 +65,10 @@ rewrite is validated. Not yet rebuilt: QC filtering, plots, clumping, and the en
   load in pandas, polars, R and GWASLab).
 - SLURM e-mail notifications: `slurm.email` and `slurm.mail_type` (one type, or several such as
   `END,FAIL`) are passed to every job.
-- `analysis.method: "auto"` (the new default): SNPTEST method `expected` for mode `GWAS`, `newml`
-  for the modes `VARIANT`, `REGION` and `GENES`.
+- `analysis.method: "auto"` (the new default): SNPTEST method `expected` for mode `GWAS`; in the
+  modes `VARIANT`, `REGION` and `GENES`, `newml` for binary and discrete phenotypes and `expected`
+  for continuous ones (SNPTEST's `newml` refuses continuous phenotypes). Asking `newml` for a
+  continuous phenotype is reported before anything runs.
 - `tests/stubs/fake_snptest.py`: a stand-in for SNPTEST, so the workflow can be tested without it.
 - Datasets can list the chromosomes they have files for (`chromosomes`), default 1-22.
 - `gwastoolkit/config.py`: the configuration schema (pydantic).

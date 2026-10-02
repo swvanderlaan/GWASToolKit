@@ -150,6 +150,17 @@ class TestCheckInputs(TargetsTestCase):
         analysis.baseline_phenotype = "0"
         self.assertEqual(check_inputs(self.config), [])
 
+    def test_newml_refuses_continuous_phenotypes(self):
+        analysis = self.config.analysis
+        analysis.method = "newml"
+        problems = "\n".join(check_inputs(self.config))
+        self.assertIn("phenotype 'BMI' is continuous (type P); method 'newml' only analyses", problems)
+        self.assertIn("phenotype 'NULLQT' is continuous", problems)
+        self.assertNotIn("T2D", problems)
+        # With "auto" the method follows the phenotype, so there is nothing to report.
+        analysis.method, analysis.mode = "auto", "VARIANT"
+        self.assertEqual(check_inputs(self.config), [])
+
     def test_condition_file(self):
         analysis = self.config.analysis
         analysis.condition = True

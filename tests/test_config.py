@@ -89,14 +89,25 @@ class TestExampleConfig(ConfigTestCase):
         self.assertEqual(config.active_references.genes, "RESOURCES/genes.gencode_v47lift37.b37.txt.gz")
         self.assertTrue(config.reference_path(config.active_references.genes).startswith("/"))
 
-    def test_method_auto_follows_the_mode(self):
+    def test_method_auto_follows_mode_and_phenotype_type(self):
         self.assertEqual(self.settings["analysis"]["method"], "auto")
-        for mode, method in (("GWAS", "expected"), ("VARIANT", "newml"), ("REGION", "newml"), ("GENES", "newml")):
+        # The fake sample file: BMI and NULLQT are continuous (P), T2D is binary (B).
+        self.settings["analysis"]["sample_file"] = str(REPOSITORY / "tests" / "data" / "fake.sample")
+        self.settings["analysis"]["mode"] = "GWAS"
+        config = self.load(self.settings)
+        self.assertEqual([config.method_for(name) for name in ("BMI", "T2D")], ["expected", "expected"])
+        for mode in ("VARIANT", "REGION", "GENES"):
             self.settings["analysis"]["mode"] = mode
-            self.assertEqual(self.load(self.settings).method, method, mode)
-        # A method that is given is used whatever the mode.
+            config = self.load(self.settings)
+            # newml cannot analyse a continuous phenotype.
+            self.assertEqual([config.method_for(name) for name in ("BMI", "T2D", "NULLQT")],
+                             ["expected", "newml", "expected"], mode)
+        # A method that is given is used whatever the mode and phenotype.
         self.settings["analysis"]["method"] = "score"
-        self.assertEqual(self.load(self.settings).method, "score")
+        self.assertEqual(self.load(self.settings).method_for("T2D"), "score")
+        # Without a readable sample file the type is unknown: expected.
+        self.settings["analysis"].update(method="auto", sample_file="/no/such/file.sample")
+        self.assertEqual(self.load(self.settings).method_for("T2D"), "expected")
 
     def test_slurm_mail_options(self):
         self.settings["slurm"] = {"email": "me@example.org", "mail_type": "end, fail"}
@@ -139,7 +150,10 @@ class TestInvalidConfigs(ConfigTestCase):
         self.settings["analysis"]["baseline_phenotype"] = "control"  # mode GWAS: method expected
         self.assertIn("analysis.baseline_phenotype", self.errors(self.settings))
         self.settings["analysis"]["method"] = "newml"
-        self.assertEqual(self.load(self.settings).method, "newml")
+        self.assertEqual(self.load(self.settings).method_for("T2D"), "newml")
+        # With "auto", newml is used in the targeted modes, so a baseline is accepted there.
+        self.settings["analysis"].update(method="auto", mode="VARIANT")
+        self.load(self.settings)
 
     def test_mail_settings(self):
         self.settings["slurm"] = {"email": "not-an-address", "mail_type": "FAIL"}
