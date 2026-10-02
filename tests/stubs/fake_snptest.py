@@ -12,7 +12,7 @@ phenotype on the dosage, WITHOUT covariates, also for binary phenotypes. Never
 use its output for anything but testing that the workflow steps fit together.
 
 Supported options: -data <vcf> <sample>, -pheno <name>, -o <file>,
--exclude_samples_where <column>==<value>, -range <start-end> [<start-end> ...].
+-exclude_samples_where <column>=<value> (a single '=', as SNPTEST v2.5.6 requires), -range <start-end> [<start-end> ...].
 All other options are accepted and ignored.
 
 The MIT License (MIT)
@@ -77,7 +77,13 @@ def main(argv) -> int:
     phenotype_column = header.index(phenotype)
     exclude_column = exclude_value = None
     if exclusion:
-        name, exclude_value = exclusion.replace('"', "").split("==")
+        # Like SNPTEST v2.5.6: only `column=value` or `column="value"`, with a single '='.
+        name, _, exclude_value = exclusion.partition("=")
+        exclude_value = exclude_value.strip('"')
+        if not name or not exclude_value or exclude_value.startswith("=") or " " in exclusion or name not in header:
+            print(f'!! Error in function: genfile::SampleFilter::create(), argument(s): spec="{exclusion}"',
+                  file=sys.stderr)
+            return 255
         exclude_column = header.index(name)
     values = []  # per sample: the phenotype, or None if the sample is not used
     for line in lines[2:]:

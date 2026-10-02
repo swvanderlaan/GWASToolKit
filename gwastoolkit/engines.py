@@ -102,8 +102,11 @@ def snptest_command(
         arguments += ["-cov_names"] + covariates
 
     # Leave out the samples for which the exclusion column has the exclusion value.
+    # The condition is written as `column=value`, with a SINGLE '=' and no spaces:
+    # that is the only spelling that both SNPTEST v2.5.4 and v2.5.6 accept
+    # (v2.5.6 refuses `column==value`, which GWASToolKit v1.x used).
     if analysis.exclusion_column:
-        arguments += ["-exclude_samples_where", f"{analysis.exclusion_column}=={analysis.exclusion_value}"]
+        arguments += ["-exclude_samples_where", f"{analysis.exclusion_column}={analysis.exclusion_value}"]
 
     # Conditional analysis: the file holds e.g. `rsid1 add rsid2 add`.
     if analysis.condition:

@@ -208,7 +208,7 @@ class TestSnptestCommand(unittest.TestCase):
             command,
             "snptest -data tests/data/fake.chr21.vcf.gz tests/data/fake.sample -genotype_field GP "
             "-pheno BMI -frequentist 1 -method expected -use_raw_phenotypes -hwe -lower_sample_limit 10 "
-            "-cov_names Age SEX PC1 PC2 -exclude_samples_where SELECTION==not_selected -o out/BMI.chr21.out",
+            "-cov_names Age SEX PC1 PC2 -exclude_samples_where SELECTION=not_selected -o out/BMI.chr21.out",
         )
 
     def test_options_follow_the_configuration(self):

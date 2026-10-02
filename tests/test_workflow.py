@@ -100,7 +100,7 @@ class TestWorkflow(unittest.TestCase):
         self.assertRegex(output, r"parquet\s+3")
         self.assertNotRegex(output, r"extract\s+\d")
         self.assertIn("-method expected", output)
-        self.assertIn("-exclude_samples_where SELECTION==not_selected", output)
+        self.assertIn("-exclude_samples_where SELECTION=not_selected", output)
         self.assertFalse(self.output.exists())  # a dry run makes nothing
 
     def test_gwas_finds_the_planted_effects(self):

@@ -83,7 +83,9 @@ rewrite is validated. Not yet rebuilt: QC filtering, plots, clumping, and the en
   v1.x scripts (`gwastoolkit.run.sh`).
 - The frequency filter is expressed as a minimum minor allele frequency (`qc.min_maf`), where v1.x
   filtered on the coded allele frequency only.
-- Sample exclusion is given as a column and a value, no longer as a literal SNPTEST flag.
+- Sample exclusion is given as a column and a value, no longer as a literal SNPTEST flag. It is
+  passed to SNPTEST as `column=value` (a single `=`), the only spelling that both v2.5.4 and v2.5.6
+  accept; the `column==value` of v1.x is refused by SNPTEST v2.5.6.
 - Results tables are tab-separated and use the standard column names; v1.x wrote space-separated
   tables with its own names (`RSID`, `CodedAlleleB`, `CAF`, ...).
 - Allele frequencies and the minor allele count are computed over the called genotypes

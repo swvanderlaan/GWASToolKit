@@ -174,7 +174,7 @@ def command_show(config: Config, args: argparse.Namespace) -> int:
     line("  covariate file", analysis.covariate_file)
     line("  sample file", config.sample_file)
     if analysis.exclusion_column:
-        exclusion = f"{analysis.exclusion_name}: drop samples where {analysis.exclusion_column} == {analysis.exclusion_value}"
+        exclusion = f"{analysis.exclusion_name}: drop samples where {analysis.exclusion_column} = {analysis.exclusion_value}"
     else:
         exclusion = f"{analysis.exclusion_name}: no samples dropped"
     line("  exclusion", exclusion)
